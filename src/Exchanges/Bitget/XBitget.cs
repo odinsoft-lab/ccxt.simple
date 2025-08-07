@@ -12,7 +12,9 @@ public class XBitget : IExchange
     /*
 		 * Bitget Support Markets: USDT,USDC,BTC,ETH,BRL
 		 *
-		 * https://bitgetlimited.github.io/apidoc/en/spot/#introduction
+		 * REST API
+		 *     https://www.bitget.com/api-doc/spot/intro
+		 *     https://www.bitget.com/api-doc/contract/intro
 		 *
 		 */
 

@@ -12,6 +12,12 @@ namespace CCXT.Simple.Exchanges.Okex
         /*
 		 * OKX (formerly OKEx) Support Markets: USDT, BTC
 		 *
+		 * API Documentation:
+		 *     https://www.okx.com/docs-v5/en/
+		 *
+		 * Fees:
+		 *     https://www.okx.com/pages/products/fees.html
+		 *
 		 * REST API
 		 *     https://www.okx.com/docs-v5/en/#market-maker-program
 		 *

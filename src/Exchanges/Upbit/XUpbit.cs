@@ -11,18 +11,17 @@ namespace CCXT.Simple.Exchanges.Upbit
         /*
 		 * Upbit Support Markets: KRW, USDT, BTC
 		 *
+		 * API Documentation:
+		 *     Korean: https://docs.upbit.com/kr/reference/
+		 *     Global: https://global-docs.upbit.com/reference/
+		 *
 		 * REST API
 		 *     https://docs.upbit.com/reference
 		 *     https://docs.upbit.com/docs/upbit-quotation-websocket
 		 *     https://upbit.com/service_center/wallet_status
 		 *
-		 * EXCHANGE API
-		 *     [�ֹ� ��û] �ʴ� 8ȸ, �д� 200ȸ
-		 *     [�ֹ� ��û �� API] �ʴ� 30ȸ, �д� 900ȸ
-		 *
-		 * QUOTATION API
-		 *     Websocket ���� ��û �� ����: �ʴ� 5ȸ, �д� 100ȸ
-		 *     REST API ��û �� ����: �д� 600ȸ, �ʴ� 10ȸ (����, ĵ��, ü��, ƼĿ, ȣ����)
+		 * Fees:
+		 *     https://upbit.com/service_center/guide
 		 */
 
         public XUpbit(Exchange mainXchg, string apiKey = "", string secretKey = "", string passPhrase = "")

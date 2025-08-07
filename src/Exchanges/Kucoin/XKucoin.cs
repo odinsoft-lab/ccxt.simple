@@ -14,8 +14,7 @@ namespace CCXT.Simple.Exchanges.Kucoin
 		 * Kucoin Support Markets: USDT, BTC
 		 *
 		 * REST API
-		 *     https://docs.kucoin.com/#general
-		 *     https://docs.kucoin.com/#symbol-snapshot
+		 *     https://docs.kucoin.com
 		 *
 		 */
 

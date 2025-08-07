@@ -12,6 +12,13 @@ namespace CCXT.Simple.Exchanges.Bybit
         /*
 		 * ByBit Support Markets: USDT,USD
 		 *
+		 * REST API
+		 *     https://bybit-exchange.github.io/docs/inverse/
+		 *     https://bybit-exchange.github.io/docs/linear/
+		 *
+		 * Fees:
+		 *     https://help.bybit.com/hc/en-us/articles/360039261154
+		 *
 		 * Rate Limit
 		 *     https://bybit-exchange.github.io/docs/inverse/#t-ratelimits
 		 *

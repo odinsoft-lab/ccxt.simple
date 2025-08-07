@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**Important**: 
+1. Always read and understand the documentation files in the `docs/` folder to maintain comprehensive knowledge of the project. These documents contain critical information about the project's architecture, implementation details, and version history.
+2. After completing each task or implementation, immediately update the relevant documentation to reflect the changes. Keep all documentation synchronized with the current state of the codebase.
+
 ## Project Overview
 
 **CCXT.Simple** is a cryptocurrency exchange trading library for .NET that provides a simplified interface for accessing cryptocurrency exchange APIs. It's designed as a simpler alternative to the more complex ccxt.net library.

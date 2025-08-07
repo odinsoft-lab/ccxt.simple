@@ -13,7 +13,9 @@ namespace CCXT.Simple.Exchanges.Coinone
         /*
 		 * Coinone Support Markets: KRW
 		 *
-		 * API https://doc.coinone.co.kr/
+		 * API Documentation:
+		 * https://doc.coinone.co.kr
+		 * https://docs.coinone.co.kr/v1.0/reference
 		 *
 		 * Public API
 		 *     Rate Limit: 300 requests per minute

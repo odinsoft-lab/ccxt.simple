@@ -12,6 +12,9 @@ namespace CCXT.Simple.Exchanges.Huobi
         /*
 		 * HuobiGlobal Support Markets: usdt,btc
 		 *
+		 * REST API
+		 *     https://huobiapi.github.io/docs/spot/v1/en/
+		 *
 		 * Rate Limit
 		 *     https://huobiapi.github.io/docs/spot/v1/en/#rate-limiting-rule
 		 *     https://huobiapi.github.io/docs/spot/v1/en/#websocket-market-data

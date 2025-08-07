@@ -11,7 +11,11 @@ namespace CCXT.Simple.Exchanges.Kraken
         /*
          * Kraken Exchange Implementation
          * 
-         * API Documentation: https://api.kraken.com
+         * REST API
+         *     https://docs.kraken.com/rest/
+         * 
+         * Fees:
+         *     https://support.kraken.com/hc/en-us/articles/201893608-What-are-the-withdrawal-fees-
          * 
          * Rate Limits: TBD
          */

@@ -11,7 +11,7 @@ namespace CCXT.Simple.Exchanges.GateIO
 		 * Gate Support Markets: USDT, BTC
 		 *
 		 * REST API
-		 *     https://www.gate.io/docs/developers/apiv4/en/#retrieve-ticker-information
+		 *     https://www.gate.io/docs/developers/apiv4
 		 *
 		 */
 

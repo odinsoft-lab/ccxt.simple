@@ -14,8 +14,16 @@ namespace CCXT.Simple.Exchanges.Binance
         /*
 		 * Binance Support Markets: USDT,BUSD,BTC
 		 *
+		 * API Documentation:
+		 * https://developers.binance.com/en
 		 * https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md
 		 * https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md
+		 *
+		 * API Management:
+		 * https://www.binance.com/en/usercenter/settings/api-management
+		 *
+		 * Fees:
+		 * https://www.binance.com/en/fee/schedule
 		 *
 		 * Rate Limit
 		 *     https://python-binance.readthedocs.io/en/latest/binance.html#binance.client.Client.get_exchange_info

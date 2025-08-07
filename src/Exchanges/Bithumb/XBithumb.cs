@@ -14,16 +14,19 @@ public class XBithumb : IExchange
     /*
 		 * Bithumb Support Markets: KRW, BTC
 		 *
+		 * API Documentation:
+		 * https://apidocs.bithumb.com
+		 * https://apidocs.bithumb.com/v1.2.0/reference
+		 *
+		 * Website:
+		 * https://www.bithumb.com
+		 *
+		 * Fees:
+		 * https://en.bithumb.com/customer_support/info_fee
+		 *
 		 * Rate Limit
 		 *     https://apidocs.bithumb.com/docs/rate_limits
 		 *
-		 * Public API
-		 *     1�ʴ� �ִ� 135ȸ ��û �����մϴ�.
-		 *     �ʰ� ��û�� ������ API ����� ���ѵ˴ϴ�.
-		 *
-		 * Private API
-		 *     1�ʴ� �ִ� 15ȸ ��û �����մϴ�.
-		 *     �ʰ� ��û�� ������ API ����� �Ͻ������� ���ѵ˴ϴ�. (Public - 1�� / Private info - 5�� / Private trade - 10��)
 		 */
 
     public XBithumb(Exchange mainXchg, string apiKey = "", string secretKey = "", string passPhrase = "")
