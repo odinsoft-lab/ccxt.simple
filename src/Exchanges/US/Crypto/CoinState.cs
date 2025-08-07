@@ -1,4 +1,4 @@
-﻿using CCXT.Simple.Converters;
+﻿using CCXT.Simple.Data;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;

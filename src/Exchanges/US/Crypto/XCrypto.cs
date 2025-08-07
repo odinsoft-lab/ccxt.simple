@@ -1,8 +1,8 @@
-using CCXT.Simple.Converters;
+using CCXT.Simple.Data;
+using CCXT.Simple.Extensions;
 using CCXT.Simple.Models;
 using CCXT.Simple.Services;
 using Newtonsoft.Json;
-using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -231,7 +231,9 @@ namespace CCXT.Simple.Exchanges.Crypto
                 var _endpoint = "private/get-currency-networks";
                 var _request = this.CreateSignature(_client, 1, _endpoint);
 
-                var _response = await _client.PostAsJsonAsync("/v2/{_endpoint}", _request);
+                var _json = JsonConvert.SerializeObject(_request);
+                var _content = new StringContent(_json, Encoding.UTF8, "application/json");
+                var _response = await _client.PostAsync($"/v2/{_endpoint}", _content);
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();

@@ -1,4 +1,4 @@
-﻿using CCXT.Simple.Converters;
+﻿using CCXT.Simple.Data;
 using Newtonsoft.Json;
 
 namespace CCXT.Simple.Exchanges.Upbit

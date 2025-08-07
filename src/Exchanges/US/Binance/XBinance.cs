@@ -1,4 +1,4 @@
-using CCXT.Simple.Converters;
+using CCXT.Simple.Data;
 using CCXT.Simple.Models;
 using CCXT.Simple.Services;
 using Newtonsoft.Json;

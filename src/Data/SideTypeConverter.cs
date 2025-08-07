@@ -1,4 +1,4 @@
-﻿namespace CCXT.Simple.Converters
+﻿namespace CCXT.Simple.Data
 {
     /// <summary>
     ///

@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
 using System.Net;
-using CCXT.Simple.Converters;
+using CCXT.Simple.Data;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System;

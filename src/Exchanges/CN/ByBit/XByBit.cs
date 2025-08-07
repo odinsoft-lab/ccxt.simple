@@ -3,7 +3,8 @@ using CCXT.Simple.Models;
 using Newtonsoft.Json;
 using System.Security.Cryptography;
 using System.Text;
-using CCXT.Simple.Converters;
+using CCXT.Simple.Data;
+using CCXT.Simple.Extensions;
 
 namespace CCXT.Simple.Exchanges.Bybit
 {

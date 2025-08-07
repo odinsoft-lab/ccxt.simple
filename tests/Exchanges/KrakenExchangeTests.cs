@@ -1,4 +1,4 @@
-using CCXT.Simple.Converters;
+using CCXT.Simple.Data;
 using CCXT.Simple.Exchanges;
 using CCXT.Simple.Exchanges.Kraken;
 using CCXT.Simple.Models;

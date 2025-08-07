@@ -1,4 +1,4 @@
-using CCXT.Simple.Converters;
+using CCXT.Simple.Data;
 using CCXT.Simple.Models;
 using System;
 using System.Collections.Generic;

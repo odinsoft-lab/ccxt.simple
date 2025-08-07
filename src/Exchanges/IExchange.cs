@@ -1,4 +1,4 @@
-﻿using CCXT.Simple.Converters;
+﻿using CCXT.Simple.Data;
 using CCXT.Simple.Models;
 
 namespace CCXT.Simple.Exchanges

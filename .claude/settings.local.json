@@ -6,7 +6,9 @@
       "Bash(mkdir:*)",
       "Bash(mv:*)",
       "Bash(powershell:*)",
-      "Bash(dotnet build:*)"
+      "Bash(dotnet build:*)",
+      "Bash(rm:*)",
+      "Bash(del \"D:\\github.com\\lisa3907\\ccxt.simple\\src\\CommonUsings.cs\")"
     ],
     "deny": []
   }
