@@ -44,4 +44,13 @@
 		<PackageReference Include="GraphQL.Client.Serializer.SystemTextJson" Version="6.1.0" />
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.13.0" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="Exchanges\Bithumb\CoinState.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Exchanges\Upbit\CoinState.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
 </Project>

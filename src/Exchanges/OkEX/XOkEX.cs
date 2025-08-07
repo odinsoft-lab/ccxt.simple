@@ -1,4 +1,4 @@
-﻿using CCXT.Simple.Services;
+using CCXT.Simple.Services;
 using CCXT.Simple.Converters;
 using CCXT.Simple.Models;
 using Newtonsoft.Json;
@@ -52,30 +52,28 @@ namespace CCXT.Simple.Exchanges.Okex
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl); 
+                var _response = await _client.GetAsync("/api/v5/public/instruments?instType=SPOT");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jarray = JsonConvert.DeserializeObject<CoinInfor>(_jstring, mainXchg.JsonSettings);
+
+                var _queue_info = mainXchg.GetXInfors(ExchangeName);
+
+                foreach (var s in _jarray.data)
                 {
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/api/v5/public/instruments?instType=SPOT");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jarray = JsonConvert.DeserializeObject<CoinInfor>(_jstring, mainXchg.JsonSettings);
+                    var _base = s.baseCcy;
+                    var _quote = s.quoteCcy;
 
-                    var _queue_info = mainXchg.GetXInfors(ExchangeName);
-
-                    foreach (var s in _jarray.data)
+                    if (_quote == "USDT" || _quote == "BTC")
                     {
-                        var _base = s.baseCcy;
-                        var _quote = s.quoteCcy;
-
-                        if (_quote == "USDT" || _quote == "BTC")
+                        _queue_info.symbols.Add(new QueueSymbol
                         {
-                            _queue_info.symbols.Add(new QueueSymbol
-                            {
-                                symbol = s.instId,
-                                compName = _base,
-                                baseName = _base,
-                                quoteName = _quote,
-                                tickSize = s.tickSz
-                            });
-                        }
+                            symbol = s.instId,
+                            compName = _base,
+                            baseName = _base,
+                            quoteName = _quote,
+                            tickSize = s.tickSz
+                        });
                     }
                 }
 
@@ -103,77 +101,75 @@ namespace CCXT.Simple.Exchanges.Okex
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl); 
+                this.CreateSignature(_client, "GET", "/api/v5/asset/currencies");
+
+                var _response = await _client.GetAsync("/api/v5/asset/currencies");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jarray = JsonConvert.DeserializeObject<CoinState>(_jstring);
+
+                foreach (var c in _jarray.data)
                 {
-                    this.CreateSignature(_client, "GET", "/api/v5/asset/currencies");
+                    var _currency = c.ccy;
 
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/api/v5/asset/currencies");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jarray = JsonConvert.DeserializeObject<CoinState>(_jstring);
-
-                    foreach (var c in _jarray.data)
+                    var _state = tickers.states.SingleOrDefault(x => x.baseName == _currency);
+                    if (_state == null)
                     {
-                        var _currency = c.ccy;
-
-                        var _state = tickers.states.SingleOrDefault(x => x.baseName == _currency);
-                        if (_state == null)
+                        _state = new WState
                         {
-                            _state = new WState
-                            {
-                                baseName = _currency,
-                                active = true,
-                                deposit = c.canDep,
-                                withdraw = c.canWd,
-                                networks = new List<WNetwork>()
-                            };
+                            baseName = _currency,
+                            active = true,
+                            deposit = c.canDep,
+                            withdraw = c.canWd,
+                            networks = new List<WNetwork>()
+                        };
 
-                            tickers.states.Add(_state);
-                        }
-                        else
+                        tickers.states.Add(_state);
+                    }
+                    else
+                    {
+                        _state.deposit = c.canDep;
+                        _state.withdraw = c.canWd;
+                    }
+
+                    var _t_items = tickers.items.Where(x => x.compName == _state.baseName);
+                    if (_t_items != null)
+                    {
+                        foreach (var t in _t_items)
                         {
-                            _state.deposit = c.canDep;
-                            _state.withdraw = c.canWd;
+                            t.active = _state.active;
+                            t.deposit = _state.deposit;
+                            t.withdraw = _state.withdraw;
                         }
+                    }
 
-                        var _t_items = tickers.items.Where(x => x.compName == _state.baseName);
-                        if (_t_items != null)
+                    var _name = c.chain;
+
+                    var _network = _state.networks.SingleOrDefault(x => x.name == _name);
+                    if (_network == null)
+                    {
+                        var _splits = c.chain.Split('-');
+
+                        _state.networks.Add(new WNetwork
                         {
-                            foreach (var t in _t_items)
-                            {
-                                t.active = _state.active;
-                                t.deposit = _state.deposit;
-                                t.withdraw = _state.withdraw;
-                            }
-                        }
+                            name = _name,
+                            network = c.ccy,
+                            chain = _splits[_splits.Length - 1],
 
-                        var _name = c.chain;
+                            deposit = c.canDep,
+                            withdraw = c.canWd,
 
-                        var _network = _state.networks.SingleOrDefault(x => x.name == _name);
-                        if (_network == null)
-                        {
-                            var _splits = c.chain.Split('-');
+                            withdrawFee = c.maxFee,
+                            minWithdrawal = c.minWd,
+                            maxWithdrawal = c.maxWd,
 
-                            _state.networks.Add(new WNetwork
-                            {
-                                name = _name,
-                                network = c.ccy,
-                                chain = _splits[_splits.Length - 1],
-
-                                deposit = c.canDep,
-                                withdraw = c.canWd,
-
-                                withdrawFee = c.maxFee,
-                                minWithdrawal = c.minWd,
-                                maxWithdrawal = c.maxWd,
-
-                                minConfirm = c.minDepArrivalConfirm
-                            });
-                        }
-                        else
-                        {
-                            _network.deposit = c.canDep;
-                            _network.withdraw = c.canWd;
-                        }
+                            minConfirm = c.minDepArrivalConfirm
+                        });
+                    }
+                    else
+                    {
+                        _network.deposit = c.canDep;
+                        _network.withdraw = c.canWd;
                     }
 
                     _result = true;
@@ -229,16 +225,14 @@ namespace CCXT.Simple.Exchanges.Okex
 
             try
             {
-                using (var _client = new HttpClient())
-                {
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/api/v5/market/ticker?instId=" + symbol);
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jtickers = JsonConvert.DeserializeObject<RaTickers>(_jstring);
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl); 
+                var _response = await _client.GetAsync("/api/v5/market/ticker?instId=" + symbol);
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jtickers = JsonConvert.DeserializeObject<RaTickers>(_jstring);
 
-                    var _jitem = _jtickers.data.SingleOrDefault(x => x.instId == symbol);
-                    if (_jitem != null)
-                        _result = _jitem.last;
-                }
+                var _jitem = _jtickers.data.SingleOrDefault(x => x.instId == symbol);
+                if (_jitem != null)
+                    _result = _jitem.last;
             }
             catch (Exception ex)
             {
@@ -259,38 +253,36 @@ namespace CCXT.Simple.Exchanges.Okex
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl); 
+                var _response = await _client.GetAsync("/api/v5/market/tickers?instType=SPOT");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jtickers = JsonConvert.DeserializeObject<RaTickers>(_jstring);
+
+                for (var i = 0; i < tickers.items.Count; i++)
                 {
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/api/v5/market/tickers?instType=SPOT");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jtickers = JsonConvert.DeserializeObject<RaTickers>(_jstring);
+                    var _ticker = tickers.items[i];
+                    if (_ticker.symbol == "X")
+                        continue;
 
-                    for (var i = 0; i < tickers.items.Count; i++)
+                    var _jitem = _jtickers.data.SingleOrDefault(x => x.instId == _ticker.symbol);
+                    if (_jitem != null)
                     {
-                        var _ticker = tickers.items[i];
-                        if (_ticker.symbol == "X")
-                            continue;
-
-                        var _jitem = _jtickers.data.SingleOrDefault(x => x.instId == _ticker.symbol);
-                        if (_jitem != null)
+                        var _last_price = _jitem.last;
                         {
-                            var _last_price = _jitem.last;
+                            if (_ticker.quoteName == "USDT")
                             {
-                                if (_ticker.quoteName == "USDT")
-                                {
-                                    _ticker.lastPrice = _last_price * tickers.exchgRate;
-                                }
-                                else if (_ticker.quoteName == "BTC")
-                                {
-                                    _ticker.lastPrice = _last_price * mainXchg.fiat_btc_price;
-                                }
+                                _ticker.lastPrice = _last_price * tickers.exchgRate;
+                            }
+                            else if (_ticker.quoteName == "BTC")
+                            {
+                                _ticker.lastPrice = _last_price * mainXchg.fiat_btc_price;
                             }
                         }
-                        else
-                        {
-                            mainXchg.OnMessageEvent(ExchangeName, $"not found: {_ticker.symbol}", 4105);
-                            _ticker.symbol = "X";
-                        }
+                    }
+                    else
+                    {
+                        mainXchg.OnMessageEvent(ExchangeName, $"not found: {_ticker.symbol}", 4105);
+                        _ticker.symbol = "X";
                     }
                 }
 
@@ -315,50 +307,48 @@ namespace CCXT.Simple.Exchanges.Okex
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl); 
+                var _response = await _client.GetAsync("/api/v5/market/tickers?instType=SPOT");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jtickers = JsonConvert.DeserializeObject<RaTickers>(_jstring);
+
+                for (var i = 0; i < tickers.items.Count; i++)
                 {
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/api/v5/market/tickers?instType=SPOT");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jtickers = JsonConvert.DeserializeObject<RaTickers>(_jstring);
+                    var _ticker = tickers.items[i];
+                    if (_ticker.symbol == "X")
+                        continue;
 
-                    for (var i = 0; i < tickers.items.Count; i++)
+                    var _jitem = _jtickers.data.SingleOrDefault(x => x.instId == _ticker.symbol);
+                    if (_jitem != null)
                     {
-                        var _ticker = tickers.items[i];
-                        if (_ticker.symbol == "X")
-                            continue;
-
-                        var _jitem = _jtickers.data.SingleOrDefault(x => x.instId == _ticker.symbol);
-                        if (_jitem != null)
+                        var _last_price = _jitem.last;
                         {
-                            var _last_price = _jitem.last;
+                            var _ask_price = _jitem.askPx;
+                            var _bid_price = _jitem.bidPx;
+
+                            if (_ticker.quoteName == "USDT")
                             {
-                                var _ask_price = _jitem.askPx;
-                                var _bid_price = _jitem.bidPx;
+                                _ticker.lastPrice = _last_price * tickers.exchgRate;
 
-                                if (_ticker.quoteName == "USDT")
-                                {
-                                    _ticker.lastPrice = _last_price * tickers.exchgRate;
-
-                                    _ticker.askPrice = _ask_price * tickers.exchgRate;
-                                    _ticker.bidPrice = _bid_price * tickers.exchgRate;
-                                }
-                                else if (_ticker.quoteName == "BTC")
-                                {
-                                    _ticker.lastPrice = _last_price * mainXchg.fiat_btc_price;
-
-                                    _ticker.askPrice = _ask_price * mainXchg.fiat_btc_price;
-                                    _ticker.bidPrice = _bid_price * mainXchg.fiat_btc_price;
-                                }
-
-                                _ticker.askQty = _jitem.askSz;
-                                _ticker.bidQty = _jitem.bidSz;
+                                _ticker.askPrice = _ask_price * tickers.exchgRate;
+                                _ticker.bidPrice = _bid_price * tickers.exchgRate;
                             }
+                            else if (_ticker.quoteName == "BTC")
+                            {
+                                _ticker.lastPrice = _last_price * mainXchg.fiat_btc_price;
+
+                                _ticker.askPrice = _ask_price * mainXchg.fiat_btc_price;
+                                _ticker.bidPrice = _bid_price * mainXchg.fiat_btc_price;
+                            }
+
+                            _ticker.askQty = _jitem.askSz;
+                            _ticker.bidQty = _jitem.bidSz;
                         }
-                        else
-                        {
-                            mainXchg.OnMessageEvent(ExchangeName, $"not found: {_ticker.symbol}", 4107);
-                            _ticker.symbol = "X";
-                        }
+                    }
+                    else
+                    {
+                        mainXchg.OnMessageEvent(ExchangeName, $"not found: {_ticker.symbol}", 4107);
+                        _ticker.symbol = "X";
                     }
                 }
 
@@ -383,48 +373,46 @@ namespace CCXT.Simple.Exchanges.Okex
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl); 
+                var _response = await _client.GetAsync("/api/v5/market/tickers?instType=SPOT");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jtickers = JsonConvert.DeserializeObject<RaTickers>(_jstring);
+
+                for (var i = 0; i < tickers.items.Count; i++)
                 {
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/api/v5/market/tickers?instType=SPOT");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jtickers = JsonConvert.DeserializeObject<RaTickers>(_jstring);
+                    var _ticker = tickers.items[i];
+                    if (_ticker.symbol == "X")
+                        continue;
 
-                    for (var i = 0; i < tickers.items.Count; i++)
+                    var _jitem = _jtickers.data.SingleOrDefault(x => x.instId == _ticker.symbol);
+                    if (_jitem != null)
                     {
-                        var _ticker = tickers.items[i];
-                        if (_ticker.symbol == "X")
-                            continue;
-
-                        var _jitem = _jtickers.data.SingleOrDefault(x => x.instId == _ticker.symbol);
-                        if (_jitem != null)
+                        var _volume = _jitem.volCcy24h;
                         {
-                            var _volume = _jitem.volCcy24h;
+                            var _prev_volume24h = _ticker.previous24h;
+                            var _next_timestamp = _ticker.timestamp + 60 * 1000;
+
+                            if (_ticker.quoteName == "USDT")
+                                _volume *= tickers.exchgRate;
+                            else if (_ticker.quoteName == "BTC")
+                                _volume *= mainXchg.fiat_btc_price;
+
+                            _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
+
+                            var _curr_timestamp = DateTimeXts.NowMilli;
+                            if (_curr_timestamp > _next_timestamp)
                             {
-                                var _prev_volume24h = _ticker.previous24h;
-                                var _next_timestamp = _ticker.timestamp + 60 * 1000;
+                                _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
 
-                                if (_ticker.quoteName == "USDT")
-                                    _volume *= tickers.exchgRate;
-                                else if (_ticker.quoteName == "BTC")
-                                    _volume *= mainXchg.fiat_btc_price;
-
-                                _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
-
-                                var _curr_timestamp = DateTimeXts.NowMilli;
-                                if (_curr_timestamp > _next_timestamp)
-                                {
-                                    _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
-
-                                    _ticker.timestamp = _curr_timestamp;
-                                    _ticker.previous24h = _volume;
-                                }
+                                _ticker.timestamp = _curr_timestamp;
+                                _ticker.previous24h = _volume;
                             }
                         }
-                        else
-                        {
-                            mainXchg.OnMessageEvent(ExchangeName, $"not found: {_ticker.symbol}", 4109);
-                            _ticker.symbol = "X";
-                        }
+                    }
+                    else
+                    {
+                        mainXchg.OnMessageEvent(ExchangeName, $"not found: {_ticker.symbol}", 4109);
+                        _ticker.symbol = "X";
                     }
                 }
 
@@ -449,72 +437,70 @@ namespace CCXT.Simple.Exchanges.Okex
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl); 
+                var _response = await _client.GetAsync("/api/v5/market/tickers?instType=SPOT");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jtickers = JsonConvert.DeserializeObject<RaTickers>(_jstring);
+
+                for (var i = 0; i < tickers.items.Count; i++)
                 {
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/api/v5/market/tickers?instType=SPOT");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jtickers = JsonConvert.DeserializeObject<RaTickers>(_jstring);
+                    var _ticker = tickers.items[i];
+                    if (_ticker.symbol == "X")
+                        continue;
 
-                    for (var i = 0; i < tickers.items.Count; i++)
+                    var _jitem = _jtickers.data.SingleOrDefault(x => x.instId == _ticker.symbol);
+                    if (_jitem != null)
                     {
-                        var _ticker = tickers.items[i];
-                        if (_ticker.symbol == "X")
-                            continue;
-
-                        var _jitem = _jtickers.data.SingleOrDefault(x => x.instId == _ticker.symbol);
-                        if (_jitem != null)
+                        var _last_price = _jitem.last;
                         {
-                            var _last_price = _jitem.last;
+                            var _ask_price = _jitem.askPx;
+                            var _bid_price = _jitem.bidPx;
+
+                            if (_ticker.quoteName == "USDT")
                             {
-                                var _ask_price = _jitem.askPx;
-                                var _bid_price = _jitem.bidPx;
+                                _ticker.lastPrice = _last_price * tickers.exchgRate;
 
-                                if (_ticker.quoteName == "USDT")
-                                {
-                                    _ticker.lastPrice = _last_price * tickers.exchgRate;
+                                _ticker.askPrice = _ask_price * tickers.exchgRate;
+                                _ticker.bidPrice = _bid_price * tickers.exchgRate;
+                            }
+                            else if (_ticker.quoteName == "BTC")
+                            {
+                                _ticker.lastPrice = _last_price * mainXchg.fiat_btc_price;
 
-                                    _ticker.askPrice = _ask_price * tickers.exchgRate;
-                                    _ticker.bidPrice = _bid_price * tickers.exchgRate;
-                                }
-                                else if (_ticker.quoteName == "BTC")
-                                {
-                                    _ticker.lastPrice = _last_price * mainXchg.fiat_btc_price;
-
-                                    _ticker.askPrice = _ask_price * mainXchg.fiat_btc_price;
-                                    _ticker.bidPrice = _bid_price * mainXchg.fiat_btc_price;
-                                }
-
-                                _ticker.askQty = _jitem.askSz;
-                                _ticker.bidQty = _jitem.bidSz;
+                                _ticker.askPrice = _ask_price * mainXchg.fiat_btc_price;
+                                _ticker.bidPrice = _bid_price * mainXchg.fiat_btc_price;
                             }
 
-                            var _volume = _jitem.volCcy24h;
+                            _ticker.askQty = _jitem.askSz;
+                            _ticker.bidQty = _jitem.bidSz;
+                        }
+
+                        var _volume = _jitem.volCcy24h;
+                        {
+                            var _prev_volume24h = _ticker.previous24h;
+                            var _next_timestamp = _ticker.timestamp + 60 * 1000;
+
+                            if (_ticker.quoteName == "USDT")
+                                _volume *= tickers.exchgRate;
+                            else if (_ticker.quoteName == "BTC")
+                                _volume *= mainXchg.fiat_btc_price;
+
+                            _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
+
+                            var _curr_timestamp = DateTimeXts.NowMilli;
+                            if (_curr_timestamp > _next_timestamp)
                             {
-                                var _prev_volume24h = _ticker.previous24h;
-                                var _next_timestamp = _ticker.timestamp + 60 * 1000;
+                                _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
 
-                                if (_ticker.quoteName == "USDT")
-                                    _volume *= tickers.exchgRate;
-                                else if (_ticker.quoteName == "BTC")
-                                    _volume *= mainXchg.fiat_btc_price;
-
-                                _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
-
-                                var _curr_timestamp = DateTimeXts.NowMilli;
-                                if (_curr_timestamp > _next_timestamp)
-                                {
-                                    _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
-
-                                    _ticker.timestamp = _curr_timestamp;
-                                    _ticker.previous24h = _volume;
-                                }
+                                _ticker.timestamp = _curr_timestamp;
+                                _ticker.previous24h = _volume;
                             }
                         }
-                        else
-                        {
-                            mainXchg.OnMessageEvent(ExchangeName, $"not found: {_ticker.symbol}", 4111);
-                            _ticker.symbol = "X";
-                        }
+                    }
+                    else
+                    {
+                        mainXchg.OnMessageEvent(ExchangeName, $"not found: {_ticker.symbol}", 4111);
+                        _ticker.symbol = "X";
                     }
                 }
 
@@ -528,7 +514,7 @@ namespace CCXT.Simple.Exchanges.Okex
             return _result;
         }
 
-        
+
 
         /// <summary>
         /// Get orderbook for a specific symbol
@@ -544,37 +530,35 @@ namespace CCXT.Simple.Exchanges.Okex
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl); 
+                var _response = await _client.GetAsync("/api/v5/market/books?instId={symbol}&sz={limit}");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+
+                if (_jobject.code == "0")
                 {
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/api/v5/market/books?instId={symbol}&sz={limit}");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+                    var data = _jobject.data[0];
 
-                    if (_jobject.code == "0")
+                    // Parse asks
+                    foreach (var ask in data.asks)
                     {
-                        var data = _jobject.data[0];
-                        
-                        // Parse asks
-                        foreach (var ask in data.asks)
+                        _result.asks.Add(new OrderbookItem
                         {
-                            _result.asks.Add(new OrderbookItem
-                            {
-                                price = decimal.Parse(ask[0].ToString()),
-                                quantity = decimal.Parse(ask[1].ToString()),
-                                total = int.Parse(ask[2].ToString())
-                            });
-                        }
+                            price = decimal.Parse(ask[0].ToString()),
+                            quantity = decimal.Parse(ask[1].ToString()),
+                            total = int.Parse(ask[2].ToString())
+                        });
+                    }
 
-                        // Parse bids
-                        foreach (var bid in data.bids)
+                    // Parse bids
+                    foreach (var bid in data.bids)
+                    {
+                        _result.bids.Add(new OrderbookItem
                         {
-                            _result.bids.Add(new OrderbookItem
-                            {
-                                price = decimal.Parse(bid[0].ToString()),
-                                quantity = decimal.Parse(bid[1].ToString()),
-                                total = int.Parse(bid[2].ToString())
-                            });
-                        }
+                            price = decimal.Parse(bid[0].ToString()),
+                            quantity = decimal.Parse(bid[1].ToString()),
+                            total = int.Parse(bid[2].ToString())
+                        });
                     }
                 }
             }
@@ -595,34 +579,32 @@ namespace CCXT.Simple.Exchanges.Okex
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl); 
+                var bar = ConvertTimeframe(timeframe);
+                var url = "/api/v5/market/candles?instId={symbol}&bar={bar}&limit={limit}";
+
+                if (since.HasValue)
                 {
-                    var bar = ConvertTimeframe(timeframe);
-                    var url = $"{ExchangeUrl}/api/v5/market/candles?instId={symbol}&bar={bar}&limit={limit}";
-                    
-                    if (since.HasValue)
-                    {
-                        url += $"&after={since.Value}";
-                    }
+                    url += $"&after={since.Value}";
+                }
 
-                    var _response = await _client.GetAsync(url);
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+                var _response = await _client.GetAsync(url);
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
 
-                    if (_jobject.code == "0")
+                if (_jobject.code == "0")
+                {
+                    foreach (var candle in _jobject.data)
                     {
-                        foreach (var candle in _jobject.data)
+                        _result.Add(new decimal[]
                         {
-                            _result.Add(new decimal[]
-                            {
                                 decimal.Parse(candle[0].ToString()),  // timestamp
                                 decimal.Parse(candle[1].ToString()),  // open
                                 decimal.Parse(candle[2].ToString()),  // high
                                 decimal.Parse(candle[3].ToString()),  // low
                                 decimal.Parse(candle[4].ToString()),  // close
                                 decimal.Parse(candle[5].ToString())   // volume
-                            });
-                        }
+                        });
                     }
                 }
             }
@@ -664,25 +646,23 @@ namespace CCXT.Simple.Exchanges.Okex
 
             try
             {
-                using (var _client = new HttpClient())
-                {
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/api/v5/market/trades?instId={symbol}&limit={limit}");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl); 
+                var _response = await _client.GetAsync("/api/v5/market/trades?instId={symbol}&limit={limit}");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
 
-                    if (_jobject.code == "0")
+                if (_jobject.code == "0")
+                {
+                    foreach (var trade in _jobject.data)
                     {
-                        foreach (var trade in _jobject.data)
+                        _result.Add(new TradeData
                         {
-                            _result.Add(new TradeData
-                            {
-                                id = trade.tradeId.ToString(),
-                                timestamp = long.Parse(trade.ts.ToString()),
-                                price = decimal.Parse(trade.px.ToString()),
-                                amount = decimal.Parse(trade.sz.ToString()),
-                                side = trade.side.ToString() == "buy" ? SideType.Bid : SideType.Ask
-                            });
-                        }
+                            id = trade.tradeId.ToString(),
+                            timestamp = long.Parse(trade.ts.ToString()),
+                            price = decimal.Parse(trade.px.ToString()),
+                            amount = decimal.Parse(trade.sz.ToString()),
+                            side = trade.side.ToString() == "buy" ? SideType.Bid : SideType.Ask
+                        });
                     }
                 }
             }
@@ -708,30 +688,28 @@ namespace CCXT.Simple.Exchanges.Okex
                     throw new InvalidOperationException("API credentials are required for private endpoints");
                 }
 
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl); 
+                var path = "/api/v5/account/balance";
+                CreateSignature(_client, "GET", path);
+
+                var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+
+                if (_jobject.code == "0")
                 {
-                    var path = "/api/v5/account/balance";
-                    CreateSignature(_client, "GET", path);
-
-                    var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
-
-                    if (_jobject.code == "0")
+                    foreach (var balance in _jobject.data[0].details)
                     {
-                        foreach (var balance in _jobject.data[0].details)
+                        var currency = balance.ccy.ToString();
+                        var available = decimal.Parse(balance.availBal.ToString());
+                        var frozen = decimal.Parse(balance.frozenBal.ToString());
+
+                        _result[currency] = new BalanceInfo
                         {
-                            var currency = balance.ccy.ToString();
-                            var available = decimal.Parse(balance.availBal.ToString());
-                            var frozen = decimal.Parse(balance.frozenBal.ToString());
-                            
-                            _result[currency] = new BalanceInfo
-                            {
-                                free = available,
-                                used = frozen,
-                                total = available + frozen
-                            };
-                        }
+                            free = available,
+                            used = frozen,
+                            total = available + frozen
+                        };
                     }
                 }
             }
@@ -762,24 +740,22 @@ namespace CCXT.Simple.Exchanges.Okex
             {
                 // Get balance information
                 _result.balances = await GetBalance();
-                
+
                 if (!string.IsNullOrEmpty(ApiKey))
                 {
-                    using (var _client = new HttpClient())
+                    var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl); 
+                    var path = "/api/v5/account/config";
+                    CreateSignature(_client, "GET", path);
+
+                    var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
+                    var _jstring = await _response.Content.ReadAsStringAsync();
+                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+
+                    if (_jobject.code == "0" && _jobject.data.Count > 0)
                     {
-                        var path = "/api/v5/account/config";
-                        CreateSignature(_client, "GET", path);
-
-                        var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
-                        var _jstring = await _response.Content.ReadAsStringAsync();
-                        var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
-
-                        if (_jobject.code == "0" && _jobject.data.Count > 0)
-                        {
-                            _result.id = _jobject.data[0].uid?.ToString() ?? "";
-                            var level = _jobject.data[0].level?.ToString() ?? "1";
-                            _result.type = $"Level {level}";
-                        }
+                        _result.id = _jobject.data[0].uid?.ToString() ?? "";
+                        var level = _jobject.data[0].level?.ToString() ?? "1";
+                        _result.type = $"Level {level}";
                     }
                 }
             }
@@ -805,51 +781,49 @@ namespace CCXT.Simple.Exchanges.Okex
                     throw new InvalidOperationException("API credentials are required for placing orders");
                 }
 
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl); 
+                var path = "/api/v5/trade/order";
+
+                var orderData = new
                 {
-                    var path = "/api/v5/trade/order";
-                    
-                    var orderData = new
+                    instId = symbol,
+                    tdMode = "cash",  // Cash trading mode
+                    side = side == SideType.Bid ? "buy" : "sell",
+                    ordType = orderType.ToLower() == "market" ? "market" : "limit",
+                    sz = amount.ToString(),
+                    px = orderType.ToLower() == "limit" ? price?.ToString() : null,
+                    clOrdId = clientOrderId
+                };
+
+                var jsonContent = JsonConvert.SerializeObject(orderData);
+                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                CreateSignature(_client, "POST", path, jsonContent);
+                _client.DefaultRequestHeaders.Add("Content-Type", "application/json");
+
+                var _response = await _client.PostAsync($"{ExchangeUrl}{path}", content);
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+
+                if (_jobject.code == "0" && _jobject.data.Count > 0)
+                {
+                    var order = _jobject.data[0];
+                    _result = new OrderInfo
                     {
-                        instId = symbol,
-                        tdMode = "cash",  // Cash trading mode
-                        side = side == SideType.Bid ? "buy" : "sell",
-                        ordType = orderType.ToLower() == "market" ? "market" : "limit",
-                        sz = amount.ToString(),
-                        px = orderType.ToLower() == "limit" ? price?.ToString() : null,
-                        clOrdId = clientOrderId
+                        id = order.ordId?.ToString() ?? "",
+                        clientOrderId = order.clOrdId?.ToString() ?? clientOrderId ?? "",
+                        symbol = symbol,
+                        side = side,
+                        type = orderType,
+                        status = "new",
+                        amount = amount,
+                        price = price,
+                        filled = 0,
+                        remaining = amount,
+                        timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                        fee = 0,
+                        feeAsset = "USDT"
                     };
-
-                    var jsonContent = JsonConvert.SerializeObject(orderData);
-                    var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-                    
-                    CreateSignature(_client, "POST", path, jsonContent);
-                    _client.DefaultRequestHeaders.Add("Content-Type", "application/json");
-                    
-                    var _response = await _client.PostAsync($"{ExchangeUrl}{path}", content);
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
-
-                    if (_jobject.code == "0" && _jobject.data.Count > 0)
-                    {
-                        var order = _jobject.data[0];
-                        _result = new OrderInfo
-                        {
-                            id = order.ordId?.ToString() ?? "",
-                            clientOrderId = order.clOrdId?.ToString() ?? clientOrderId ?? "",
-                            symbol = symbol,
-                            side = side,
-                            type = orderType,
-                            status = "new",
-                            amount = amount,
-                            price = price,
-                            filled = 0,
-                            remaining = amount,
-                            timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                            fee = 0,
-                            feeAsset = "USDT"
-                        };
-                    }
                 }
             }
             catch (Exception ex)
@@ -879,29 +853,27 @@ namespace CCXT.Simple.Exchanges.Okex
                     throw new ArgumentException("Symbol is required for OKX order cancellation");
                 }
 
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl); 
+                var path = "/api/v5/trade/cancel-order";
+
+                var cancelData = new
                 {
-                    var path = "/api/v5/trade/cancel-order";
-                    
-                    var cancelData = new
-                    {
-                        instId = symbol,
-                        ordId = orderId,
-                        clOrdId = clientOrderId
-                    };
+                    instId = symbol,
+                    ordId = orderId,
+                    clOrdId = clientOrderId
+                };
 
-                    var jsonContent = JsonConvert.SerializeObject(cancelData);
-                    var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-                    
-                    CreateSignature(_client, "POST", path, jsonContent);
-                    _client.DefaultRequestHeaders.Add("Content-Type", "application/json");
-                    
-                    var _response = await _client.PostAsync($"{ExchangeUrl}{path}", content);
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+                var jsonContent = JsonConvert.SerializeObject(cancelData);
+                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-                    _result = _jobject.code == "0";
-                }
+                CreateSignature(_client, "POST", path, jsonContent);
+                _client.DefaultRequestHeaders.Add("Content-Type", "application/json");
+
+                var _response = await _client.PostAsync($"{ExchangeUrl}{path}", content);
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+
+                _result = _jobject.code == "0";
             }
             catch (Exception ex)
             {
@@ -930,40 +902,38 @@ namespace CCXT.Simple.Exchanges.Okex
                     throw new ArgumentException("Symbol is required for OKX order query");
                 }
 
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl); 
+                var path = $"/api/v5/trade/order?instId={symbol}";
+                if (!string.IsNullOrEmpty(orderId))
+                    path += $"&ordId={orderId}";
+                else if (!string.IsNullOrEmpty(clientOrderId))
+                    path += $"&clOrdId={clientOrderId}";
+
+                CreateSignature(_client, "GET", path);
+
+                var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+
+                if (_jobject.code == "0" && _jobject.data.Count > 0)
                 {
-                    var path = $"/api/v5/trade/order?instId={symbol}";
-                    if (!string.IsNullOrEmpty(orderId))
-                        path += $"&ordId={orderId}";
-                    else if (!string.IsNullOrEmpty(clientOrderId))
-                        path += $"&clOrdId={clientOrderId}";
-                    
-                    CreateSignature(_client, "GET", path);
-
-                    var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
-
-                    if (_jobject.code == "0" && _jobject.data.Count > 0)
+                    var order = _jobject.data[0];
+                    _result = new OrderInfo
                     {
-                        var order = _jobject.data[0];
-                        _result = new OrderInfo
-                        {
-                            id = order.ordId?.ToString() ?? "",
-                            clientOrderId = order.clOrdId?.ToString() ?? "",
-                            symbol = order.instId?.ToString() ?? symbol,
-                            side = order.side?.ToString() == "buy" ? SideType.Bid : SideType.Ask,
-                            type = order.ordType?.ToString() ?? "",
-                            status = order.state?.ToString() ?? "",
-                            amount = decimal.Parse(order.sz?.ToString() ?? "0"),
-                            price = !string.IsNullOrEmpty(order.px?.ToString()) ? decimal.Parse(order.px.ToString()) : (decimal?)null,
-                            filled = decimal.Parse(order.fillSz?.ToString() ?? "0"),
-                            remaining = decimal.Parse(order.sz?.ToString() ?? "0") - decimal.Parse(order.fillSz?.ToString() ?? "0"),
-                            timestamp = long.Parse(order.cTime?.ToString() ?? "0"),
-                            fee = decimal.Parse(order.fee?.ToString() ?? "0"),
-                            feeAsset = order.feeCcy?.ToString() ?? "USDT"
-                        };
-                    }
+                        id = order.ordId?.ToString() ?? "",
+                        clientOrderId = order.clOrdId?.ToString() ?? "",
+                        symbol = order.instId?.ToString() ?? symbol,
+                        side = order.side?.ToString() == "buy" ? SideType.Bid : SideType.Ask,
+                        type = order.ordType?.ToString() ?? "",
+                        status = order.state?.ToString() ?? "",
+                        amount = decimal.Parse(order.sz?.ToString() ?? "0"),
+                        price = !string.IsNullOrEmpty(order.px?.ToString()) ? decimal.Parse(order.px.ToString()) : (decimal?)null,
+                        filled = decimal.Parse(order.fillSz?.ToString() ?? "0"),
+                        remaining = decimal.Parse(order.sz?.ToString() ?? "0") - decimal.Parse(order.fillSz?.ToString() ?? "0"),
+                        timestamp = long.Parse(order.cTime?.ToString() ?? "0"),
+                        fee = decimal.Parse(order.fee?.ToString() ?? "0"),
+                        feeAsset = order.feeCcy?.ToString() ?? "USDT"
+                    };
                 }
             }
             catch (Exception ex)
@@ -988,41 +958,39 @@ namespace CCXT.Simple.Exchanges.Okex
                     throw new InvalidOperationException("API credentials are required for getting open orders");
                 }
 
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl); 
+                var path = "/api/v5/trade/orders-pending";
+                if (!string.IsNullOrEmpty(symbol))
+                    path += $"?instId={symbol}";
+                else
+                    path += "?instType=SPOT";
+
+                CreateSignature(_client, "GET", path);
+
+                var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+
+                if (_jobject.code == "0")
                 {
-                    var path = "/api/v5/trade/orders-pending";
-                    if (!string.IsNullOrEmpty(symbol))
-                        path += $"?instId={symbol}";
-                    else
-                        path += "?instType=SPOT";
-                    
-                    CreateSignature(_client, "GET", path);
-
-                    var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
-
-                    if (_jobject.code == "0")
+                    foreach (var order in _jobject.data)
                     {
-                        foreach (var order in _jobject.data)
+                        _result.Add(new OrderInfo
                         {
-                            _result.Add(new OrderInfo
-                            {
-                                id = order.ordId?.ToString() ?? "",
-                                clientOrderId = order.clOrdId?.ToString() ?? "",
-                                symbol = order.instId?.ToString() ?? "",
-                                side = order.side?.ToString() == "buy" ? SideType.Bid : SideType.Ask,
-                                type = order.ordType?.ToString() ?? "",
-                                status = order.state?.ToString() ?? "",
-                                amount = decimal.Parse(order.sz?.ToString() ?? "0"),
-                                price = !string.IsNullOrEmpty(order.px?.ToString()) ? decimal.Parse(order.px.ToString()) : (decimal?)null,
-                                filled = decimal.Parse(order.fillSz?.ToString() ?? "0"),
-                                remaining = decimal.Parse(order.sz?.ToString() ?? "0") - decimal.Parse(order.fillSz?.ToString() ?? "0"),
-                                timestamp = long.Parse(order.cTime?.ToString() ?? "0"),
-                                fee = decimal.Parse(order.fee?.ToString() ?? "0"),
-                                feeAsset = order.feeCcy?.ToString() ?? "USDT"
-                            });
-                        }
+                            id = order.ordId?.ToString() ?? "",
+                            clientOrderId = order.clOrdId?.ToString() ?? "",
+                            symbol = order.instId?.ToString() ?? "",
+                            side = order.side?.ToString() == "buy" ? SideType.Bid : SideType.Ask,
+                            type = order.ordType?.ToString() ?? "",
+                            status = order.state?.ToString() ?? "",
+                            amount = decimal.Parse(order.sz?.ToString() ?? "0"),
+                            price = !string.IsNullOrEmpty(order.px?.ToString()) ? decimal.Parse(order.px.ToString()) : (decimal?)null,
+                            filled = decimal.Parse(order.fillSz?.ToString() ?? "0"),
+                            remaining = decimal.Parse(order.sz?.ToString() ?? "0") - decimal.Parse(order.fillSz?.ToString() ?? "0"),
+                            timestamp = long.Parse(order.cTime?.ToString() ?? "0"),
+                            fee = decimal.Parse(order.fee?.ToString() ?? "0"),
+                            feeAsset = order.feeCcy?.ToString() ?? "USDT"
+                        });
                     }
                 }
             }
@@ -1048,39 +1016,37 @@ namespace CCXT.Simple.Exchanges.Okex
                     throw new InvalidOperationException("API credentials are required for getting order history");
                 }
 
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl); 
+                var path = $"/api/v5/trade/orders-history?instType=SPOT&limit={limit}";
+                if (!string.IsNullOrEmpty(symbol))
+                    path += $"&instId={symbol}";
+
+                CreateSignature(_client, "GET", path);
+
+                var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+
+                if (_jobject.code == "0")
                 {
-                    var path = $"/api/v5/trade/orders-history?instType=SPOT&limit={limit}";
-                    if (!string.IsNullOrEmpty(symbol))
-                        path += $"&instId={symbol}";
-                    
-                    CreateSignature(_client, "GET", path);
-
-                    var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
-
-                    if (_jobject.code == "0")
+                    foreach (var order in _jobject.data)
                     {
-                        foreach (var order in _jobject.data)
+                        _result.Add(new OrderInfo
                         {
-                            _result.Add(new OrderInfo
-                            {
-                                id = order.ordId?.ToString() ?? "",
-                                clientOrderId = order.clOrdId?.ToString() ?? "",
-                                symbol = order.instId?.ToString() ?? "",
-                                side = order.side?.ToString() == "buy" ? SideType.Bid : SideType.Ask,
-                                type = order.ordType?.ToString() ?? "",
-                                status = order.state?.ToString() ?? "",
-                                amount = decimal.Parse(order.sz?.ToString() ?? "0"),
-                                price = !string.IsNullOrEmpty(order.px?.ToString()) ? decimal.Parse(order.px.ToString()) : (decimal?)null,
-                                filled = decimal.Parse(order.fillSz?.ToString() ?? "0"),
-                                remaining = 0,
-                                timestamp = long.Parse(order.cTime?.ToString() ?? "0"),
-                                fee = decimal.Parse(order.fee?.ToString() ?? "0"),
-                                feeAsset = order.feeCcy?.ToString() ?? "USDT"
-                            });
-                        }
+                            id = order.ordId?.ToString() ?? "",
+                            clientOrderId = order.clOrdId?.ToString() ?? "",
+                            symbol = order.instId?.ToString() ?? "",
+                            side = order.side?.ToString() == "buy" ? SideType.Bid : SideType.Ask,
+                            type = order.ordType?.ToString() ?? "",
+                            status = order.state?.ToString() ?? "",
+                            amount = decimal.Parse(order.sz?.ToString() ?? "0"),
+                            price = !string.IsNullOrEmpty(order.px?.ToString()) ? decimal.Parse(order.px.ToString()) : (decimal?)null,
+                            filled = decimal.Parse(order.fillSz?.ToString() ?? "0"),
+                            remaining = 0,
+                            timestamp = long.Parse(order.cTime?.ToString() ?? "0"),
+                            fee = decimal.Parse(order.fee?.ToString() ?? "0"),
+                            feeAsset = order.feeCcy?.ToString() ?? "USDT"
+                        });
                     }
                 }
             }
@@ -1106,35 +1072,33 @@ namespace CCXT.Simple.Exchanges.Okex
                     throw new InvalidOperationException("API credentials are required for getting trade history");
                 }
 
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl); 
+                var path = $"/api/v5/trade/fills?instType=SPOT&limit={limit}";
+                if (!string.IsNullOrEmpty(symbol))
+                    path += $"&instId={symbol}";
+
+                CreateSignature(_client, "GET", path);
+
+                var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+
+                if (_jobject.code == "0")
                 {
-                    var path = $"/api/v5/trade/fills?instType=SPOT&limit={limit}";
-                    if (!string.IsNullOrEmpty(symbol))
-                        path += $"&instId={symbol}";
-                    
-                    CreateSignature(_client, "GET", path);
-
-                    var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
-
-                    if (_jobject.code == "0")
+                    foreach (var trade in _jobject.data)
                     {
-                        foreach (var trade in _jobject.data)
+                        _result.Add(new TradeInfo
                         {
-                            _result.Add(new TradeInfo
-                            {
-                                id = trade.tradeId?.ToString() ?? "",
-                                orderId = trade.ordId?.ToString() ?? "",
-                                symbol = trade.instId?.ToString() ?? "",
-                                side = trade.side?.ToString() == "buy" ? SideType.Bid : SideType.Ask,
-                                amount = decimal.Parse(trade.fillSz?.ToString() ?? "0"),
-                                price = decimal.Parse(trade.fillPx?.ToString() ?? "0"),
-                                timestamp = long.Parse(trade.fillTime?.ToString() ?? "0"),
-                                fee = decimal.Parse(trade.fee?.ToString() ?? "0"),
-                                feeAsset = trade.feeCcy?.ToString() ?? "USDT"
-                            });
-                        }
+                            id = trade.tradeId?.ToString() ?? "",
+                            orderId = trade.ordId?.ToString() ?? "",
+                            symbol = trade.instId?.ToString() ?? "",
+                            side = trade.side?.ToString() == "buy" ? SideType.Bid : SideType.Ask,
+                            amount = decimal.Parse(trade.fillSz?.ToString() ?? "0"),
+                            price = decimal.Parse(trade.fillPx?.ToString() ?? "0"),
+                            timestamp = long.Parse(trade.fillTime?.ToString() ?? "0"),
+                            fee = decimal.Parse(trade.fee?.ToString() ?? "0"),
+                            feeAsset = trade.feeCcy?.ToString() ?? "USDT"
+                        });
                     }
                 }
             }
@@ -1160,26 +1124,24 @@ namespace CCXT.Simple.Exchanges.Okex
                     throw new InvalidOperationException("API credentials are required for getting deposit address");
                 }
 
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl); 
+                var path = $"/api/v5/asset/deposit-address?ccy={currency}";
+                CreateSignature(_client, "GET", path);
+
+                var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+
+                if (_jobject.code == "0" && _jobject.data.Count > 0)
                 {
-                    var path = $"/api/v5/asset/deposit-address?ccy={currency}";
-                    CreateSignature(_client, "GET", path);
-
-                    var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
-
-                    if (_jobject.code == "0" && _jobject.data.Count > 0)
+                    var addressInfo = _jobject.data[0];
+                    _result = new DepositAddress
                     {
-                        var addressInfo = _jobject.data[0];
-                        _result = new DepositAddress
-                        {
-                            address = addressInfo.addr?.ToString() ?? "",
-                            tag = addressInfo.tag?.ToString() ?? "",
-                            network = addressInfo.chain?.ToString() ?? network ?? "",
-                            currency = currency
-                        };
-                    }
+                        address = addressInfo.addr?.ToString() ?? "",
+                        tag = addressInfo.tag?.ToString() ?? "",
+                        network = addressInfo.chain?.ToString() ?? network ?? "",
+                        currency = currency
+                    };
                 }
             }
             catch (Exception ex)
@@ -1204,47 +1166,45 @@ namespace CCXT.Simple.Exchanges.Okex
                     throw new InvalidOperationException("API credentials are required for withdrawal");
                 }
 
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl); 
+                var path = "/api/v5/asset/withdrawal";
+
+                var withdrawData = new
                 {
-                    var path = "/api/v5/asset/withdrawal";
-                    
-                    var withdrawData = new
+                    ccy = currency,
+                    amt = amount.ToString(),
+                    dest = "4",  // On-chain withdrawal
+                    toAddr = address,
+                    fee = "0",
+                    chain = network,
+                    tag = tag
+                };
+
+                var jsonContent = JsonConvert.SerializeObject(withdrawData);
+                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                CreateSignature(_client, "POST", path, jsonContent);
+                _client.DefaultRequestHeaders.Add("Content-Type", "application/json");
+
+                var _response = await _client.PostAsync($"{ExchangeUrl}{path}", content);
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+
+                if (_jobject.code == "0" && _jobject.data.Count > 0)
+                {
+                    var withdrawal = _jobject.data[0];
+                    _result = new WithdrawalInfo
                     {
-                        ccy = currency,
-                        amt = amount.ToString(),
-                        dest = "4",  // On-chain withdrawal
-                        toAddr = address,
-                        fee = "0",
-                        chain = network,
-                        tag = tag
+                        id = withdrawal.wdId?.ToString() ?? "",
+                        currency = currency,
+                        amount = amount,
+                        address = address,
+                        tag = tag ?? "",
+                        network = network ?? withdrawal.chain?.ToString() ?? "",
+                        status = "pending",
+                        timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                        fee = decimal.Parse(withdrawal.fee?.ToString() ?? "0")
                     };
-
-                    var jsonContent = JsonConvert.SerializeObject(withdrawData);
-                    var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-                    
-                    CreateSignature(_client, "POST", path, jsonContent);
-                    _client.DefaultRequestHeaders.Add("Content-Type", "application/json");
-                    
-                    var _response = await _client.PostAsync($"{ExchangeUrl}{path}", content);
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
-
-                    if (_jobject.code == "0" && _jobject.data.Count > 0)
-                    {
-                        var withdrawal = _jobject.data[0];
-                        _result = new WithdrawalInfo
-                        {
-                            id = withdrawal.wdId?.ToString() ?? "",
-                            currency = currency,
-                            amount = amount,
-                            address = address,
-                            tag = tag ?? "",
-                            network = network ?? withdrawal.chain?.ToString() ?? "",
-                            status = "pending",
-                            timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                            fee = decimal.Parse(withdrawal.fee?.ToString() ?? "0")
-                        };
-                    }
                 }
             }
             catch (Exception ex)
@@ -1269,35 +1229,33 @@ namespace CCXT.Simple.Exchanges.Okex
                     throw new InvalidOperationException("API credentials are required for getting deposit history");
                 }
 
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl); 
+                var path = $"/api/v5/asset/deposit-history?limit={limit}";
+                if (!string.IsNullOrEmpty(currency))
+                    path += $"&ccy={currency}";
+
+                CreateSignature(_client, "GET", path);
+
+                var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+
+                if (_jobject.code == "0")
                 {
-                    var path = $"/api/v5/asset/deposit-history?limit={limit}";
-                    if (!string.IsNullOrEmpty(currency))
-                        path += $"&ccy={currency}";
-                    
-                    CreateSignature(_client, "GET", path);
-
-                    var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
-
-                    if (_jobject.code == "0")
+                    foreach (var deposit in _jobject.data)
                     {
-                        foreach (var deposit in _jobject.data)
+                        _result.Add(new DepositInfo
                         {
-                            _result.Add(new DepositInfo
-                            {
-                                id = deposit.depId?.ToString() ?? "",
-                                currency = deposit.ccy?.ToString() ?? "",
-                                amount = decimal.Parse(deposit.amt?.ToString() ?? "0"),
-                                address = deposit.to?.ToString() ?? "",
-                                tag = "",
-                                network = deposit.chain?.ToString() ?? "",
-                                status = deposit.state?.ToString() ?? "",
-                                timestamp = long.Parse(deposit.ts?.ToString() ?? "0"),
-                                txid = deposit.txId?.ToString() ?? ""
-                            });
-                        }
+                            id = deposit.depId?.ToString() ?? "",
+                            currency = deposit.ccy?.ToString() ?? "",
+                            amount = decimal.Parse(deposit.amt?.ToString() ?? "0"),
+                            address = deposit.to?.ToString() ?? "",
+                            tag = "",
+                            network = deposit.chain?.ToString() ?? "",
+                            status = deposit.state?.ToString() ?? "",
+                            timestamp = long.Parse(deposit.ts?.ToString() ?? "0"),
+                            txid = deposit.txId?.ToString() ?? ""
+                        });
                     }
                 }
             }
@@ -1323,35 +1281,33 @@ namespace CCXT.Simple.Exchanges.Okex
                     throw new InvalidOperationException("API credentials are required for getting withdrawal history");
                 }
 
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl); 
+                var path = $"/api/v5/asset/withdrawal-history?limit={limit}";
+                if (!string.IsNullOrEmpty(currency))
+                    path += $"&ccy={currency}";
+
+                CreateSignature(_client, "GET", path);
+
+                var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+
+                if (_jobject.code == "0")
                 {
-                    var path = $"/api/v5/asset/withdrawal-history?limit={limit}";
-                    if (!string.IsNullOrEmpty(currency))
-                        path += $"&ccy={currency}";
-                    
-                    CreateSignature(_client, "GET", path);
-
-                    var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
-
-                    if (_jobject.code == "0")
+                    foreach (var withdrawal in _jobject.data)
                     {
-                        foreach (var withdrawal in _jobject.data)
+                        _result.Add(new WithdrawalInfo
                         {
-                            _result.Add(new WithdrawalInfo
-                            {
-                                id = withdrawal.wdId?.ToString() ?? "",
-                                currency = withdrawal.ccy?.ToString() ?? "",
-                                amount = decimal.Parse(withdrawal.amt?.ToString() ?? "0"),
-                                address = withdrawal.to?.ToString() ?? "",
-                                tag = "",
-                                network = withdrawal.chain?.ToString() ?? "",
-                                status = withdrawal.state?.ToString() ?? "",
-                                timestamp = long.Parse(withdrawal.ts?.ToString() ?? "0"),
-                                fee = decimal.Parse(withdrawal.fee?.ToString() ?? "0")
-                            });
-                        }
+                            id = withdrawal.wdId?.ToString() ?? "",
+                            currency = withdrawal.ccy?.ToString() ?? "",
+                            amount = decimal.Parse(withdrawal.amt?.ToString() ?? "0"),
+                            address = withdrawal.to?.ToString() ?? "",
+                            tag = "",
+                            network = withdrawal.chain?.ToString() ?? "",
+                            status = withdrawal.state?.ToString() ?? "",
+                            timestamp = long.Parse(withdrawal.ts?.ToString() ?? "0"),
+                            fee = decimal.Parse(withdrawal.fee?.ToString() ?? "0")
+                        });
                     }
                 }
             }

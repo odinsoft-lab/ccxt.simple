@@ -1,4 +1,4 @@
-﻿using CCXT.Simple.Services;
+using CCXT.Simple.Services;
 using CCXT.Simple.Models;
 using CCXT.Simple.Exchanges.Crypto;
 using GraphQL;
@@ -60,27 +60,25 @@ namespace CCXT.Simple.Exchanges.Korbit
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+                var _response = await _client.GetAsync("/v1/ticker/detailed/all");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jobject = JObject.Parse(_jstring);
+
+                var _queue_info = mainXchg.GetXInfors(ExchangeName);
+
+                foreach (var s in _jobject)
                 {
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/v1/ticker/detailed/all");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JObject.Parse(_jstring);
+                    var _symbol = s.Key;
+                    var _pairs = _symbol.Split('_');
 
-                    var _queue_info = mainXchg.GetXInfors(ExchangeName);
-
-                    foreach (var s in _jobject)
+                    _queue_info.symbols.Add(new QueueSymbol
                     {
-                        var _symbol = s.Key;
-                        var _pairs = _symbol.Split('_');
-
-                        _queue_info.symbols.Add(new QueueSymbol
-                        {
-                            symbol = _symbol,
-                            compName = _pairs[0].ToUpper(),
-                            baseName = _pairs[0].ToUpper(),
-                            quoteName = _pairs[1].ToUpper()
-                        });
-                    }
+                        symbol = _symbol,
+                        compName = _pairs[0].ToUpper(),
+                        baseName = _pairs[0].ToUpper(),
+                        quoteName = _pairs[1].ToUpper()
+                    });
                 }
 
                 _result = true;
@@ -103,85 +101,83 @@ namespace CCXT.Simple.Exchanges.Korbit
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+                var _endpoint = "/api/korbit/v3/currencies";
+
+                _client.DefaultRequestHeaders.Add("platform-identifier", "witcher_android");
+
+                var _response = await _client.GetAsync($"{ExchangePpUrl}{_endpoint}");
+                if (_response.IsSuccessStatusCode)
                 {
-                    var _endpoint = "/api/korbit/v3/currencies";
+                    var _jstring = await _response.Content.ReadAsStringAsync();
+                    var _jarray = JsonConvert.DeserializeObject<List<CoinState>>(_jstring, mainXchg.JsonSettings);
 
-                    _client.DefaultRequestHeaders.Add("platform-identifier", "witcher_android");
-
-                    var _response = await _client.GetAsync($"{ExchangePpUrl}{_endpoint}");
-                    if (_response.IsSuccessStatusCode)
+                    foreach (var c in _jarray)
                     {
-                        var _jstring = await _response.Content.ReadAsStringAsync();
-                        var _jarray = JsonConvert.DeserializeObject<List<CoinState>>(_jstring, mainXchg.JsonSettings);
+                        if (c.currency_type != "crypto")
+                            continue;
 
-                        foreach (var c in _jarray)
+                        var _state = tickers.states.SingleOrDefault(x => x.baseName == c.symbol);
+                        if (_state == null)
                         {
-                            if (c.currency_type != "crypto")
-                                continue;
-
-                            var _state = tickers.states.SingleOrDefault(x => x.baseName == c.symbol);
-                            if (_state == null)
+                            _state = new WState
                             {
-                                _state = new WState
-                                {
-                                    baseName = c.symbol,
-                                    active = true,
-                                    deposit = c.deposit_status == "launched",
-                                    withdraw = c.withdrawal_status == "launched",
-                                    networks = new List<WNetwork>()
-                                };
+                                baseName = c.symbol,
+                                active = true,
+                                deposit = c.deposit_status == "launched",
+                                withdraw = c.withdrawal_status == "launched",
+                                networks = new List<WNetwork>()
+                            };
 
-                                tickers.states.Add(_state);
-                            }
-                            else
+                            tickers.states.Add(_state);
+                        }
+                        else
+                        {
+                            _state.deposit = c.deposit_status == "launched";
+                            _state.withdraw = c.withdrawal_status == "launched";
+                        }
+
+                        var _t_items = tickers.items.Where(x => x.compName == _state.baseName);
+                        if (_t_items != null)
+                        {
+                            foreach (var t in _t_items)
                             {
-                                _state.deposit = c.deposit_status == "launched";
-                                _state.withdraw = c.withdrawal_status == "launched";
+                                t.active = _state.active;
+                                t.deposit = _state.deposit;
+                                t.withdraw = _state.withdraw;
                             }
+                        }
 
-                            var _t_items = tickers.items.Where(x => x.compName == _state.baseName);
-                            if (_t_items != null)
+                        var _name = c.symbol + "-" + c.currency_network;
+
+                        var _network = _state.networks.SingleOrDefault(x => x.name == _name);
+                        if (_network == null)
+                        {
+                            var _chain = c.symbol;
+                            var _protocol = (c.currency_network != null && c.currency_network != "Mainnet")
+                                          ? c.currency_network.Replace("-", "")
+                                          : c.symbol;
+
+                            _network = new WNetwork
                             {
-                                foreach (var t in _t_items)
-                                {
-                                    t.active = _state.active;
-                                    t.deposit = _state.deposit;
-                                    t.withdraw = _state.withdraw;
-                                }
-                            }
+                                name = _name,
+                                network = _chain,
+                                chain = _protocol,
 
-                            var _name = c.symbol + "-" + c.currency_network;
+                                deposit = _state.deposit,
+                                withdraw = _state.withdraw,
 
-                            var _network = _state.networks.SingleOrDefault(x => x.name == _name);
-                            if (_network == null)
-                            {
-                                var _chain = c.symbol;
-                                var _protocol = (c.currency_network != null && c.currency_network != "Mainnet")
-                                              ? c.currency_network.Replace("-", "")
-                                              : c.symbol;
+                                withdrawFee = c.withdrawal_tx_fee,
+                                minWithdrawal = c.withdrawal_min_amount,
+                                maxWithdrawal = c.withdrawal_max_amount_per_request
+                            };
 
-                                _network = new WNetwork
-                                {
-                                    name = _name,
-                                    network = _chain,
-                                    chain = _protocol,
-
-                                    deposit = _state.deposit,
-                                    withdraw = _state.withdraw,
-
-                                    withdrawFee = c.withdrawal_tx_fee,
-                                    minWithdrawal = c.withdrawal_min_amount,
-                                    maxWithdrawal = c.withdrawal_max_amount_per_request
-                                };
-
-                                _state.networks.Add(_network);
-                            }
-                            else
-                            {
-                                _network.deposit = _state.deposit;
-                                _network.withdraw = _state.withdraw;
-                            }
+                            _state.networks.Add(_network);
+                        }
+                        else
+                        {
+                            _network.deposit = _state.deposit;
+                            _network.withdraw = _state.withdraw;
                         }
                     }
 
@@ -281,16 +277,15 @@ namespace CCXT.Simple.Exchanges.Korbit
 
             try
             {
-                using (var _client = new HttpClient())
-                {
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/v1/ticker?currency_pair=" + symbol);
-                    var _tstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JObject.Parse(_tstring);
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
 
-                    _result = _jobject.Value<decimal>("last");
+                var _response = await _client.GetAsync("/v1/ticker?currency_pair=" + symbol);
+                var _tstring = await _response.Content.ReadAsStringAsync();
+                var _jobject = JObject.Parse(_tstring);
 
-                    Debug.Assert(_result != 0.0m);
-                }
+                _result = _jobject.Value<decimal>("last");
+
+                Debug.Assert(_result != 0.0m);
             }
             catch (Exception ex)
             {
@@ -310,31 +305,29 @@ namespace CCXT.Simple.Exchanges.Korbit
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+                var _response = await _client.GetAsync("/v1/ticker/detailed/all");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jarray = JObject.Parse(_jstring).Properties();
+
+                for (var i = 0; i < tickers.items.Count; i++)
                 {
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/v1/ticker/detailed/all");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jarray = JObject.Parse(_jstring).Properties();
+                    var _ticker = tickers.items[i];
+                    if (_ticker.symbol == "X")
+                        continue;
 
-                    for (var i = 0; i < tickers.items.Count; i++)
+                    var _jticker = _jarray.SingleOrDefault(x => x.Name == _ticker.symbol);
+                    if (_jticker != null)
                     {
-                        var _ticker = tickers.items[i];
-                        if (_ticker.symbol == "X")
-                            continue;
-
-                        var _jticker = _jarray.SingleOrDefault(x => x.Name == _ticker.symbol);
-                        if (_jticker != null)
+                        var _last_price = _jticker.Value.Value<decimal>("last");
                         {
-                            var _last_price = _jticker.Value.Value<decimal>("last");
-                            {
-                                _ticker.lastPrice = _last_price;
-                            }
+                            _ticker.lastPrice = _last_price;
                         }
-                        else
-                        {
-                            mainXchg.OnMessageEvent(ExchangeName, $"not found: {_ticker.symbol}", 3905);
-                            _ticker.symbol = "X";
-                        }
+                    }
+                    else
+                    {
+                        mainXchg.OnMessageEvent(ExchangeName, $"not found: {_ticker.symbol}", 3905);
+                        _ticker.symbol = "X";
                     }
                 }
 
@@ -358,34 +351,32 @@ namespace CCXT.Simple.Exchanges.Korbit
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+                var _response = await _client.GetAsync("/v1/ticker/detailed/all");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jarray = JObject.Parse(_jstring).Properties();
+
+                for (var i = 0; i < tickers.items.Count; i++)
                 {
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/v1/ticker/detailed/all");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jarray = JObject.Parse(_jstring).Properties();
+                    var _ticker = tickers.items[i];
+                    if (_ticker.symbol == "X")
+                        continue;
 
-                    for (var i = 0; i < tickers.items.Count; i++)
+                    var _jticker = _jarray.SingleOrDefault(x => x.Name == _ticker.symbol);
+                    if (_jticker != null)
                     {
-                        var _ticker = tickers.items[i];
-                        if (_ticker.symbol == "X")
-                            continue;
-
-                        var _jticker = _jarray.SingleOrDefault(x => x.Name == _ticker.symbol);
-                        if (_jticker != null)
+                        var _last_price = _jticker.Value.Value<decimal>("last");
                         {
-                            var _last_price = _jticker.Value.Value<decimal>("last");
-                            {
-                                _ticker.lastPrice = _last_price;
+                            _ticker.lastPrice = _last_price;
 
-                                _ticker.askPrice = _jticker.Value.Value<decimal>("ask");
-                                _ticker.bidPrice = _jticker.Value.Value<decimal>("bid");
-                            }
+                            _ticker.askPrice = _jticker.Value.Value<decimal>("ask");
+                            _ticker.bidPrice = _jticker.Value.Value<decimal>("bid");
                         }
-                        else
-                        {
-                            mainXchg.OnMessageEvent(ExchangeName, $"not found: {_ticker.symbol}", 3907);
-                            _ticker.symbol = "X";
-                        }
+                    }
+                    else
+                    {
+                        mainXchg.OnMessageEvent(ExchangeName, $"not found: {_ticker.symbol}", 3907);
+                        _ticker.symbol = "X";
                     }
                 }
 
@@ -409,46 +400,45 @@ namespace CCXT.Simple.Exchanges.Korbit
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+
+                var _response = await _client.GetAsync("/v1/ticker/detailed/all");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jarray = JObject.Parse(_jstring).Properties();
+
+                for (var i = 0; i < tickers.items.Count; i++)
                 {
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/v1/ticker/detailed/all");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jarray = JObject.Parse(_jstring).Properties();
+                    var _ticker = tickers.items[i];
+                    if (_ticker.symbol == "X")
+                        continue;
 
-                    for (var i = 0; i < tickers.items.Count; i++)
+                    var _jticker = _jarray.SingleOrDefault(x => x.Name == _ticker.symbol);
+                    if (_jticker != null)
                     {
-                        var _ticker = tickers.items[i];
-                        if (_ticker.symbol == "X")
-                            continue;
+                        var _last_price = _jticker.Value.Value<decimal>("last");
 
-                        var _jticker = _jarray.SingleOrDefault(x => x.Name == _ticker.symbol);
-                        if (_jticker != null)
+                        var _volume = _jticker.Value.Value<decimal>("volume");
                         {
-                            var _last_price = _jticker.Value.Value<decimal>("last");
+                            var _prev_volume24h = _ticker.previous24h;
+                            var _next_timestamp = _ticker.timestamp + 60 * 1000;
 
-                            var _volume = _jticker.Value.Value<decimal>("volume");
+                            _volume *= _last_price;
+                            _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
+
+                            var _curr_timestamp = DateTimeXts.NowMilli;
+                            if (_curr_timestamp > _next_timestamp)
                             {
-                                var _prev_volume24h = _ticker.previous24h;
-                                var _next_timestamp = _ticker.timestamp + 60 * 1000;
+                                _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
 
-                                _volume *= _last_price;
-                                _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
-
-                                var _curr_timestamp = DateTimeXts.NowMilli;
-                                if (_curr_timestamp > _next_timestamp)
-                                {
-                                    _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
-
-                                    _ticker.timestamp = _curr_timestamp;
-                                    _ticker.previous24h = _volume;
-                                }
+                                _ticker.timestamp = _curr_timestamp;
+                                _ticker.previous24h = _volume;
                             }
                         }
-                        else
-                        {
-                            mainXchg.OnMessageEvent(ExchangeName, $"not found: {_ticker.symbol}", 3909);
-                            _ticker.symbol = "X";
-                        }
+                    }
+                    else
+                    {
+                        mainXchg.OnMessageEvent(ExchangeName, $"not found: {_ticker.symbol}", 3909);
+                        _ticker.symbol = "X";
                     }
                 }
 
@@ -473,52 +463,50 @@ namespace CCXT.Simple.Exchanges.Korbit
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+                var _response = await _client.GetAsync("/v1/ticker/detailed/all");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jarray = JObject.Parse(_jstring).Properties();
+
+                for (var i = 0; i < tickers.items.Count; i++)
                 {
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/v1/ticker/detailed/all");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jarray = JObject.Parse(_jstring).Properties();
+                    var _ticker = tickers.items[i];
+                    if (_ticker.symbol == "X")
+                        continue;
 
-                    for (var i = 0; i < tickers.items.Count; i++)
+                    var _jticker = _jarray.SingleOrDefault(x => x.Name == _ticker.symbol);
+                    if (_jticker != null)
                     {
-                        var _ticker = tickers.items[i];
-                        if (_ticker.symbol == "X")
-                            continue;
-
-                        var _jticker = _jarray.SingleOrDefault(x => x.Name == _ticker.symbol);
-                        if (_jticker != null)
+                        var _last_price = _jticker.Value.Value<decimal>("last");
                         {
-                            var _last_price = _jticker.Value.Value<decimal>("last");
+                            _ticker.lastPrice = _last_price;
+
+                            _ticker.askPrice = _jticker.Value.Value<decimal>("ask");
+                            _ticker.bidPrice = _jticker.Value.Value<decimal>("bid");
+                        }
+
+                        var _volume = _jticker.Value.Value<decimal>("volume");
+                        {
+                            var _prev_volume24h = _ticker.previous24h;
+                            var _next_timestamp = _ticker.timestamp + 60 * 1000;
+
+                            _volume *= _last_price;
+                            _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
+
+                            var _curr_timestamp = DateTimeXts.NowMilli;
+                            if (_curr_timestamp > _next_timestamp)
                             {
-                                _ticker.lastPrice = _last_price;
+                                _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
 
-                                _ticker.askPrice = _jticker.Value.Value<decimal>("ask");
-                                _ticker.bidPrice = _jticker.Value.Value<decimal>("bid");
-                            }
-
-                            var _volume = _jticker.Value.Value<decimal>("volume");
-                            {
-                                var _prev_volume24h = _ticker.previous24h;
-                                var _next_timestamp = _ticker.timestamp + 60 * 1000;
-
-                                _volume *= _last_price;
-                                _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
-
-                                var _curr_timestamp = DateTimeXts.NowMilli;
-                                if (_curr_timestamp > _next_timestamp)
-                                {
-                                    _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
-
-                                    _ticker.timestamp = _curr_timestamp;
-                                    _ticker.previous24h = _volume;
-                                }
+                                _ticker.timestamp = _curr_timestamp;
+                                _ticker.previous24h = _volume;
                             }
                         }
-                        else
-                        {
-                            mainXchg.OnMessageEvent(ExchangeName, $"not found: {_ticker.symbol}", 3911);
-                            _ticker.symbol = "X";
-                        }
+                    }
+                    else
+                    {
+                        mainXchg.OnMessageEvent(ExchangeName, $"not found: {_ticker.symbol}", 3911);
+                        _ticker.symbol = "X";
                     }
                 }
 
@@ -532,7 +520,7 @@ namespace CCXT.Simple.Exchanges.Korbit
             return _result;
         }
 
-        
+
 
         public ValueTask<Orderbook> GetOrderbook(string symbol, int limit = 5)
         {

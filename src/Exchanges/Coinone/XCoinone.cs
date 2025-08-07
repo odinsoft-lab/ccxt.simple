@@ -1,4 +1,4 @@
-﻿using CCXT.Simple.Converters;
+using CCXT.Simple.Converters;
 using CCXT.Simple.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -59,29 +59,28 @@ namespace CCXT.Simple.Exchanges.Coinone
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+
+                var _response = await _client.GetAsync($"{ExchangeUrlTb}/api/v1/tradepair/");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jarray = JsonConvert.DeserializeObject<CoinInfor>(_jstring);
+
+                var _queue_info = mainXchg.GetXInfors(ExchangeName);
+
+                foreach (var c in _jarray.tradepairs)
                 {
-                    var _response = await _client.GetAsync($"{ExchangeUrlTb}/api/v1/tradepair/");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jarray = JsonConvert.DeserializeObject<CoinInfor>(_jstring);
+                    var _base_name = c.target_coin_symbol;
+                    var _quote_name = c.base_coin_symbol;
 
-                    var _queue_info = mainXchg.GetXInfors(ExchangeName);
-
-                    foreach (var c in _jarray.tradepairs)
+                    _queue_info.symbols.Add(new QueueSymbol
                     {
-                        var _base_name = c.target_coin_symbol;
-                        var _quote_name = c.base_coin_symbol;
+                        symbol = $"{_base_name}-{_quote_name}",
+                        compName = _base_name,
+                        baseName = _base_name,
+                        quoteName = _quote_name,
 
-                        _queue_info.symbols.Add(new QueueSymbol
-                        {
-                            symbol = $"{_base_name}-{_quote_name}",
-                            compName = _base_name,
-                            baseName = _base_name,
-                            quoteName = _quote_name,
-
-                            tickSize = c.price_unit
-                        });
-                    }
+                        tickSize = c.price_unit
+                    });
                 }
 
                 _result = true;
@@ -109,7 +108,7 @@ namespace CCXT.Simple.Exchanges.Coinone
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 {
                     var _response = await _client.GetAsync($"{ExchangeUrlTb}/api/v1/coin/");
                     var _jstring = await _response.Content.ReadAsStringAsync();
@@ -193,16 +192,15 @@ namespace CCXT.Simple.Exchanges.Coinone
 
             try
             {
-                using (var _client = new HttpClient())
-                {
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/ticker?currency=" + symbol);
-                    var _tstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JObject.Parse(_tstring);
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
 
-                    _result = _jobject.Value<decimal>("last");
+                var _response = await _client.GetAsync("/ticker?currency=" + symbol);
+                var _tstring = await _response.Content.ReadAsStringAsync();
+                var _jobject = JObject.Parse(_tstring);
 
-                    Debug.Assert(_result != 0.0m);
-                }
+                _result = _jobject.Value<decimal>("last");
+
+                Debug.Assert(_result != 0.0m);
             }
             catch (Exception ex)
             {
@@ -223,9 +221,9 @@ namespace CCXT.Simple.Exchanges.Coinone
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 {
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/orderbook?currency=" + symbol);
+                    var _response = await _client.GetAsync("/orderbook?currency=" + symbol);
                     var _tstring = await _response.Content.ReadAsStringAsync();
                     var _jobject = JObject.Parse(_tstring);
 
@@ -262,50 +260,49 @@ namespace CCXT.Simple.Exchanges.Coinone
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+
+                var _response = await _client.GetAsync("/public/v2/ticker_new/KRW");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jarray = JsonConvert.DeserializeObject<RaTickers>(_jstring);
+
+                for (var i = 0; i < tickers.items.Count; i++)
                 {
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/public/v2/ticker_new/KRW");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jarray = JsonConvert.DeserializeObject<RaTickers>(_jstring);
+                    var _ticker = tickers.items[i];
+                    if (_ticker.symbol == "X")
+                        continue;
 
-                    for (var i = 0; i < tickers.items.Count; i++)
+                    var _jitem = _jarray.tickers.FirstOrDefault(x => x.target_currency.ToUpper() == _ticker.baseName);
+                    if (_jitem != null)
                     {
-                        var _ticker = tickers.items[i];
-                        if (_ticker.symbol == "X")
-                            continue;
-
-                        var _jitem = _jarray.tickers.FirstOrDefault(x => x.target_currency.ToUpper() == _ticker.baseName);
-                        if (_jitem != null)
+                        var _price = _jitem.last;
                         {
-                            var _price = _jitem.last;
+                            _ticker.lastPrice = _price;
+                            _ticker.askPrice = _jitem.best_asks.Count > 0 ? _jitem.best_asks[0].price : 0;
+                            _ticker.bidPrice = _jitem.best_bids.Count > 0 ? _jitem.best_bids[0].price : 0;
+                        }
+
+                        var _volume = _jitem.quote_volume;
+                        {
+                            var _prev_volume24h = _ticker.previous24h;
+                            var _next_timestamp = _ticker.timestamp + 60 * 1000;
+
+                            _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
+
+                            var _curr_timestamp = _jitem.timestamp;
+                            if (_curr_timestamp > _next_timestamp)
                             {
-                                _ticker.lastPrice = _price;
-                                _ticker.askPrice = _jitem.best_asks.Count > 0 ? _jitem.best_asks[0].price : 0;
-                                _ticker.bidPrice = _jitem.best_bids.Count > 0 ? _jitem.best_bids[0].price : 0;
-                            }
+                                _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
 
-                            var _volume = _jitem.quote_volume;
-                            {
-                                var _prev_volume24h = _ticker.previous24h;
-                                var _next_timestamp = _ticker.timestamp + 60 * 1000;
-
-                                _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
-
-                                var _curr_timestamp = _jitem.timestamp;
-                                if (_curr_timestamp > _next_timestamp)
-                                {
-                                    _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
-
-                                    _ticker.timestamp = _curr_timestamp;
-                                    _ticker.previous24h = _volume;
-                                }
+                                _ticker.timestamp = _curr_timestamp;
+                                _ticker.previous24h = _volume;
                             }
                         }
-                        else
-                        {
-                            mainXchg.OnMessageEvent(ExchangeName, $"not found: {_ticker.symbol}", 3506);
-                            _ticker.symbol = "X";
-                        }
+                    }
+                    else
+                    {
+                        mainXchg.OnMessageEvent(ExchangeName, $"not found: {_ticker.symbol}", 3506);
+                        _ticker.symbol = "X";
                     }
                 }
 
@@ -341,17 +338,17 @@ namespace CCXT.Simple.Exchanges.Coinone
         {
             // Generate UUID v4 nonce
             var nonce = Guid.NewGuid().ToString();
-            
+
             // Add nonce to request body
             var bodyWithNonce = JObject.FromObject(requestBody);
             bodyWithNonce["nonce"] = nonce;
-            
+
             // Convert to JSON string
             var jsonString = JsonConvert.SerializeObject(bodyWithNonce);
-            
+
             // Base64 encode for payload
             var payload = Convert.ToBase64String(Encoding.UTF8.GetBytes(jsonString));
-            
+
             // Generate HMAC-SHA512 signature
             using (var hmac = new HMACSHA512(Encoding.UTF8.GetBytes(SecretKey)))
             {
@@ -366,24 +363,20 @@ namespace CCXT.Simple.Exchanges.Coinone
         /// </summary>
         private async Task<JObject> MakePrivateRequest(string endpoint, object requestBody)
         {
-            using (var client = new HttpClient())
-            {
-                var (payload, signature) = GenerateAuthHeaders(requestBody);
-                
-                client.DefaultRequestHeaders.Add("X-COINONE-PAYLOAD", payload);
-                client.DefaultRequestHeaders.Add("X-COINONE-SIGNATURE", signature);
-                
-                var jsonContent = JsonConvert.SerializeObject(requestBody);
-                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-                
-                var response = await client.PostAsync($"{ExchangeUrl}/v2.1{endpoint}", content);
-                var responseString = await response.Content.ReadAsStringAsync();
-                
-                return JObject.Parse(responseString);
-            }
-        }
+            var client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+            var (payload, signature) = GenerateAuthHeaders(requestBody);
 
-        
+            client.DefaultRequestHeaders.Add("X-COINONE-PAYLOAD", payload);
+            client.DefaultRequestHeaders.Add("X-COINONE-SIGNATURE", signature);
+
+            var jsonContent = JsonConvert.SerializeObject(requestBody);
+            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync("/v2.1{endpoint}", content);
+            var responseString = await response.Content.ReadAsStringAsync();
+
+            return JObject.Parse(responseString);
+        }
 
         /// <summary>
         /// Get orderbook for a specific symbol
@@ -410,9 +403,9 @@ namespace CCXT.Simple.Exchanges.Coinone
                 }
                 var targetCurrency = parts[0];
 
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 {
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/public/v2/orderbook/KRW/{targetCurrency}?size={limit}");
+                    var _response = await _client.GetAsync("/public/v2/orderbook/KRW/{targetCurrency}?size={limit}");
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     var _jobject = JObject.Parse(_jstring);
 
@@ -481,12 +474,12 @@ namespace CCXT.Simple.Exchanges.Coinone
                 // Convert timeframe to Coinone interval format
                 var interval = ConvertTimeframe(timeframe);
 
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 {
-                    var url = $"{ExchangeUrl}/public/v2/chart/KRW/{targetCurrency}?interval={interval}";
+                    var url = "/public/v2/chart/KRW/{targetCurrency}?interval={interval}";
                     if (since.HasValue)
                         url += $"&start={since.Value}";
-                    
+
                     var _response = await _client.GetAsync(url);
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     var _jobject = JObject.Parse(_jstring);
@@ -556,9 +549,9 @@ namespace CCXT.Simple.Exchanges.Coinone
                 }
                 var targetCurrency = parts[0];
 
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 {
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/public/v2/trades/KRW/{targetCurrency}?limit={limit}");
+                    var _response = await _client.GetAsync("/public/v2/trades/KRW/{targetCurrency}?limit={limit}");
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     var _jobject = JObject.Parse(_jstring);
 
@@ -607,7 +600,7 @@ namespace CCXT.Simple.Exchanges.Coinone
 
                 var requestBody = new { };
                 var response = await MakePrivateRequest("/balance", requestBody);
-                
+
                 if (response["result"]?.ToString() == "success")
                 {
                     var balances = response["balances"] as JObject;
@@ -617,12 +610,12 @@ namespace CCXT.Simple.Exchanges.Coinone
                         {
                             var currency = prop.Name.ToUpper();
                             var balance = prop.Value as JObject;
-                            
+
                             if (balance != null)
                             {
                                 var available = balance["available"]?.Value<decimal>() ?? 0;
                                 var locked = balance["locked"]?.Value<decimal>() ?? 0;
-                                
+
                                 _result[currency] = new BalanceInfo
                                 {
                                     free = available,
@@ -662,7 +655,7 @@ namespace CCXT.Simple.Exchanges.Coinone
             {
                 // Get balance information
                 _result.balances = await GetBalance();
-                
+
                 // Coinone doesn't provide account ID in balance endpoint
                 // Using API key hash as a pseudo ID
                 if (!string.IsNullOrEmpty(ApiKey))
@@ -715,7 +708,7 @@ namespace CCXT.Simple.Exchanges.Coinone
                 };
 
                 var response = await MakePrivateRequest("/order", requestBody);
-                
+
                 if (response["result"]?.ToString() == "success")
                 {
                     var order = response["order"];
@@ -763,7 +756,7 @@ namespace CCXT.Simple.Exchanges.Coinone
                 }
 
                 object requestBody = new { };
-                
+
                 if (!string.IsNullOrEmpty(orderId))
                 {
                     requestBody = new { order_id = orderId };
@@ -778,7 +771,7 @@ namespace CCXT.Simple.Exchanges.Coinone
                 }
 
                 var response = await MakePrivateRequest("/order/cancel", requestBody);
-                
+
                 _result = response["result"]?.ToString() == "success";
             }
             catch (Exception ex)
@@ -804,7 +797,7 @@ namespace CCXT.Simple.Exchanges.Coinone
                 }
 
                 object requestBody = new { };
-                
+
                 if (!string.IsNullOrEmpty(orderId))
                 {
                     requestBody = new { order_id = orderId };
@@ -819,7 +812,7 @@ namespace CCXT.Simple.Exchanges.Coinone
                 }
 
                 var response = await MakePrivateRequest("/order/info", requestBody);
-                
+
                 if (response["result"]?.ToString() == "success")
                 {
                     var order = response["order"];
@@ -827,7 +820,7 @@ namespace CCXT.Simple.Exchanges.Coinone
                     {
                         var targetCurrency = order["target_currency"]?.ToString()?.ToUpper() ?? "";
                         var quoteCurrency = order["quote_currency"]?.ToString()?.ToUpper() ?? "";
-                        
+
                         _result = new OrderInfo
                         {
                             id = order["order_id"]?.ToString() ?? "",
@@ -870,7 +863,7 @@ namespace CCXT.Simple.Exchanges.Coinone
                 }
 
                 object requestBody = new { };
-                
+
                 if (!string.IsNullOrEmpty(symbol))
                 {
                     var parts = symbol.Split('-');
@@ -885,7 +878,7 @@ namespace CCXT.Simple.Exchanges.Coinone
                 }
 
                 var response = await MakePrivateRequest("/order/active_orders", requestBody);
-                
+
                 if (response["result"]?.ToString() == "success")
                 {
                     var orders = response["active_orders"] as JArray;
@@ -895,7 +888,7 @@ namespace CCXT.Simple.Exchanges.Coinone
                         {
                             var targetCurrency = order["target_currency"]?.ToString()?.ToUpper() ?? "";
                             var quoteCurrency = order["quote_currency"]?.ToString()?.ToUpper() ?? "";
-                            
+
                             _result.Add(new OrderInfo
                             {
                                 id = order["order_id"]?.ToString() ?? "",
@@ -939,7 +932,7 @@ namespace CCXT.Simple.Exchanges.Coinone
                 }
 
                 object requestBody = new { limit = limit };
-                
+
                 if (!string.IsNullOrEmpty(symbol))
                 {
                     var parts = symbol.Split('-');
@@ -955,7 +948,7 @@ namespace CCXT.Simple.Exchanges.Coinone
                 }
 
                 var response = await MakePrivateRequest("/order/completed_orders", requestBody);
-                
+
                 if (response["result"]?.ToString() == "success")
                 {
                     var orders = response["completed_orders"] as JArray;
@@ -965,7 +958,7 @@ namespace CCXT.Simple.Exchanges.Coinone
                         {
                             var targetCurrency = order["target_currency"]?.ToString()?.ToUpper() ?? "";
                             var quoteCurrency = order["quote_currency"]?.ToString()?.ToUpper() ?? "";
-                            
+
                             _result.Add(new OrderInfo
                             {
                                 id = order["order_id"]?.ToString() ?? "",
@@ -1010,7 +1003,7 @@ namespace CCXT.Simple.Exchanges.Coinone
 
                 // Get completed orders and extract trade information
                 var orders = await GetOrderHistory(symbol, limit);
-                
+
                 foreach (var order in orders.Where(o => o.filled > 0))
                 {
                     _result.Add(new TradeInfo
@@ -1055,7 +1048,7 @@ namespace CCXT.Simple.Exchanges.Coinone
                 };
 
                 var response = await MakePrivateRequest("/wallet/deposit_address", requestBody);
-                
+
                 if (response["result"]?.ToString() == "success")
                 {
                     var addressInfo = response["deposit_address"];
@@ -1103,7 +1096,7 @@ namespace CCXT.Simple.Exchanges.Coinone
                 };
 
                 var response = await MakePrivateRequest("/wallet/withdraw", requestBody);
-                
+
                 if (response["result"]?.ToString() == "success")
                 {
                     var withdrawal = response["withdrawal"];
@@ -1153,7 +1146,7 @@ namespace CCXT.Simple.Exchanges.Coinone
                 };
 
                 var response = await MakePrivateRequest("/wallet/deposit_history", requestBody);
-                
+
                 if (response["result"]?.ToString() == "success")
                 {
                     var deposits = response["deposits"] as JArray;
@@ -1206,7 +1199,7 @@ namespace CCXT.Simple.Exchanges.Coinone
                 };
 
                 var response = await MakePrivateRequest("/wallet/withdrawal_history", requestBody);
-                
+
                 if (response["result"]?.ToString() == "success")
                 {
                     var withdrawals = response["withdrawals"] as JArray;

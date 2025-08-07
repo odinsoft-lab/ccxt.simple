@@ -1,4 +1,4 @@
-﻿using CCXT.Simple.Converters;
+using CCXT.Simple.Converters;
 using CCXT.Simple.Models;
 using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
@@ -17,12 +17,12 @@ namespace CCXT.Simple.Exchanges.Upbit
 		 *     https://upbit.com/service_center/wallet_status
 		 *
 		 * EXCHANGE API
-		 *     [주문 요청] 초당 8회, 분당 200회
-		 *     [주문 요청 외 API] 초당 30회, 분당 900회
+		 *     [�ֹ� ��û] �ʴ� 8ȸ, �д� 200ȸ
+		 *     [�ֹ� ��û �� API] �ʴ� 30ȸ, �д� 900ȸ
 		 *
 		 * QUOTATION API
-		 *     Websocket 연결 요청 수 제한: 초당 5회, 분당 100회
-		 *     REST API 요청 수 제한: 분당 600회, 초당 10회 (종목, 캔들, 체결, 티커, 호가별)
+		 *     Websocket ���� ��û �� ����: �ʴ� 5ȸ, �д� 100ȸ
+		 *     REST API ��û �� ����: �д� 600ȸ, �ʴ� 10ȸ (����, ĵ��, ü��, ƼĿ, ȣ����)
 		 */
 
         public XUpbit(Exchange mainXchg, string apiKey = "", string secretKey = "", string passPhrase = "")
@@ -61,9 +61,9 @@ namespace CCXT.Simple.Exchanges.Upbit
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 {
-                    var _b_response = await _client.GetAsync($"{ExchangeUrl}/v1/market/all?isDetails=true");
+                    var _b_response = await _client.GetAsync("/v1/market/all?isDetails=true");
                     var _jstring = await _b_response.Content.ReadAsStringAsync();
                     var _jarray = JsonConvert.DeserializeObject<List<CoinInfor>>(_jstring);
 
@@ -139,7 +139,7 @@ namespace CCXT.Simple.Exchanges.Upbit
                 var _cstring = await File.ReadAllTextAsync(@"Exchanges\Upbit\CoinState.json");
                 var _carray = JsonConvert.DeserializeObject<CoinState>(_cstring);
 
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 {
                     var _b_response = await _client.GetAsync($"{ExchangeUrlCc}/api/v1/status/wallet");
                     var _jstring = await _b_response.Content.ReadAsStringAsync();
@@ -196,7 +196,7 @@ namespace CCXT.Simple.Exchanges.Upbit
                             {
                                 name = _name,
                                 network = c.code,
-                                chain = (c.net_type == null || c.net_type == "메인넷") ? c.code : c.net_type.Replace("-", ""),
+                                chain = (c.net_type == null || c.net_type == "���γ�") ? c.code : c.net_type.Replace("-", ""),
 
                                 withdrawFee = c.withdraw_fee
                             };
@@ -231,9 +231,9 @@ namespace CCXT.Simple.Exchanges.Upbit
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 {
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/v1/ticker?markets=" + symbol);
+                    var _response = await _client.GetAsync("/v1/ticker?markets=" + symbol);
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     var _jarray = JsonConvert.DeserializeObject<List<RaTicker>>(_jstring);
 
@@ -260,11 +260,11 @@ namespace CCXT.Simple.Exchanges.Upbit
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 {
                     var _request = String.Join(",", tickers.items.Where(x => x.symbol != "X").Select(x => x.symbol));
 
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/v1/ticker?markets=" + _request);
+                    var _response = await _client.GetAsync("/v1/ticker?markets=" + _request);
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     var _jmarkets = JsonConvert.DeserializeObject<List<RaTicker>>(_jstring);
 
@@ -313,44 +313,42 @@ namespace CCXT.Simple.Exchanges.Upbit
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+                var _request = String.Join(",", tickers.items.Where(x => x.symbol != "X").Select(x => x.symbol));
+
+                var _response = await _client.GetAsync("/v1/ticker?markets=" + _request);
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jmarkets = JsonConvert.DeserializeObject<List<RaTicker>>(_jstring);
+
+                for (var i = 0; i < tickers.items.Count; i++)
                 {
-                    var _request = String.Join(",", tickers.items.Where(x => x.symbol != "X").Select(x => x.symbol));
+                    var _ticker = tickers.items[i];
+                    if (_ticker.symbol == "X")
+                        continue;
 
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/v1/ticker?markets=" + _request);
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jmarkets = JsonConvert.DeserializeObject<List<RaTicker>>(_jstring);
-
-                    for (var i = 0; i < tickers.items.Count; i++)
+                    var _jitem = _jmarkets.SingleOrDefault(x => x.market == _ticker.symbol);
+                    if (_jitem != null)
                     {
-                        var _ticker = tickers.items[i];
-                        if (_ticker.symbol == "X")
-                            continue;
+                        // UTC 0�� ���� ���� �ŷ���
+                        var _volume = _jitem.acc_trade_price;
 
-                        var _jitem = _jmarkets.SingleOrDefault(x => x.market == _ticker.symbol);
-                        if (_jitem != null)
+                        var _prev_volume24h = _ticker.previous24h;
+                        var _next_timestamp = _ticker.timestamp + 60 * 1000;
+
+                        if (_ticker.quoteName == "USDT")
+                            _volume *= tickers.exchgRate;
+                        else if (_ticker.quoteName == "BTC")
+                            _volume *= mainXchg.fiat_btc_price;
+
+                        _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
+
+                        var _curr_timestamp = _jitem.timestamp;
+                        if (_curr_timestamp > _next_timestamp)
                         {
-                            // UTC 0시 부터 누적 거래액
-                            var _volume = _jitem.acc_trade_price;
+                            _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
 
-                            var _prev_volume24h = _ticker.previous24h;
-                            var _next_timestamp = _ticker.timestamp + 60 * 1000;
-
-                            if (_ticker.quoteName == "USDT")
-                                _volume *= tickers.exchgRate;
-                            else if (_ticker.quoteName == "BTC")
-                                _volume *= mainXchg.fiat_btc_price;
-
-                            _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
-
-                            var _curr_timestamp = _jitem.timestamp;
-                            if (_curr_timestamp > _next_timestamp)
-                            {
-                                _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
-
-                                _ticker.timestamp = _curr_timestamp;
-                                _ticker.previous24h = _volume;
-                            }
+                            _ticker.timestamp = _curr_timestamp;
+                            _ticker.previous24h = _volume;
                         }
                     }
                 }
@@ -376,62 +374,60 @@ namespace CCXT.Simple.Exchanges.Upbit
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+                var _request = String.Join(",", tickers.items.Where(x => x.symbol != "X").Select(x => x.symbol));
+
+                var _response = await _client.GetAsync("/v1/ticker?markets=" + _request);
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jarray = JsonConvert.DeserializeObject<List<RaTicker>>(_jstring);
+
+                foreach (var m in _jarray)
                 {
-                    var _request = String.Join(",", tickers.items.Where(x => x.symbol != "X").Select(x => x.symbol));
+                    var _coin_name = m.market;
 
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/v1/ticker?markets=" + _request);
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jarray = JsonConvert.DeserializeObject<List<RaTicker>>(_jstring);
+                    var _ticker = tickers.items.Find(x => x.symbol == _coin_name);
+                    if (_ticker == null)
+                        continue;
 
-                    foreach (var m in _jarray)
+                    var _price = m.trade_price;
                     {
-                        var _coin_name = m.market;
-
-                        var _ticker = tickers.items.Find(x => x.symbol == _coin_name);
-                        if (_ticker == null)
-                            continue;
-
-                        var _price = m.trade_price;
+                        if (_ticker.quoteName == "KRW")
                         {
-                            if (_ticker.quoteName == "KRW")
-                            {
-                                if (_coin_name == "KRW-BTC")
-                                    mainXchg.OnKrwPriceEvent(_price);
+                            if (_coin_name == "KRW-BTC")
+                                mainXchg.OnKrwPriceEvent(_price);
 
-                                _ticker.lastPrice = _price;
-                            }
-                            else if (_ticker.quoteName == "USDT")
-                            {
-                                _ticker.lastPrice = _price * tickers.exchgRate;
-                            }
-                            else if (_ticker.quoteName == "BTC")
-                            {
-                                _ticker.lastPrice = _price * mainXchg.fiat_btc_price;
-                            }
+                            _ticker.lastPrice = _price;
                         }
-
-                        // UTC 0시 부터 누적 거래액
-                        var _volume = m.acc_trade_price;
+                        else if (_ticker.quoteName == "USDT")
                         {
-                            var _prev_volume24h = _ticker.previous24h;
-                            var _next_timestamp = _ticker.timestamp + 60 * 1000;
+                            _ticker.lastPrice = _price * tickers.exchgRate;
+                        }
+                        else if (_ticker.quoteName == "BTC")
+                        {
+                            _ticker.lastPrice = _price * mainXchg.fiat_btc_price;
+                        }
+                    }
 
-                            if (_ticker.quoteName == "USDT")
-                                _volume *= tickers.exchgRate;
-                            else if (_ticker.quoteName == "BTC")
-                                _volume *= mainXchg.fiat_btc_price;
+                    // UTC 0�� ���� ���� �ŷ���
+                    var _volume = m.acc_trade_price;
+                    {
+                        var _prev_volume24h = _ticker.previous24h;
+                        var _next_timestamp = _ticker.timestamp + 60 * 1000;
 
-                            _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
+                        if (_ticker.quoteName == "USDT")
+                            _volume *= tickers.exchgRate;
+                        else if (_ticker.quoteName == "BTC")
+                            _volume *= mainXchg.fiat_btc_price;
 
-                            var _curr_timestamp = m.timestamp;
-                            if (_curr_timestamp > _next_timestamp)
-                            {
-                                _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
+                        _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
 
-                                _ticker.timestamp = _curr_timestamp;
-                                _ticker.previous24h = _volume;
-                            }
+                        var _curr_timestamp = m.timestamp;
+                        if (_curr_timestamp > _next_timestamp)
+                        {
+                            _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
+
+                            _ticker.timestamp = _curr_timestamp;
+                            _ticker.previous24h = _volume;
                         }
                     }
                 }
@@ -452,44 +448,42 @@ namespace CCXT.Simple.Exchanges.Upbit
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+                var _request = String.Join(",", tickers.items.Where(x => x.symbol != "X").Select(x => x.symbol));
+
+                var _response = await _client.GetAsync("/v1/ticker?markets=" + _request);
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jarray = JsonConvert.DeserializeObject<List<UOrderboook>>(_jstring);
+
+                foreach (var o in _jarray)
                 {
-                    var _request = String.Join(",", tickers.items.Where(x => x.symbol != "X").Select(x => x.symbol));
+                    var _ticker = tickers.items.Find(x => x.symbol == o.market);
+                    if (_ticker == null)
+                        continue;
 
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/v1/ticker?markets=" + _request);
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jarray = JsonConvert.DeserializeObject<List<UOrderboook>>(_jstring);
+                    _ticker.orderbook.asks.Clear();
+                    _ticker.orderbook.asks.AddRange(
+                        o.orderbook_units
+                            .OrderBy(x => x.ask_price)
+                            .Select(x => new OrderbookItem
+                            {
+                                price = x.ask_price,
+                                quantity = x.ask_size,
+                                total = 1
+                            })
+                    );
 
-                    foreach (var o in _jarray)
-                    {
-                        var _ticker = tickers.items.Find(x => x.symbol == o.market);
-                        if (_ticker == null)
-                            continue;
-
-                        _ticker.orderbook.asks.Clear();
-                        _ticker.orderbook.asks.AddRange(
-                            o.orderbook_units
-                                .OrderBy(x => x.ask_price)
-                                .Select(x => new OrderbookItem
-                                {
-                                    price = x.ask_price,
-                                    quantity = x.ask_size,
-                                    total = 1
-                                })
-                        );
-
-                        _ticker.orderbook.bids.Clear();
-                        _ticker.orderbook.bids.AddRange(
-                            o.orderbook_units
-                                .OrderBy(x => x.bid_price)
-                                .Select(x => new OrderbookItem
-                                {
-                                    price = x.bid_price,
-                                    quantity = x.bid_size,
-                                    total = 1
-                                })
-                        );
-                    }
+                    _ticker.orderbook.bids.Clear();
+                    _ticker.orderbook.bids.AddRange(
+                        o.orderbook_units
+                            .OrderBy(x => x.bid_price)
+                            .Select(x => new OrderbookItem
+                            {
+                                price = x.bid_price,
+                                quantity = x.bid_size,
+                                total = 1
+                            })
+                    );
                 }
 
                 _result = true;
@@ -507,7 +501,7 @@ namespace CCXT.Simple.Exchanges.Upbit
             throw new NotImplementedException();
         }
 
-        
+
 
         public ValueTask<Orderbook> GetOrderbook(string symbol, int limit = 5)
         {

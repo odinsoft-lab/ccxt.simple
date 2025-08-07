@@ -1,4 +1,4 @@
-﻿using CCXT.Simple.Services;
+using CCXT.Simple.Services;
 using CCXT.Simple.Converters;
 using CCXT.Simple.Models;
 using Newtonsoft.Json;
@@ -50,27 +50,26 @@ namespace CCXT.Simple.Exchanges.GateIO
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+
+                var _response = await _client.GetAsync("/api/v4/spot/currency_pairs");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jarray = JsonConvert.DeserializeObject<List<CoinInfor>>(_jstring);
+
+                var _queue_info = mainXchg.GetXInfors(ExchangeName);
+
+                foreach (var s in _jarray)
                 {
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/api/v4/spot/currency_pairs");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jarray = JsonConvert.DeserializeObject<List<CoinInfor>>(_jstring);
-
-                    var _queue_info = mainXchg.GetXInfors(ExchangeName);
-
-                    foreach (var s in _jarray)
+                    if (s.quote == "USDT" || s.quote == "USD" || s.quote == "BTC")
                     {
-                        if (s.quote == "USDT" || s.quote == "USD" || s.quote == "BTC")
+                        _queue_info.symbols.Add(new QueueSymbol
                         {
-                            _queue_info.symbols.Add(new QueueSymbol
-                            {
-                                symbol = s.id,
-                                compName = s.@base,
-                                baseName = s.@base,
-                                quoteName = s.quote,
-                                tickSize = s.min_quote_amount
-                            });
-                        }
+                            symbol = s.id,
+                            compName = s.@base,
+                            baseName = s.@base,
+                            quoteName = s.quote,
+                            tickSize = s.min_quote_amount
+                        });
                     }
                 }
 
@@ -98,79 +97,78 @@ namespace CCXT.Simple.Exchanges.GateIO
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+
+                var _response = await _client.GetAsync("/api/v4/spot/currencies");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jarray = JsonConvert.DeserializeObject<List<CoinState>>(_jstring);
+
+                foreach (var c in _jarray)
                 {
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/api/v4/spot/currencies");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jarray = JsonConvert.DeserializeObject<List<CoinState>>(_jstring);
+                    var _currency = c.currency.Split('_')[0];
 
-                    foreach (var c in _jarray)
+                    var _state = tickers.states.SingleOrDefault(x => x.baseName == _currency);
+                    if (_state == null)
                     {
-                        var _currency = c.currency.Split('_')[0];
-
-                        var _state = tickers.states.SingleOrDefault(x => x.baseName == _currency);
-                        if (_state == null)
+                        _state = new WState
                         {
-                            _state = new WState
-                            {
-                                baseName = _currency,
-                                active = !c.trade_disabled,
-                                deposit = !c.deposit_disabled,
-                                withdraw = !c.withdraw_disabled,
-                                networks = new List<WNetwork>()
-                            };
+                            baseName = _currency,
+                            active = !c.trade_disabled,
+                            deposit = !c.deposit_disabled,
+                            withdraw = !c.withdraw_disabled,
+                            networks = new List<WNetwork>()
+                        };
 
-                            tickers.states.Add(_state);
-                        }
-                        else
+                        tickers.states.Add(_state);
+                    }
+                    else
+                    {
+                        _state.active |= !c.trade_disabled;
+                        _state.deposit |= !c.deposit_disabled;
+                        _state.withdraw |= !c.withdraw_disabled;
+                    }
+
+                    var _t_items = tickers.items.Where(x => x.compName == _state.baseName);
+                    if (_t_items != null)
+                    {
+                        foreach (var t in _t_items)
                         {
-                            _state.active |= !c.trade_disabled;
-                            _state.deposit |= !c.deposit_disabled;
-                            _state.withdraw |= !c.withdraw_disabled;
+                            t.active = _state.active;
+                            t.deposit = _state.deposit;
+                            t.withdraw = _state.withdraw;
                         }
+                    }
 
-                        var _t_items = tickers.items.Where(x => x.compName == _state.baseName);
-                        if (_t_items != null)
+                    var _network = c.chain;
+                    var _chain = c.chain == "ETH" ? "ERC20" : (c.chain == "BSC" ? "BEP20" : c.chain);
+
+                    var _name = _currency + "-" + _network;
+
+                    var _nw = _state.networks.SingleOrDefault(x => x.name == _name);
+                    if (_nw == null)
+                    {
+                        _nw = new WNetwork
                         {
-                            foreach (var t in _t_items)
-                            {
-                                t.active = _state.active;
-                                t.deposit = _state.deposit;
-                                t.withdraw = _state.withdraw;
-                            }
-                        }
+                            name = _name,
+                            network = _network,
+                            chain = _chain,
 
-                        var _network = c.chain;
-                        var _chain = c.chain == "ETH" ? "ERC20" : (c.chain == "BSC" ? "BEP20" : c.chain);
+                            deposit = !c.deposit_disabled,
+                            withdraw = !c.withdraw_disabled,
 
-                        var _name = _currency + "-" + _network;
+                            withdrawFee = 0,
+                            minWithdrawal = 0,
+                            maxWithdrawal = 0,
 
-                        var _nw = _state.networks.SingleOrDefault(x => x.name == _name);
-                        if (_nw == null)
-                        {
-                            _nw = new WNetwork
-                            {
-                                name = _name,
-                                network = _network,
-                                chain = _chain,
+                            minConfirm = 0
+                        };
 
-                                deposit = !c.deposit_disabled,
-                                withdraw = !c.withdraw_disabled,
-
-                                withdrawFee = 0,
-                                minWithdrawal = 0,
-                                maxWithdrawal = 0,
-
-                                minConfirm = 0
-                            };
-
-                            _state.networks.Add(_nw);
-                        }
-                        else
-                        {
-                            _nw.deposit = !c.deposit_disabled;
-                            _nw.withdraw = !c.withdraw_disabled;
-                        }
+                        _state.networks.Add(_nw);
+                    }
+                    else
+                    {
+                        _nw.deposit = !c.deposit_disabled;
+                        _nw.withdraw = !c.withdraw_disabled;
                     }
 
                     _result = true;
@@ -192,67 +190,66 @@ namespace CCXT.Simple.Exchanges.GateIO
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+
+                var _response = await _client.GetAsync("/api/v4/spot/tickers");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jarray = JsonConvert.DeserializeObject<List<RaTicker>>(_jstring, mainXchg.JsonSettings);
+
+                for (var i = 0; i < tickers.items.Count; i++)
                 {
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/api/v4/spot/tickers");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jarray = JsonConvert.DeserializeObject<List<RaTicker>>(_jstring, mainXchg.JsonSettings);
+                    var _ticker = tickers.items[i];
+                    if (_ticker.symbol == "X")
+                        continue;
 
-                    for (var i = 0; i < tickers.items.Count; i++)
+                    var _jitem = _jarray.SingleOrDefault(x => x.currency_pair == _ticker.symbol);
+                    if (_jitem != null)
                     {
-                        var _ticker = tickers.items[i];
-                        if (_ticker.symbol == "X")
-                            continue;
-
-                        var _jitem = _jarray.SingleOrDefault(x => x.currency_pair == _ticker.symbol);
-                        if (_jitem != null)
+                        var _last_price = _jitem.last;
                         {
-                            var _last_price = _jitem.last;
-                            {
-                                var _ask_price = _jitem.lowest_ask;
-                                var _bid_price = _jitem.highest_bid;
+                            var _ask_price = _jitem.lowest_ask;
+                            var _bid_price = _jitem.highest_bid;
 
-                                if (_ticker.quoteName == "USDT" || _ticker.quoteName == "USD")
-                                {
-                                    _ticker.lastPrice = _last_price * tickers.exchgRate;
-                                    _ticker.askPrice = _ask_price * tickers.exchgRate;
-                                    _ticker.bidPrice = _bid_price * tickers.exchgRate;
-                                }
-                                else if (_ticker.quoteName == "BTC")
-                                {
-                                    _ticker.lastPrice = _last_price * mainXchg.fiat_btc_price;
-                                    _ticker.askPrice = _ask_price * mainXchg.fiat_btc_price;
-                                    _ticker.bidPrice = _bid_price * mainXchg.fiat_btc_price;
-                                }
+                            if (_ticker.quoteName == "USDT" || _ticker.quoteName == "USD")
+                            {
+                                _ticker.lastPrice = _last_price * tickers.exchgRate;
+                                _ticker.askPrice = _ask_price * tickers.exchgRate;
+                                _ticker.bidPrice = _bid_price * tickers.exchgRate;
                             }
-
-                            var _volume = _jitem.quote_volume;
+                            else if (_ticker.quoteName == "BTC")
                             {
-                                var _prev_volume24h = _ticker.previous24h;
-                                var _next_timestamp = _ticker.timestamp + 60 * 1000;
-
-                                if (_ticker.quoteName == "USDT" || _ticker.quoteName == "USD")
-                                    _volume *= tickers.exchgRate;
-                                else if (_ticker.quoteName == "BTC")
-                                    _volume *= mainXchg.fiat_btc_price;
-
-                                _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
-
-                                var _curr_timestamp = DateTimeXts.NowMilli;
-                                if (_curr_timestamp > _next_timestamp)
-                                {
-                                    _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
-
-                                    _ticker.timestamp = _curr_timestamp;
-                                    _ticker.previous24h = _volume;
-                                }
+                                _ticker.lastPrice = _last_price * mainXchg.fiat_btc_price;
+                                _ticker.askPrice = _ask_price * mainXchg.fiat_btc_price;
+                                _ticker.bidPrice = _bid_price * mainXchg.fiat_btc_price;
                             }
                         }
-                        else
+
+                        var _volume = _jitem.quote_volume;
                         {
-                            mainXchg.OnMessageEvent(ExchangeName, $"not found: {_ticker.symbol}", 3704);
-                            _ticker.symbol = "X";
+                            var _prev_volume24h = _ticker.previous24h;
+                            var _next_timestamp = _ticker.timestamp + 60 * 1000;
+
+                            if (_ticker.quoteName == "USDT" || _ticker.quoteName == "USD")
+                                _volume *= tickers.exchgRate;
+                            else if (_ticker.quoteName == "BTC")
+                                _volume *= mainXchg.fiat_btc_price;
+
+                            _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
+
+                            var _curr_timestamp = DateTimeXts.NowMilli;
+                            if (_curr_timestamp > _next_timestamp)
+                            {
+                                _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
+
+                                _ticker.timestamp = _curr_timestamp;
+                                _ticker.previous24h = _volume;
+                            }
                         }
+                    }
+                    else
+                    {
+                        mainXchg.OnMessageEvent(ExchangeName, $"not found: {_ticker.symbol}", 3704);
+                        _ticker.symbol = "X";
                     }
                 }
 
@@ -286,7 +283,7 @@ namespace CCXT.Simple.Exchanges.GateIO
             throw new NotImplementedException();
         }
 
-        
+
 
         public ValueTask<Orderbook> GetOrderbook(string symbol, int limit = 5)
         {

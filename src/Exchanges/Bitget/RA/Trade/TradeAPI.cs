@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System.Diagnostics;
 
 namespace CCXT.Simple.Exchanges.Bitget.RA.Trade;
@@ -29,7 +29,7 @@ public class TradeAPI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
             {
                 var _endpoint = "/api/spot/v1/trade/orders";
 
@@ -46,7 +46,7 @@ public class TradeAPI : XBitget
 
                 var _content = this.PostContent(_client, _endpoint, _args);
 
-                var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
+                var _response = await _client.PostAsync(_endpoint, _content);
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
@@ -77,27 +77,25 @@ public class TradeAPI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+            var _endpoint = "/api/spot/v1/trade/batch-orders";
+
+            var _args = new Dictionary<string, string>();
             {
-                var _endpoint = "/api/spot/v1/trade/batch-orders";
+                _args.Add("symbol", symbol);
+                _args.Add("orderList", JsonConvert.SerializeObject(orderList));
+            }
 
-                var _args = new Dictionary<string, string>();
-                {
-                    _args.Add("symbol", symbol);
-                    _args.Add("orderList", JsonConvert.SerializeObject(orderList));
-                }
+            var _content = this.PostContent(_client, _endpoint, _args);
 
-                var _content = this.PostContent(_client, _endpoint, _args);
-
-                var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                if (_response.IsSuccessStatusCode)
-                {
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<BatchOrder>(_jstring, JsonSettings);
+            var _response = await _client.PostAsync(_endpoint, _content);
+            if (_response.IsSuccessStatusCode)
+            {
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                _result = JsonConvert.DeserializeObject<BatchOrder>(_jstring, JsonSettings);
 #if DEBUG
-                    _result.json = _jstring;
+                _result.json = _jstring;
 #endif
-                }
             }
         }
         catch (Exception ex)
@@ -120,7 +118,7 @@ public class TradeAPI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
             {
                 var _endpoint = "/api/spot/v1/trade/cancel-order";
 
@@ -132,7 +130,7 @@ public class TradeAPI : XBitget
 
                 var _content = this.PostContent(_client, _endpoint, _args);
 
-                var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
+                var _response = await _client.PostAsync(_endpoint, _content);
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
@@ -163,7 +161,7 @@ public class TradeAPI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
             {
                 var _endpoint = "/api/spot/v1/trade/cancel-orders";
 
@@ -175,7 +173,7 @@ public class TradeAPI : XBitget
 
                 var _content = this.PostContent(_client, _endpoint, _args);
 
-                var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
+                var _response = await _client.PostAsync(_endpoint, _content);
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
@@ -206,27 +204,25 @@ public class TradeAPI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+            var _endpoint = "/api/spot/v1/trade/orderInfo";
+
+            var _args = new Dictionary<string, string>();
             {
-                var _endpoint = "/api/spot/v1/trade/orderInfo";
+                _args.Add("symbol", symbol);
+                _args.Add("orderId", orderId);
+            }
 
-                var _args = new Dictionary<string, string>();
-                {
-                    _args.Add("symbol", symbol);
-                    _args.Add("orderId", orderId);
-                }
+            var _content = this.PostContent(_client, _endpoint, _args);
 
-                var _content = this.PostContent(_client, _endpoint, _args);
-
-                var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                if (_response.IsSuccessStatusCode)
-                {
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<OrderInfo>(_jstring, JsonSettings);
+            var _response = await _client.PostAsync(_endpoint, _content);
+            if (_response.IsSuccessStatusCode)
+            {
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                _result = JsonConvert.DeserializeObject<OrderInfo>(_jstring, JsonSettings);
 #if DEBUG
-                    _result.json = _jstring;
+                _result.json = _jstring;
 #endif
-                }
             }
         }
         catch (Exception ex)
@@ -248,26 +244,24 @@ public class TradeAPI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+            var _endpoint = "/api/spot/v1/trade/open-orders";
+
+            var _args = new Dictionary<string, string>();
             {
-                var _endpoint = "/api/spot/v1/trade/open-orders";
+                _args.Add("symbol", symbol);
+            }
 
-                var _args = new Dictionary<string, string>();
-                {
-                    _args.Add("symbol", symbol);
-                }
+            var _content = this.PostContent(_client, _endpoint, _args);
 
-                var _content = this.PostContent(_client, _endpoint, _args);
-
-                var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                if (_response.IsSuccessStatusCode)
-                {
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<OrderInfo>(_jstring, JsonSettings);
+            var _response = await _client.PostAsync(_endpoint, _content);
+            if (_response.IsSuccessStatusCode)
+            {
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                _result = JsonConvert.DeserializeObject<OrderInfo>(_jstring, JsonSettings);
 #if DEBUG
-                    _result.json = _jstring;
+                _result.json = _jstring;
 #endif
-                }
             }
         }
         catch (Exception ex)
@@ -292,29 +286,27 @@ public class TradeAPI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+            var _endpoint = "/api/spot/v1/trade/history";
+
+            var _args = new Dictionary<string, string>();
             {
-                var _endpoint = "/api/spot/v1/trade/history";
+                _args.Add("symbol", symbol);
+                _args.Add("after", after);
+                _args.Add("before", before);
+                _args.Add("limit", $"{limit}");
+            }
 
-                var _args = new Dictionary<string, string>();
-                {
-                    _args.Add("symbol", symbol);
-                    _args.Add("after", after);
-                    _args.Add("before", before);
-                    _args.Add("limit", $"{limit}");
-                }
+            var _content = this.PostContent(_client, _endpoint, _args);
 
-                var _content = this.PostContent(_client, _endpoint, _args);
-
-                var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                if (_response.IsSuccessStatusCode)
-                {
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<OrderInfo>(_jstring, JsonSettings);
+            var _response = await _client.PostAsync(_endpoint, _content);
+            if (_response.IsSuccessStatusCode)
+            {
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                _result = JsonConvert.DeserializeObject<OrderInfo>(_jstring, JsonSettings);
 #if DEBUG
-                    _result.json = _jstring;
+                _result.json = _jstring;
 #endif
-                }
             }
         }
         catch (Exception ex)
@@ -340,7 +332,7 @@ public class TradeAPI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
             {
                 var _endpoint = "/api/spot/v1/trade/fills";
 
@@ -355,7 +347,7 @@ public class TradeAPI : XBitget
 
                 var _content = this.PostContent(_client, _endpoint, _args);
 
-                var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
+                var _response = await _client.PostAsync(_endpoint, _content);
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
@@ -393,34 +385,32 @@ public class TradeAPI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+            var _endpoint = "/api/spot/v1/trade/placePlan";
+
+            var _args = new Dictionary<string, string>();
             {
-                var _endpoint = "/api/spot/v1/trade/placePlan";
+                _args.Add("symbol", symbol);
+                _args.Add("side", side);
+                _args.Add("triggerPrice", $"{triggerPrice}");
+                _args.Add("executePrice", $"{executePrice}");
+                _args.Add("size", $"{size}");
+                _args.Add("triggerType", triggerType);
+                _args.Add("orderType", orderType);
+                _args.Add("clientOid", clientOid);
+                _args.Add("timeInForceValue", timeInForceValue);
+            }
 
-                var _args = new Dictionary<string, string>();
-                {
-                    _args.Add("symbol", symbol);
-                    _args.Add("side", side);
-                    _args.Add("triggerPrice", $"{triggerPrice}");
-                    _args.Add("executePrice", $"{executePrice}");
-                    _args.Add("size", $"{size}");
-                    _args.Add("triggerType", triggerType);
-                    _args.Add("orderType", orderType);
-                    _args.Add("clientOid", clientOid);
-                    _args.Add("timeInForceValue", timeInForceValue);
-                }
+            var _content = this.PostContent(_client, _endpoint, _args);
 
-                var _content = this.PostContent(_client, _endpoint, _args);
-
-                var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                if (_response.IsSuccessStatusCode)
-                {
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<PlaceOrder>(_jstring, JsonSettings);
+            var _response = await _client.PostAsync(_endpoint, _content);
+            if (_response.IsSuccessStatusCode)
+            {
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                _result = JsonConvert.DeserializeObject<PlaceOrder>(_jstring, JsonSettings);
 #if DEBUG
-                    _result.json = _jstring;
+                _result.json = _jstring;
 #endif
-                }
             }
         }
         catch (Exception ex)
@@ -446,30 +436,28 @@ public class TradeAPI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+            var _endpoint = "/api/spot/v1/trade/modifyPlan";
+
+            var _args = new Dictionary<string, string>();
             {
-                var _endpoint = "/api/spot/v1/trade/modifyPlan";
+                _args.Add("orderId", orderId);
+                _args.Add("triggerPrice", $"{triggerPrice}");
+                _args.Add("executePrice", $"{executePrice}");
+                _args.Add("size", $"{size}");
+                _args.Add("orderType", orderType);
+            }
 
-                var _args = new Dictionary<string, string>();
-                {
-                    _args.Add("orderId", orderId);
-                    _args.Add("triggerPrice", $"{triggerPrice}");
-                    _args.Add("executePrice", $"{executePrice}");
-                    _args.Add("size", $"{size}");
-                    _args.Add("orderType", orderType);
-                }
+            var _content = this.PostContent(_client, _endpoint, _args);
 
-                var _content = this.PostContent(_client, _endpoint, _args);
-
-                var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                if (_response.IsSuccessStatusCode)
-                {
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<PlaceOrder>(_jstring, JsonSettings);
+            var _response = await _client.PostAsync(_endpoint, _content);
+            if (_response.IsSuccessStatusCode)
+            {
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                _result = JsonConvert.DeserializeObject<PlaceOrder>(_jstring, JsonSettings);
 #if DEBUG
-                    _result.json = _jstring;
+                _result.json = _jstring;
 #endif
-                }
             }
         }
         catch (Exception ex)
@@ -491,26 +479,24 @@ public class TradeAPI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+            var _endpoint = "/api/spot/v1/trade/cancelPlan";
+
+            var _args = new Dictionary<string, string>();
             {
-                var _endpoint = "/api/spot/v1/trade/cancelPlan";
+                _args.Add("orderId", orderId);
+            }
 
-                var _args = new Dictionary<string, string>();
-                {
-                    _args.Add("orderId", orderId);
-                }
+            var _content = this.PostContent(_client, _endpoint, _args);
 
-                var _content = this.PostContent(_client, _endpoint, _args);
-
-                var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                if (_response.IsSuccessStatusCode)
-                {
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<RResult<string>>(_jstring, JsonSettings);
+            var _response = await _client.PostAsync(_endpoint, _content);
+            if (_response.IsSuccessStatusCode)
+            {
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                _result = JsonConvert.DeserializeObject<RResult<string>>(_jstring, JsonSettings);
 #if DEBUG
-                    _result.json = _jstring;
+                _result.json = _jstring;
 #endif
-                }
             }
         }
         catch (Exception ex)
@@ -533,7 +519,7 @@ public class TradeAPI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
             {
                 var _endpoint = "/api/spot/v1/trade/currentPlan";
 
@@ -545,7 +531,7 @@ public class TradeAPI : XBitget
 
                 var _content = this.PostContent(_client, _endpoint, _args);
 
-                var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
+                var _response = await _client.PostAsync(_endpoint, _content);
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
@@ -578,29 +564,27 @@ public class TradeAPI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+            var _endpoint = "/api/spot/v1/trade/historyPlan";
+
+            var _args = new Dictionary<string, string>();
             {
-                var _endpoint = "/api/spot/v1/trade/historyPlan";
+                _args.Add("symbol", symbol);
+                _args.Add("pageSize", $"{pageSize}");
+                _args.Add("startTiem", $"{startTiem}");
+                _args.Add("endTime", $"{endTime}");
+            }
 
-                var _args = new Dictionary<string, string>();
-                {
-                    _args.Add("symbol", symbol);
-                    _args.Add("pageSize", $"{pageSize}");
-                    _args.Add("startTiem", $"{startTiem}");
-                    _args.Add("endTime", $"{endTime}");
-                }
+            var _content = this.PostContent(_client, _endpoint, _args);
 
-                var _content = this.PostContent(_client, _endpoint, _args);
-
-                var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                if (_response.IsSuccessStatusCode)
-                {
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<PlanOrder>(_jstring, JsonSettings);
+            var _response = await _client.PostAsync(_endpoint, _content);
+            if (_response.IsSuccessStatusCode)
+            {
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                _result = JsonConvert.DeserializeObject<PlanOrder>(_jstring, JsonSettings);
 #if DEBUG
-                    _result.json = _jstring;
+                _result.json = _jstring;
 #endif
-                }
             }
         }
         catch (Exception ex)

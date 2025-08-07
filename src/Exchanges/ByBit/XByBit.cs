@@ -1,4 +1,4 @@
-﻿using CCXT.Simple.Services;
+using CCXT.Simple.Services;
 using CCXT.Simple.Models;
 using Newtonsoft.Json;
 using System.Security.Cryptography;
@@ -61,35 +61,34 @@ namespace CCXT.Simple.Exchanges.Bybit
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+
+                var _response = await _client.GetAsync("/spot/v3/public/symbols");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jarray = JsonConvert.DeserializeObject<CoinInfor>(_jstring, mainXchg.JsonSettings);
+
+                var _queue_info = mainXchg.GetXInfors(ExchangeName);
+
+                foreach (var c in _jarray.result.list)
                 {
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/spot/v3/public/symbols");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jarray = JsonConvert.DeserializeObject<CoinInfor>(_jstring, mainXchg.JsonSettings);
+                    var _base = c.baseCoin;
+                    var _quote = c.quoteCoin;
 
-                    var _queue_info = mainXchg.GetXInfors(ExchangeName);
-
-                    foreach (var c in _jarray.result.list)
+                    if (_quote == "USDT" || _quote == "USD")
                     {
-                        var _base = c.baseCoin;
-                        var _quote = c.quoteCoin;
-
-                        if (_quote == "USDT" || _quote == "USD")
+                        _queue_info.symbols.Add(new QueueSymbol
                         {
-                            _queue_info.symbols.Add(new QueueSymbol
-                            {
-                                symbol = c.name,
-                                compName = _base,
-                                baseName = _base,
-                                quoteName = _quote,
+                            symbol = c.name,
+                            compName = _base,
+                            baseName = _base,
+                            quoteName = _quote,
 
-                                minPrice = c.minTradeAmt,
-                                maxPrice = c.maxTradeAmt,
+                            minPrice = c.minTradeAmt,
+                            maxPrice = c.maxTradeAmt,
 
-                                minQty = c.minTradeQty,
-                                maxQty = c.maxTradeQty
-                            });
-                        }
+                            minQty = c.minTradeQty,
+                            maxQty = c.maxTradeQty
+                        });
                     }
                 }
 
@@ -146,78 +145,77 @@ namespace CCXT.Simple.Exchanges.Bybit
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+
+                var _end_point = "/asset/v3/private/coin-info/query";
+
+                this.CreateSignature(_client);
+
+                var _response = await _client.GetAsync($"{ExchangeUrl}{_end_point}");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jarray = JsonConvert.DeserializeObject<CoinState>(_jstring, mainXchg.JsonSettings);
+
+                foreach (var c in _jarray.result.rows)
                 {
-                    var _end_point = "/asset/v3/private/coin-info/query";
-
-                    this.CreateSignature(_client);
-
-                    var _response = await _client.GetAsync($"{ExchangeUrl}{_end_point}");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jarray = JsonConvert.DeserializeObject<CoinState>(_jstring, mainXchg.JsonSettings);
-
-                    foreach (var c in _jarray.result.rows)
+                    var _state = tickers.states.SingleOrDefault(x => x.baseName == c.coin);
+                    if (_state == null)
                     {
-                        var _state = tickers.states.SingleOrDefault(x => x.baseName == c.coin);
-                        if (_state == null)
+                        _state = new WState
                         {
-                            _state = new WState
-                            {
-                                baseName = c.coin,
-                                active = true,
-                                deposit = true,
-                                withdraw = true,
-                                networks = new List<WNetwork>()
-                            };
+                            baseName = c.coin,
+                            active = true,
+                            deposit = true,
+                            withdraw = true,
+                            networks = new List<WNetwork>()
+                        };
 
-                            tickers.states.Add(_state);
+                        tickers.states.Add(_state);
+                    }
+
+                    var _t_items = tickers.items.Where(x => x.compName == _state.baseName);
+                    if (_t_items != null)
+                    {
+                        foreach (var t in _t_items)
+                        {
+                            t.active = _state.active;
+                            t.deposit = _state.deposit;
+                            t.withdraw = _state.withdraw;
                         }
+                    }
 
-                        var _t_items = tickers.items.Where(x => x.compName == _state.baseName);
-                        if (_t_items != null)
+                    foreach (var n in c.chains)
+                    {
+                        var _name = c.name + "-" + n.chain;
+
+                        var _network = _state.networks.SingleOrDefault(x => x.name == _name);
+                        if (_network == null)
                         {
-                            foreach (var t in _t_items)
+                            var _chain = n.chainType;
+
+                            var _l_ndx = _chain.IndexOf("(");
+                            var _r_ndx = _chain.IndexOf(")");
+                            if (_l_ndx >= 0 && _r_ndx > _l_ndx)
+                                _chain = _chain.Substring(_l_ndx + 1, _r_ndx - _l_ndx - 1);
+
+                            _state.networks.Add(new WNetwork
                             {
-                                t.active = _state.active;
-                                t.deposit = _state.deposit;
-                                t.withdraw = _state.withdraw;
-                            }
+                                name = _name,
+                                network = n.chain,
+                                chain = _chain,
+
+                                deposit = n.chainDeposit == 1,
+                                withdraw = n.chainWithdraw == 1,
+
+                                minWithdrawal = n.withdrawMin,
+                                withdrawFee = n.withdrawFee,
+
+                                minConfirm = n.confirmation != null ? n.confirmation.Value : 0
+                            });
                         }
-
-                        foreach (var n in c.chains)
+                        else
                         {
-                            var _name = c.name + "-" + n.chain;
-
-                            var _network = _state.networks.SingleOrDefault(x => x.name == _name);
-                            if (_network == null)
-                            {
-                                var _chain = n.chainType;
-
-                                var _l_ndx = _chain.IndexOf("(");
-                                var _r_ndx = _chain.IndexOf(")");
-                                if (_l_ndx >= 0 && _r_ndx > _l_ndx)
-                                    _chain = _chain.Substring(_l_ndx + 1, _r_ndx - _l_ndx - 1);
-
-                                _state.networks.Add(new WNetwork
-                                {
-                                    name = _name,
-                                    network = n.chain,
-                                    chain = _chain,
-
-                                    deposit = n.chainDeposit == 1,
-                                    withdraw = n.chainWithdraw == 1,
-
-                                    minWithdrawal = n.withdrawMin,
-                                    withdrawFee = n.withdrawFee,
-
-                                    minConfirm = n.confirmation != null ? n.confirmation.Value : 0
-                                });
-                            }
-                            else
-                            {
-                                _state.deposit = n.chainDeposit == 1;
-                                _state.withdraw = n.chainWithdraw == 1;
-                            }
+                            _state.deposit = n.chainDeposit == 1;
+                            _state.withdraw = n.chainWithdraw == 1;
                         }
                     }
 
@@ -243,57 +241,56 @@ namespace CCXT.Simple.Exchanges.Bybit
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+
+                var _response = await _client.GetAsync("/v5/market/tickers?category=spot");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jtickers = JsonConvert.DeserializeObject<RaTickers>(_jstring, mainXchg.JsonSettings);
+
+                for (var i = 0; i < tickers.items.Count; i++)
                 {
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/v5/market/tickers?category=spot");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jtickers = JsonConvert.DeserializeObject<RaTickers>(_jstring, mainXchg.JsonSettings);
+                    var _ticker = tickers.items[i];
+                    if (_ticker.symbol == "X")
+                        continue;
 
-                    for (var i = 0; i < tickers.items.Count; i++)
+                    var _jobject = _jtickers.result.list.Find(x => x.s == _ticker.symbol);
+                    if (_jobject != null)
                     {
-                        var _ticker = tickers.items[i];
-                        if (_ticker.symbol == "X")
-                            continue;
-
-                        var _jobject = _jtickers.result.list.Find(x => x.s == _ticker.symbol);
-                        if (_jobject != null)
+                        if (_ticker.quoteName == "USDT" || _ticker.quoteName == "USD")
                         {
-                            if (_ticker.quoteName == "USDT" || _ticker.quoteName == "USD")
+                            var _price = _jobject.lp;
                             {
-                                var _price = _jobject.lp;
+                                var _ask_price = _jobject.ap;
+                                var _bid_price = _jobject.bp;
+
+                                _ticker.lastPrice = _price * tickers.exchgRate;
+                                _ticker.askPrice = _ask_price * tickers.exchgRate;
+                                _ticker.bidPrice = _bid_price * tickers.exchgRate;
+                            }
+
+                            var _volume = _jobject.qv;
+                            {
+                                var _prev_volume24h = _ticker.previous24h;
+                                var _next_timestamp = _ticker.timestamp + 60 * 1000;
+
+                                _volume *= tickers.exchgRate;
+                                _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
+
+                                var _curr_timestamp = DateTimeXts.NowMilli;
+                                if (_curr_timestamp > _next_timestamp)
                                 {
-                                    var _ask_price = _jobject.ap;
-                                    var _bid_price = _jobject.bp;
+                                    _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
 
-                                    _ticker.lastPrice = _price * tickers.exchgRate;
-                                    _ticker.askPrice = _ask_price * tickers.exchgRate;
-                                    _ticker.bidPrice = _bid_price * tickers.exchgRate;
-                                }
-
-                                var _volume = _jobject.qv;
-                                {
-                                    var _prev_volume24h = _ticker.previous24h;
-                                    var _next_timestamp = _ticker.timestamp + 60 * 1000;
-
-                                    _volume *= tickers.exchgRate;
-                                    _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
-
-                                    var _curr_timestamp = DateTimeXts.NowMilli;
-                                    if (_curr_timestamp > _next_timestamp)
-                                    {
-                                        _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
-
-                                        _ticker.timestamp = _curr_timestamp;
-                                        _ticker.previous24h = _volume;
-                                    }
+                                    _ticker.timestamp = _curr_timestamp;
+                                    _ticker.previous24h = _volume;
                                 }
                             }
                         }
-                        else
-                        {
-                            mainXchg.OnMessageEvent(ExchangeName, $"not found: {_ticker.symbol}", 3302);
-                            _ticker.symbol = "X";
-                        }
+                    }
+                    else
+                    {
+                        mainXchg.OnMessageEvent(ExchangeName, $"not found: {_ticker.symbol}", 3302);
+                        _ticker.symbol = "X";
                     }
                 }
 
@@ -327,7 +324,7 @@ namespace CCXT.Simple.Exchanges.Bybit
             throw new NotImplementedException();
         }
 
-        
+
 
         public ValueTask<Orderbook> GetOrderbook(string symbol, int limit = 5)
         {

@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System.Diagnostics;
 
 namespace CCXT.Simple.Exchanges.Bitget.RA.Private;
@@ -26,7 +26,7 @@ public class PrivatePI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
             {
                 var _endpoint = "/api/spot/v1/wallet/transfer";
 
@@ -40,7 +40,7 @@ public class PrivatePI : XBitget
 
                 var _content = this.PostContent(_client, _endpoint, _args);
 
-                var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
+                var _response = await _client.PostAsync(_endpoint, _content);
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
@@ -76,7 +76,7 @@ public class PrivatePI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
             {
                 var _endpoint = "/api/spot/v1/wallet/subTransfer";
 
@@ -93,7 +93,7 @@ public class PrivatePI : XBitget
 
                 var _content = this.PostContent(_client, _endpoint, _args);
 
-                var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
+                var _response = await _client.PostAsync(_endpoint, _content);
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
@@ -124,7 +124,7 @@ public class PrivatePI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
             {
                 var _endpoint = "/api/spot/v1/wallet/deposit-address";
                 var _query = $"?coin={coin}&chain={chain}";
@@ -164,32 +164,30 @@ public class PrivatePI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+            var _endpoint = "/api/spot/v1/wallet/withdrawal";
+
+            var _args = new Dictionary<string, string>();
             {
-                var _endpoint = "/api/spot/v1/wallet/withdrawal";
+                _args.Add("coin", coin);
+                _args.Add("address", address);
+                _args.Add("chain", chain);
+                _args.Add("amount", $"{amount}");
 
-                var _args = new Dictionary<string, string>();
-                {
-                    _args.Add("coin", coin);
-                    _args.Add("address", address);
-                    _args.Add("chain", chain);
-                    _args.Add("amount", $"{amount}");
+                if (tag != null)
+                    _args.Add("tag", tag);
+            }
 
-                    if (tag != null)
-                        _args.Add("tag", tag);
-                }
+            var _content = this.PostContent(_client, _endpoint, _args);
 
-                var _content = this.PostContent(_client, _endpoint, _args);
-
-                var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                if (_response.IsSuccessStatusCode)
-                {
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<RResult<string>>(_jstring, JsonSettings);
+            var _response = await _client.PostAsync(_endpoint, _content);
+            if (_response.IsSuccessStatusCode)
+            {
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                _result = JsonConvert.DeserializeObject<RResult<string>>(_jstring, JsonSettings);
 #if DEBUG
-                    _result.json = _jstring;
+                _result.json = _jstring;
 #endif
-                }
             }
         }
         catch (Exception ex)
@@ -213,7 +211,7 @@ public class PrivatePI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
             {
                 var _endpoint = "/api/spot/v1/wallet/withdrawal-inner";
 
@@ -226,7 +224,7 @@ public class PrivatePI : XBitget
 
                 var _content = this.PostContent(_client, _endpoint, _args);
 
-                var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
+                var _response = await _client.PostAsync(_endpoint, _content);
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
@@ -260,22 +258,20 @@ public class PrivatePI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+            var _endpoint = "/api/spot/v1/wallet/withdrawal-list";
+            var _query = $"?coin={coin}&startTime={start}&endTime={end}&pageNo={page_no}&pageSize={page_size}";
+
+            var _content = this.GetContent(_client, _endpoint, _query);
+
+            var _response = await _client.GetAsync($"{ExchangeUrl}{_endpoint}{_query}");
+            if (_response.IsSuccessStatusCode)
             {
-                var _endpoint = "/api/spot/v1/wallet/withdrawal-list";
-                var _query = $"?coin={coin}&startTime={start}&endTime={end}&pageNo={page_no}&pageSize={page_size}";
-
-                var _content = this.GetContent(_client, _endpoint, _query);
-
-                var _response = await _client.GetAsync($"{ExchangeUrl}{_endpoint}{_query}");
-                if (_response.IsSuccessStatusCode)
-                {
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<WithdrawList>(_jstring, JsonSettings);
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                _result = JsonConvert.DeserializeObject<WithdrawList>(_jstring, JsonSettings);
 #if DEBUG
-                    _result.json = _jstring;
+                _result.json = _jstring;
 #endif
-                }
             }
         }
         catch (Exception ex)
@@ -301,22 +297,20 @@ public class PrivatePI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+            var _endpoint = "/api/spot/v1/wallet/deposit-list";
+            var _query = $"?coin={coin}&startTime={start}&endTime={end}&pageNo={page_no}&pageSize={page_size}";
+
+            var _content = this.GetContent(_client, _endpoint, _query);
+
+            var _response = await _client.GetAsync($"{ExchangeUrl}{_endpoint}{_query}");
+            if (_response.IsSuccessStatusCode)
             {
-                var _endpoint = "/api/spot/v1/wallet/deposit-list";
-                var _query = $"?coin={coin}&startTime={start}&endTime={end}&pageNo={page_no}&pageSize={page_size}";
-
-                var _content = this.GetContent(_client, _endpoint, _query);
-
-                var _response = await _client.GetAsync($"{ExchangeUrl}{_endpoint}{_query}");
-                if (_response.IsSuccessStatusCode)
-                {
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<DepositList>(_jstring, JsonSettings);
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                _result = JsonConvert.DeserializeObject<DepositList>(_jstring, JsonSettings);
 #if DEBUG
-                    _result.json = _jstring;
+                _result.json = _jstring;
 #endif
-                }
             }
         }
         catch (Exception ex)
@@ -341,22 +335,20 @@ public class PrivatePI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+            var _endpoint = "/api/spot/v1/account/getInfo";
+            var _query = $"";
+
+            var _content = this.GetContent(_client, _endpoint, _query);
+
+            var _response = await _client.GetAsync($"{ExchangeUrl}{_endpoint}{_query}");
+            if (_response.IsSuccessStatusCode)
             {
-                var _endpoint = "/api/spot/v1/account/getInfo";
-                var _query = $"";
-
-                var _content = this.GetContent(_client, _endpoint, _query);
-
-                var _response = await _client.GetAsync($"{ExchangeUrl}{_endpoint}{_query}");
-                if (_response.IsSuccessStatusCode)
-                {
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<ApiKey>(_jstring, JsonSettings);
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                _result = JsonConvert.DeserializeObject<ApiKey>(_jstring, JsonSettings);
 #if DEBUG
-                    _result.json = _jstring;
+                _result.json = _jstring;
 #endif
-                }
             }
         }
         catch (Exception ex)
@@ -378,22 +370,20 @@ public class PrivatePI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+            var _endpoint = "/api/spot/v1/account/assets";
+            var _query = $"?coin={coin}";
+
+            var _content = this.GetContent(_client, _endpoint, _query);
+
+            var _response = await _client.GetAsync($"{ExchangeUrl}{_endpoint}{_query}");
+            if (_response.IsSuccessStatusCode)
             {
-                var _endpoint = "/api/spot/v1/account/assets";
-                var _query = $"?coin={coin}";
-
-                var _content = this.GetContent(_client, _endpoint, _query);
-
-                var _response = await _client.GetAsync($"{ExchangeUrl}{_endpoint}{_query}");
-                if (_response.IsSuccessStatusCode)
-                {
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<Asset>(_jstring, JsonSettings);
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                _result = JsonConvert.DeserializeObject<Asset>(_jstring, JsonSettings);
 #if DEBUG
-                    _result.json = _jstring;
+                _result.json = _jstring;
 #endif
-                }
             }
         }
         catch (Exception ex)
@@ -414,25 +404,23 @@ public class PrivatePI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+            var _endpoint = "/api/spot/v1/account/sub-account-spot-assets";
+
+            var _args = new Dictionary<string, string>();
             {
-                var _endpoint = "/api/spot/v1/account/sub-account-spot-assets";
+            }
 
-                var _args = new Dictionary<string, string>();
-                {
-                }
+            var _content = this.PostContent(_client, _endpoint, _args);
 
-                var _content = this.PostContent(_client, _endpoint, _args);
-
-                var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                if (_response.IsSuccessStatusCode)
-                {
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<SAsset>(_jstring, JsonSettings);
+            var _response = await _client.PostAsync(_endpoint, _content);
+            if (_response.IsSuccessStatusCode)
+            {
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                _result = JsonConvert.DeserializeObject<SAsset>(_jstring, JsonSettings);
 #if DEBUG
-                    _result.json = _jstring;
+                _result.json = _jstring;
 #endif
-                }
             }
         }
         catch (Exception ex)
@@ -459,31 +447,29 @@ public class PrivatePI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+            var _endpoint = "/api/spot/v1/account/bills";
+
+            var _args = new Dictionary<string, string>();
             {
-                var _endpoint = "/api/spot/v1/account/bills";
+                _args.Add("coinId", $"{coinId}");
+                _args.Add("groupType", groupType);
+                _args.Add("bizType", bizType);
+                _args.Add("after", after);
+                _args.Add("before", before);
+                _args.Add("limit", $"{limit}");
+            }
 
-                var _args = new Dictionary<string, string>();
-                {
-                    _args.Add("coinId", $"{coinId}");
-                    _args.Add("groupType", groupType);
-                    _args.Add("bizType", bizType);
-                    _args.Add("after", after);
-                    _args.Add("before", before);
-                    _args.Add("limit", $"{limit}");
-                }
+            var _content = this.PostContent(_client, _endpoint, _args);
 
-                var _content = this.PostContent(_client, _endpoint, _args);
-
-                var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                if (_response.IsSuccessStatusCode)
-                {
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<Bill>(_jstring, JsonSettings);
+            var _response = await _client.PostAsync(_endpoint, _content);
+            if (_response.IsSuccessStatusCode)
+            {
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                _result = JsonConvert.DeserializeObject<Bill>(_jstring, JsonSettings);
 #if DEBUG
-                    _result.json = _jstring;
+                _result.json = _jstring;
 #endif
-                }
             }
         }
         catch (Exception ex)
@@ -509,22 +495,20 @@ public class PrivatePI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+            var _endpoint = "/api/spot/v1/account/transferRecords";
+            var _query = $"?coinId={coinId}&fromType={fromType}&after={after}&before={before}}}&limit={limit}";
+
+            var _content = this.GetContent(_client, _endpoint, _query);
+
+            var _response = await _client.GetAsync($"{ExchangeUrl}{_endpoint}{_query}");
+            if (_response.IsSuccessStatusCode)
             {
-                var _endpoint = "/api/spot/v1/account/transferRecords";
-                var _query = $"?coinId={coinId}&fromType={fromType}&after={after}&before={before}}}&limit={limit}";
-
-                var _content = this.GetContent(_client, _endpoint, _query);
-
-                var _response = await _client.GetAsync($"{ExchangeUrl}{_endpoint}{_query}");
-                if (_response.IsSuccessStatusCode)
-                {
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<TransferList>(_jstring, JsonSettings);
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                _result = JsonConvert.DeserializeObject<TransferList>(_jstring, JsonSettings);
 #if DEBUG
-                    _result.json = _jstring;
+                _result.json = _jstring;
 #endif
-                }
             }
         }
         catch (Exception ex)

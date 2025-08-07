@@ -1,4 +1,5 @@
 ﻿using CCXT.Simple.Models;
+using CCXT.Simple.Services;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
@@ -31,8 +32,11 @@ namespace CCXT.Simple.Exchanges
         }
     }
 
-    public class Exchange
+    public class Exchange : IDisposable
     {
+        private readonly HttpClientService _httpClientService;
+        private bool _disposed;
+
         public Exchange(string fiatName = "KRW")
         {
             this.UserAgent = "ccxt.simple.sdk";
@@ -48,6 +52,17 @@ namespace CCXT.Simple.Exchanges
 
             this.exchangeBs = new ConcurrentDictionary<string, CompData>();
             this.exchangesNs = new ConcurrentDictionary<string, ChainData>();
+            
+            // Initialize HttpClientService
+            this._httpClientService = new HttpClientService();
+        }
+        
+        /// <summary>
+        /// Get HttpClient for specific exchange
+        /// </summary>
+        public HttpClient GetHttpClient(string exchangeName, string baseUrl = null)
+        {
+            return _httpClientService.GetClient(exchangeName, baseUrl);
         }
 
         public event EventHandler<MessageEventArgs> MessageEvent;
@@ -292,5 +307,23 @@ namespace CCXT.Simple.Exchanges
             NullValueHandling = NullValueHandling.Ignore,
             MissingMemberHandling = MissingMemberHandling.Ignore
         };
+        
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    _httpClientService?.Dispose();
+                }
+                _disposed = true;
+            }
+        }
     }
 }

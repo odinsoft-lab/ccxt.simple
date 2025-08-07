@@ -1,4 +1,4 @@
-﻿using CCXT.Simple.Services;
+using CCXT.Simple.Services;
 using CCXT.Simple.Converters;
 using CCXT.Simple.Models;
 using Newtonsoft.Json;
@@ -58,28 +58,27 @@ namespace CCXT.Simple.Exchanges.Coinbase
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+
+                _client.DefaultRequestHeaders.Add("User-Agent", mainXchg.UserAgent);
+
+                var _response = await _client.GetAsync("/products");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jarray = JsonConvert.DeserializeObject<List<CoinInfor>>(_jstring);
+
+                var _queue_info = mainXchg.GetXInfors(ExchangeName);
+
+                foreach (var s in _jarray)
                 {
-                    _client.DefaultRequestHeaders.Add("User-Agent", mainXchg.UserAgent);
-
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/products");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jarray = JsonConvert.DeserializeObject<List<CoinInfor>>(_jstring);
-
-                    var _queue_info = mainXchg.GetXInfors(ExchangeName);
-
-                    foreach (var s in _jarray)
+                    if (s.quote_currency == "USDT" || s.quote_currency == "USD" || s.quote_currency == "BTC")
                     {
-                        if (s.quote_currency == "USDT" || s.quote_currency == "USD" || s.quote_currency == "BTC")
+                        _queue_info.symbols.Add(new QueueSymbol
                         {
-                            _queue_info.symbols.Add(new QueueSymbol
-                            {
-                                symbol = s.id,
-                                compName = s.base_currency,
-                                baseName = s.base_currency,
-                                quoteName = s.quote_currency
-                            });
-                        }
+                            symbol = s.id,
+                            compName = s.base_currency,
+                            baseName = s.base_currency,
+                            quoteName = s.quote_currency
+                        });
                     }
                 }
 
@@ -103,85 +102,84 @@ namespace CCXT.Simple.Exchanges.Coinbase
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+
+                _client.DefaultRequestHeaders.Add("User-Agent", mainXchg.UserAgent);
+
+                var _response = await _client.GetAsync("/currencies");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+                var _jarray = JsonConvert.DeserializeObject<List<CoinState>>(_jstring);
+
+                foreach (var c in _jarray)
                 {
-                    _client.DefaultRequestHeaders.Add("User-Agent", mainXchg.UserAgent);
+                    var _currency = c.id;
 
-                    var _response = await _client.GetAsync($"{ExchangeUrl}/currencies");
-                    var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jarray = JsonConvert.DeserializeObject<List<CoinState>>(_jstring);
-
-                    foreach (var c in _jarray)
+                    var _state = tickers.states.SingleOrDefault(x => x.baseName == _currency);
+                    if (_state == null)
                     {
-                        var _currency = c.id;
-
-                        var _state = tickers.states.SingleOrDefault(x => x.baseName == _currency);
-                        if (_state == null)
+                        _state = new WState
                         {
-                            _state = new WState
+                            baseName = _currency,
+                            active = c.status == "online",
+                            deposit = true,
+                            withdraw = true,
+                            networks = new List<WNetwork>()
+                        };
+
+                        tickers.states.Add(_state);
+                    }
+                    else
+                    {
+                        _state.active = c.status == "online";
+                    }
+
+                    var _t_items = tickers.items.Where(x => x.compName == _state.baseName);
+                    if (_t_items != null)
+                    {
+                        foreach (var t in _t_items)
+                        {
+                            t.active = _state.active;
+                            t.deposit = _state.deposit;
+                            t.withdraw = _state.withdraw;
+                        }
+                    }
+
+                    foreach (var n in c.supported_networks)
+                    {
+                        var _name = _currency + "-" + n.id;
+
+                        var _network = _state.networks.SingleOrDefault(x => x.name == _name);
+                        if (_network == null)
+                        {
+                            var _protocol = n.name.ToUpper();
+                            if (n.id == "ethereum")
+                                _protocol = "ERC20";
+                            else if (n.id == "solana")
+                                _protocol = "SOL";
+
+                            _network = new WNetwork
                             {
-                                baseName = _currency,
-                                active = c.status == "online",
-                                deposit = true,
-                                withdraw = true,
-                                networks = new List<WNetwork>()
+                                name = _name,
+                                network = n.name.ToUpper(),
+                                chain = _protocol,
+
+                                deposit = n.status == "online",
+                                withdraw = n.status == "online",
+
+                                withdrawFee = 0,
+                                minWithdrawal = n.min_withdrawal_amount,
+                                maxWithdrawal = n.max_withdrawal_amount,
+
+                                minConfirm = n.network_confirmations,
+                                arrivalTime = n.processing_time_seconds != null ? n.processing_time_seconds.Value : 0
                             };
 
-                            tickers.states.Add(_state);
+                            _state.networks.Add(_network);
                         }
                         else
                         {
-                            _state.active = c.status == "online";
-                        }
-
-                        var _t_items = tickers.items.Where(x => x.compName == _state.baseName);
-                        if (_t_items != null)
-                        {
-                            foreach (var t in _t_items)
-                            {
-                                t.active = _state.active;
-                                t.deposit = _state.deposit;
-                                t.withdraw = _state.withdraw;
-                            }
-                        }
-
-                        foreach (var n in c.supported_networks)
-                        {
-                            var _name = _currency + "-" + n.id;
-
-                            var _network = _state.networks.SingleOrDefault(x => x.name == _name);
-                            if (_network == null)
-                            {
-                                var _protocol = n.name.ToUpper();
-                                if (n.id == "ethereum")
-                                    _protocol = "ERC20";
-                                else if (n.id == "solana")
-                                    _protocol = "SOL";
-
-                                _network = new WNetwork
-                                {
-                                    name = _name,
-                                    network = n.name.ToUpper(),
-                                    chain = _protocol,
-
-                                    deposit = n.status == "online",
-                                    withdraw = n.status == "online",
-
-                                    withdrawFee = 0,
-                                    minWithdrawal = n.min_withdrawal_amount,
-                                    maxWithdrawal = n.max_withdrawal_amount,
-
-                                    minConfirm = n.network_confirmations,
-                                    arrivalTime = n.processing_time_seconds != null ? n.processing_time_seconds.Value : 0
-                                };
-
-                                _state.networks.Add(_network);
-                            }
-                            else
-                            {
-                                _network.deposit = n.status == "online";
-                                _network.withdraw = n.status == "online";
-                            }
+                            _network.deposit = n.status == "online";
+                            _network.withdraw = n.status == "online";
                         }
                     }
                 }
@@ -237,54 +235,53 @@ namespace CCXT.Simple.Exchanges.Coinbase
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+
+                _client.DefaultRequestHeaders.Add("User-Agent", mainXchg.UserAgent);
+
+                var _response = await _client.GetAsync($"{ExchangeUrlPro}/products/{_ticker.symbol}/ticker");
+                if (_response.IsSuccessStatusCode)
                 {
-                    _client.DefaultRequestHeaders.Add("User-Agent", mainXchg.UserAgent);
+                    var _tstring = await _response.Content.ReadAsStringAsync();
+                    var _jobject = JObject.Parse(_tstring);
 
-                    var _response = await _client.GetAsync($"{ExchangeUrlPro}/products/{_ticker.symbol}/ticker");
-                    if (_response.IsSuccessStatusCode)
+                    var _price = _jobject.Value<decimal>("price");
                     {
-                        var _tstring = await _response.Content.ReadAsStringAsync();
-                        var _jobject = JObject.Parse(_tstring);
-
-                        var _price = _jobject.Value<decimal>("price");
+                        if (_ticker.quoteName == "USDT" || _ticker.quoteName == "USD")
                         {
-                            if (_ticker.quoteName == "USDT" || _ticker.quoteName == "USD")
-                            {
-                                _ticker.lastPrice = _price * exchg_rate;
+                            _ticker.lastPrice = _price * exchg_rate;
 
-                                _ticker.askPrice = _price * exchg_rate;
-                                _ticker.bidPrice = _price * exchg_rate;
-                            }
-                            else if (_ticker.quoteName == "BTC")
-                            {
-                                _ticker.lastPrice = _price * mainXchg.fiat_btc_price;
-
-                                _ticker.askPrice = _price * mainXchg.fiat_btc_price;
-                                _ticker.bidPrice = _price * mainXchg.fiat_btc_price;
-                            }
+                            _ticker.askPrice = _price * exchg_rate;
+                            _ticker.bidPrice = _price * exchg_rate;
                         }
-
-                        var _volume = _jobject.Value<decimal>("volume");
+                        else if (_ticker.quoteName == "BTC")
                         {
-                            var _prev_volume24h = _ticker.previous24h;
-                            var _next_timestamp = _ticker.timestamp + 60 * 1000;
+                            _ticker.lastPrice = _price * mainXchg.fiat_btc_price;
 
-                            if (_ticker.quoteName == "USDT" || _ticker.quoteName == "USD")
-                                _volume *= _price * exchg_rate;
-                            else if (_ticker.quoteName == "BTC")
-                                _volume *= _price * mainXchg.fiat_btc_price;
+                            _ticker.askPrice = _price * mainXchg.fiat_btc_price;
+                            _ticker.bidPrice = _price * mainXchg.fiat_btc_price;
+                        }
+                    }
 
-                            _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
+                    var _volume = _jobject.Value<decimal>("volume");
+                    {
+                        var _prev_volume24h = _ticker.previous24h;
+                        var _next_timestamp = _ticker.timestamp + 60 * 1000;
 
-                            var _curr_timestamp = DateTimeXts.ConvertToUnixTimeMilli(_jobject.Value<DateTime>("time"));
-                            if (_curr_timestamp > _next_timestamp)
-                            {
-                                _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
+                        if (_ticker.quoteName == "USDT" || _ticker.quoteName == "USD")
+                            _volume *= _price * exchg_rate;
+                        else if (_ticker.quoteName == "BTC")
+                            _volume *= _price * mainXchg.fiat_btc_price;
 
-                                _ticker.timestamp = _curr_timestamp;
-                                _ticker.previous24h = _volume;
-                            }
+                        _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
+
+                        var _curr_timestamp = DateTimeXts.ConvertToUnixTimeMilli(_jobject.Value<DateTime>("time"));
+                        if (_curr_timestamp > _next_timestamp)
+                        {
+                            _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
+
+                            _ticker.timestamp = _curr_timestamp;
+                            _ticker.previous24h = _volume;
                         }
                     }
                 }
@@ -308,7 +305,7 @@ namespace CCXT.Simple.Exchanges.Coinbase
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 {
                     _client.DefaultRequestHeaders.Add("User-Agent", mainXchg.UserAgent);
 
@@ -345,7 +342,7 @@ namespace CCXT.Simple.Exchanges.Coinbase
             try
             {
                 var tasks = new List<Task<bool>>();
-                
+
                 for (var i = 0; i < tickers.items.Count; i++)
                 {
                     var _ticker = tickers.items[i];
@@ -353,7 +350,7 @@ namespace CCXT.Simple.Exchanges.Coinbase
                         continue;
 
                     tasks.Add(GetMarket(_ticker, tickers.exchgRate).AsTask());
-                    
+
                     // Rate limiting - 10 requests per second
                     if (tasks.Count >= 10)
                     {
@@ -362,10 +359,10 @@ namespace CCXT.Simple.Exchanges.Coinbase
                         await Task.Delay(1000);
                     }
                 }
-                
+
                 if (tasks.Count > 0)
                     await Task.WhenAll(tasks);
-                
+
                 _result = true;
             }
             catch (Exception ex)
@@ -391,7 +388,7 @@ namespace CCXT.Simple.Exchanges.Coinbase
         {
             return await GetMarkets(tickers);
         }
-        
+
 
         /// <summary>
         /// Get orderbook for a specific symbol
@@ -407,7 +404,7 @@ namespace CCXT.Simple.Exchanges.Coinbase
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 {
                     _client.DefaultRequestHeaders.Add("User-Agent", mainXchg.UserAgent);
 
@@ -462,16 +459,16 @@ namespace CCXT.Simple.Exchanges.Coinbase
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 {
                     _client.DefaultRequestHeaders.Add("User-Agent", mainXchg.UserAgent);
 
                     // Convert timeframe to Coinbase granularity (seconds)
                     var granularity = ConvertTimeframe(timeframe);
-                    
+
                     // Coinbase uses ISO 8601 time format
                     var url = $"{ExchangeUrlPro}/products/{symbol}/candles?granularity={granularity}";
-                    
+
                     if (since.HasValue)
                     {
                         var start = DateTimeOffset.FromUnixTimeMilliseconds(since.Value).ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
@@ -496,7 +493,7 @@ namespace CCXT.Simple.Exchanges.Coinbase
                             candle[5].Value<decimal>()       // volume
                         });
                     }
-                    
+
                     // Reverse to get chronological order
                     _result.Reverse();
                 }
@@ -532,7 +529,7 @@ namespace CCXT.Simple.Exchanges.Coinbase
 
             try
             {
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 {
                     _client.DefaultRequestHeaders.Add("User-Agent", mainXchg.UserAgent);
 
@@ -575,7 +572,7 @@ namespace CCXT.Simple.Exchanges.Coinbase
                     throw new InvalidOperationException("API credentials are required for private endpoints");
                 }
 
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 {
                     var endpoint = "/accounts";
                     CreateSignature(_client, "GET", endpoint);
@@ -627,11 +624,11 @@ namespace CCXT.Simple.Exchanges.Coinbase
             {
                 // Get balance information
                 _result.balances = await GetBalance();
-                
+
                 // Use first account ID if available
                 if (_result.balances.Count > 0)
                 {
-                    using (var _client = new HttpClient())
+                    var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                     {
                         var endpoint = "/accounts";
                         CreateSignature(_client, "GET", endpoint);
@@ -669,10 +666,10 @@ namespace CCXT.Simple.Exchanges.Coinbase
                     throw new InvalidOperationException("API credentials are required for placing orders");
                 }
 
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 {
                     var endpoint = "/orders";
-                    
+
                     var orderData = new
                     {
                         product_id = symbol,
@@ -685,9 +682,9 @@ namespace CCXT.Simple.Exchanges.Coinbase
 
                     var jsonContent = JsonConvert.SerializeObject(orderData);
                     var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-                    
+
                     CreateSignature(_client, "POST", endpoint + jsonContent);
-                    
+
                     var _response = await _client.PostAsync($"{ExchangeUrl}{endpoint}", content);
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     var _jobject = JObject.Parse(_jstring);
@@ -732,10 +729,10 @@ namespace CCXT.Simple.Exchanges.Coinbase
                     throw new InvalidOperationException("API credentials are required for canceling orders");
                 }
 
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 {
                     var orderIdToCancel = orderId;
-                    
+
                     // If clientOrderId is provided, need to find the actual order ID
                     if (string.IsNullOrEmpty(orderId) && !string.IsNullOrEmpty(clientOrderId))
                     {
@@ -773,7 +770,7 @@ namespace CCXT.Simple.Exchanges.Coinbase
                     throw new InvalidOperationException("API credentials are required for getting order info");
                 }
 
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 {
                     var endpoint = $"/orders/{orderId}";
                     CreateSignature(_client, "GET", endpoint);
@@ -822,12 +819,12 @@ namespace CCXT.Simple.Exchanges.Coinbase
                     throw new InvalidOperationException("API credentials are required for getting open orders");
                 }
 
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 {
                     var endpoint = "/orders?status=open&status=pending";
                     if (!string.IsNullOrEmpty(symbol))
                         endpoint += $"&product_id={symbol}";
-                    
+
                     CreateSignature(_client, "GET", endpoint);
 
                     var _response = await _client.GetAsync($"{ExchangeUrl}{endpoint}");
@@ -877,12 +874,12 @@ namespace CCXT.Simple.Exchanges.Coinbase
                     throw new InvalidOperationException("API credentials are required for getting order history");
                 }
 
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 {
                     var endpoint = "/orders?status=done&limit=" + limit;
                     if (!string.IsNullOrEmpty(symbol))
                         endpoint += $"&product_id={symbol}";
-                    
+
                     CreateSignature(_client, "GET", endpoint);
 
                     var _response = await _client.GetAsync($"{ExchangeUrl}{endpoint}");
@@ -932,12 +929,12 @@ namespace CCXT.Simple.Exchanges.Coinbase
                     throw new InvalidOperationException("API credentials are required for getting trade history");
                 }
 
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 {
                     var endpoint = "/fills";
                     if (!string.IsNullOrEmpty(symbol))
                         endpoint += $"?product_id={symbol}";
-                    
+
                     CreateSignature(_client, "GET", endpoint);
 
                     var _response = await _client.GetAsync($"{ExchangeUrl}{endpoint}");
@@ -983,25 +980,25 @@ namespace CCXT.Simple.Exchanges.Coinbase
                     throw new InvalidOperationException("API credentials are required for getting deposit address");
                 }
 
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 {
                     // First get the account ID for the currency
                     var accountEndpoint = "/accounts";
                     CreateSignature(_client, "GET", accountEndpoint);
-                    
+
                     var accountResponse = await _client.GetAsync($"{ExchangeUrl}{accountEndpoint}");
                     var accountString = await accountResponse.Content.ReadAsStringAsync();
                     var accounts = JArray.Parse(accountString);
-                    
+
                     var account = accounts.FirstOrDefault(a => a["currency"].ToString() == currency);
                     if (account != null)
                     {
                         var accountId = account["id"].ToString();
-                        
+
                         // Generate deposit address
                         var endpoint = $"/coinbase-accounts/{accountId}/addresses";
                         CreateSignature(_client, "POST", endpoint);
-                        
+
                         var _response = await _client.PostAsync($"{ExchangeUrl}{endpoint}", new StringContent(""));
                         var _jstring = await _response.Content.ReadAsStringAsync();
                         var _jobject = JObject.Parse(_jstring);
@@ -1038,10 +1035,10 @@ namespace CCXT.Simple.Exchanges.Coinbase
                     throw new InvalidOperationException("API credentials are required for withdrawal");
                 }
 
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 {
                     var endpoint = "/withdrawals/crypto";
-                    
+
                     var withdrawData = new
                     {
                         amount = amount.ToString(),
@@ -1054,9 +1051,9 @@ namespace CCXT.Simple.Exchanges.Coinbase
 
                     var jsonContent = JsonConvert.SerializeObject(withdrawData);
                     var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-                    
+
                     CreateSignature(_client, "POST", endpoint + jsonContent);
-                    
+
                     var _response = await _client.PostAsync($"{ExchangeUrl}{endpoint}", content);
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     var _jobject = JObject.Parse(_jstring);
@@ -1097,7 +1094,7 @@ namespace CCXT.Simple.Exchanges.Coinbase
                     throw new InvalidOperationException("API credentials are required for getting deposit history");
                 }
 
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 {
                     var endpoint = "/deposits?type=deposit&limit=" + limit;
                     CreateSignature(_client, "GET", endpoint);
@@ -1111,7 +1108,7 @@ namespace CCXT.Simple.Exchanges.Coinbase
                         var curr = deposit["currency"]?.ToString() ?? "";
                         if (!string.IsNullOrEmpty(currency) && curr != currency)
                             continue;
-                            
+
                         _result.Add(new DepositInfo
                         {
                             id = deposit["id"]?.ToString() ?? "",
@@ -1149,7 +1146,7 @@ namespace CCXT.Simple.Exchanges.Coinbase
                     throw new InvalidOperationException("API credentials are required for getting withdrawal history");
                 }
 
-                using (var _client = new HttpClient())
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 {
                     var endpoint = "/withdrawals?type=withdraw&limit=" + limit;
                     CreateSignature(_client, "GET", endpoint);
@@ -1163,7 +1160,7 @@ namespace CCXT.Simple.Exchanges.Coinbase
                         var curr = withdrawal["currency"]?.ToString() ?? "";
                         if (!string.IsNullOrEmpty(currency) && curr != currency)
                             continue;
-                            
+
                         _result.Add(new WithdrawalInfo
                         {
                             id = withdrawal["id"]?.ToString() ?? "",

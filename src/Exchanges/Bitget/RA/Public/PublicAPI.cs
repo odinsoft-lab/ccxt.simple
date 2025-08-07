@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System.Diagnostics;
 
 namespace CCXT.Simple.Exchanges.Bitget.RA.Public;
@@ -22,9 +22,9 @@ public class PublicAPI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
             {
-                var _response = await _client.GetAsync($"{ExchangeUrl}/api/spot/v1/public/time");
+                var _response = await _client.GetAsync("/api/spot/v1/public/time");
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
@@ -54,9 +54,9 @@ public class PublicAPI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
             {
-                var _response = await _client.GetAsync($"{ExchangeUrl}/api/spot/v1/public/currencies");
+                var _response = await _client.GetAsync("/api/spot/v1/public/currencies");
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
@@ -85,9 +85,9 @@ public class PublicAPI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
             {
-                var _response = await _client.GetAsync($"{ExchangeUrl}/api/spot/v1/public/products");
+                var _response = await _client.GetAsync("/api/spot/v1/public/products");
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
@@ -117,9 +117,9 @@ public class PublicAPI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
             {
-                var _response = await _client.GetAsync($"{ExchangeUrl}/api/spot/v1/public/product?symbol={symbol}");
+                var _response = await _client.GetAsync("/api/spot/v1/public/product?symbol={symbol}");
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
@@ -153,9 +153,9 @@ public class PublicAPI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
             {
-                var _response = await _client.GetAsync($"{ExchangeUrl}/api/spot/v1/market/ticker?symbol={symbol}");
+                var _response = await _client.GetAsync("/api/spot/v1/market/ticker?symbol={symbol}");
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
@@ -184,9 +184,9 @@ public class PublicAPI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
             {
-                var _response = await _client.GetAsync($"{ExchangeUrl}/api/spot/v1/market/tickers");
+                var _response = await _client.GetAsync("/api/spot/v1/market/tickers");
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
@@ -217,9 +217,9 @@ public class PublicAPI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
             {
-                var _response = await _client.GetAsync($"{ExchangeUrl}/api/spot/v1/market/fills?symbol={symbol}&limit={limit}");
+                var _response = await _client.GetAsync("/api/spot/v1/market/fills?symbol={symbol}&limit={limit}");
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
@@ -251,9 +251,9 @@ public class PublicAPI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
             {
-                var _response = await _client.GetAsync($"{ExchangeUrl}/api/spot/v1/market/candles?symbol={symbol}&period={period}&limit={limit}");
+                var _response = await _client.GetAsync("/api/spot/v1/market/candles?symbol={symbol}&period={period}&limit={limit}");
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
@@ -285,9 +285,9 @@ public class PublicAPI : XBitget
 
         try
         {
-            using (var _client = new HttpClient())
+            var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
             {
-                var _response = await _client.GetAsync($"{ExchangeUrl}/api/spot/v1/market/depth?symbol={symbol}&type={type}&limit={limit}");
+                var _response = await _client.GetAsync("/api/spot/v1/market/depth?symbol={symbol}&type={type}&limit={limit}");
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
