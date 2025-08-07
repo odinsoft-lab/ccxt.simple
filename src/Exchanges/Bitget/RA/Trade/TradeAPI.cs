@@ -47,7 +47,7 @@ public class TradeAPI : XBitget
                 var _content = this.PostContent(_client, _endpoint, _args);
 
                 var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<PlaceOrder>(_jstring, JsonSettings);
@@ -90,7 +90,7 @@ public class TradeAPI : XBitget
                 var _content = this.PostContent(_client, _endpoint, _args);
 
                 var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<BatchOrder>(_jstring, JsonSettings);
@@ -133,7 +133,7 @@ public class TradeAPI : XBitget
                 var _content = this.PostContent(_client, _endpoint, _args);
 
                 var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<RResult<string>>(_jstring, JsonSettings);
@@ -176,7 +176,7 @@ public class TradeAPI : XBitget
                 var _content = this.PostContent(_client, _endpoint, _args);
 
                 var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<RResult<string>>(_jstring, JsonSettings);
@@ -219,7 +219,7 @@ public class TradeAPI : XBitget
                 var _content = this.PostContent(_client, _endpoint, _args);
 
                 var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<OrderInfo>(_jstring, JsonSettings);
@@ -260,7 +260,7 @@ public class TradeAPI : XBitget
                 var _content = this.PostContent(_client, _endpoint, _args);
 
                 var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<OrderInfo>(_jstring, JsonSettings);
@@ -307,7 +307,7 @@ public class TradeAPI : XBitget
                 var _content = this.PostContent(_client, _endpoint, _args);
 
                 var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<OrderInfo>(_jstring, JsonSettings);
@@ -356,7 +356,7 @@ public class TradeAPI : XBitget
                 var _content = this.PostContent(_client, _endpoint, _args);
 
                 var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<FillOrder>(_jstring, JsonSettings);
@@ -413,7 +413,7 @@ public class TradeAPI : XBitget
                 var _content = this.PostContent(_client, _endpoint, _args);
 
                 var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<PlaceOrder>(_jstring, JsonSettings);
@@ -462,7 +462,7 @@ public class TradeAPI : XBitget
                 var _content = this.PostContent(_client, _endpoint, _args);
 
                 var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<PlaceOrder>(_jstring, JsonSettings);
@@ -503,7 +503,7 @@ public class TradeAPI : XBitget
                 var _content = this.PostContent(_client, _endpoint, _args);
 
                 var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<RResult<string>>(_jstring, JsonSettings);
@@ -546,7 +546,7 @@ public class TradeAPI : XBitget
                 var _content = this.PostContent(_client, _endpoint, _args);
 
                 var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<PlanOrder>(_jstring, JsonSettings);
@@ -593,7 +593,7 @@ public class TradeAPI : XBitget
                 var _content = this.PostContent(_client, _endpoint, _args);
 
                 var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<PlanOrder>(_jstring, JsonSettings);

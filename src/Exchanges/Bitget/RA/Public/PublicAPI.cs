@@ -25,7 +25,7 @@ public class PublicAPI : XBitget
             using (var _client = new HttpClient())
             {
                 var _response = await _client.GetAsync($"{ExchangeUrl}/api/spot/v1/public/time");
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<RResult<long>>(_jstring, JsonSettings);
@@ -57,7 +57,7 @@ public class PublicAPI : XBitget
             using (var _client = new HttpClient())
             {
                 var _response = await _client.GetAsync($"{ExchangeUrl}/api/spot/v1/public/currencies");
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<Currency>(_jstring, JsonSettings);
@@ -88,7 +88,7 @@ public class PublicAPI : XBitget
             using (var _client = new HttpClient())
             {
                 var _response = await _client.GetAsync($"{ExchangeUrl}/api/spot/v1/public/products");
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<Symbol>(_jstring, JsonSettings);
@@ -120,7 +120,7 @@ public class PublicAPI : XBitget
             using (var _client = new HttpClient())
             {
                 var _response = await _client.GetAsync($"{ExchangeUrl}/api/spot/v1/public/product?symbol={symbol}");
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<ASymbol>(_jstring, JsonSettings);
@@ -156,7 +156,7 @@ public class PublicAPI : XBitget
             using (var _client = new HttpClient())
             {
                 var _response = await _client.GetAsync($"{ExchangeUrl}/api/spot/v1/market/ticker?symbol={symbol}");
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<ATicker>(_jstring, JsonSettings);
@@ -187,7 +187,7 @@ public class PublicAPI : XBitget
             using (var _client = new HttpClient())
             {
                 var _response = await _client.GetAsync($"{ExchangeUrl}/api/spot/v1/market/tickers");
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<Ticker>(_jstring, JsonSettings);
@@ -220,7 +220,7 @@ public class PublicAPI : XBitget
             using (var _client = new HttpClient())
             {
                 var _response = await _client.GetAsync($"{ExchangeUrl}/api/spot/v1/market/fills?symbol={symbol}&limit={limit}");
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<Trade>(_jstring, JsonSettings);
@@ -254,7 +254,7 @@ public class PublicAPI : XBitget
             using (var _client = new HttpClient())
             {
                 var _response = await _client.GetAsync($"{ExchangeUrl}/api/spot/v1/market/candles?symbol={symbol}&period={period}&limit={limit}");
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<Candle>(_jstring, JsonSettings);
@@ -288,7 +288,7 @@ public class PublicAPI : XBitget
             using (var _client = new HttpClient())
             {
                 var _response = await _client.GetAsync($"{ExchangeUrl}/api/spot/v1/market/depth?symbol={symbol}&type={type}&limit={limit}");
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<Orderbook>(_jstring, JsonSettings);

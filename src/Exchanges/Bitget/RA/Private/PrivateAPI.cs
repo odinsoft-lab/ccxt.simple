@@ -41,7 +41,7 @@ public class PrivatePI : XBitget
                 var _content = this.PostContent(_client, _endpoint, _args);
 
                 var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<RResult<string>>(_jstring, JsonSettings);
@@ -94,7 +94,7 @@ public class PrivatePI : XBitget
                 var _content = this.PostContent(_client, _endpoint, _args);
 
                 var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<RResult<string>>(_jstring, JsonSettings);
@@ -132,7 +132,7 @@ public class PrivatePI : XBitget
                 var _content = this.GetContent(_client, _endpoint, _query);
 
                 var _response = await _client.GetAsync($"{ExchangeUrl}{_endpoint}{_query}");
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<Address>(_jstring, JsonSettings);
@@ -182,7 +182,7 @@ public class PrivatePI : XBitget
                 var _content = this.PostContent(_client, _endpoint, _args);
 
                 var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<RResult<string>>(_jstring, JsonSettings);
@@ -227,7 +227,7 @@ public class PrivatePI : XBitget
                 var _content = this.PostContent(_client, _endpoint, _args);
 
                 var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<RResult<string>>(_jstring, JsonSettings);
@@ -268,7 +268,7 @@ public class PrivatePI : XBitget
                 var _content = this.GetContent(_client, _endpoint, _query);
 
                 var _response = await _client.GetAsync($"{ExchangeUrl}{_endpoint}{_query}");
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<WithdrawList>(_jstring, JsonSettings);
@@ -309,7 +309,7 @@ public class PrivatePI : XBitget
                 var _content = this.GetContent(_client, _endpoint, _query);
 
                 var _response = await _client.GetAsync($"{ExchangeUrl}{_endpoint}{_query}");
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<DepositList>(_jstring, JsonSettings);
@@ -349,7 +349,7 @@ public class PrivatePI : XBitget
                 var _content = this.GetContent(_client, _endpoint, _query);
 
                 var _response = await _client.GetAsync($"{ExchangeUrl}{_endpoint}{_query}");
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<ApiKey>(_jstring, JsonSettings);
@@ -386,7 +386,7 @@ public class PrivatePI : XBitget
                 var _content = this.GetContent(_client, _endpoint, _query);
 
                 var _response = await _client.GetAsync($"{ExchangeUrl}{_endpoint}{_query}");
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<Asset>(_jstring, JsonSettings);
@@ -425,7 +425,7 @@ public class PrivatePI : XBitget
                 var _content = this.PostContent(_client, _endpoint, _args);
 
                 var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<SAsset>(_jstring, JsonSettings);
@@ -476,7 +476,7 @@ public class PrivatePI : XBitget
                 var _content = this.PostContent(_client, _endpoint, _args);
 
                 var _response = await _client.PostAsync($"{ExchangeUrl}{_endpoint}", _content);
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<Bill>(_jstring, JsonSettings);
@@ -517,7 +517,7 @@ public class PrivatePI : XBitget
                 var _content = this.GetContent(_client, _endpoint, _query);
 
                 var _response = await _client.GetAsync($"{ExchangeUrl}{_endpoint}{_query}");
-                //if (_response.IsSuccessStatusCode)
+                if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
                     _result = JsonConvert.DeserializeObject<TransferList>(_jstring, JsonSettings);

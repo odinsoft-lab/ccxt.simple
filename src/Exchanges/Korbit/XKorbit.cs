@@ -110,7 +110,7 @@ namespace CCXT.Simple.Exchanges.Korbit
                     _client.DefaultRequestHeaders.Add("platform-identifier", "witcher_android");
 
                     var _response = await _client.GetAsync($"{ExchangePpUrl}{_endpoint}");
-                    //if (_response.IsSuccessStatusCode)
+                    if (_response.IsSuccessStatusCode)
                     {
                         var _jstring = await _response.Content.ReadAsStringAsync();
                         var _jarray = JsonConvert.DeserializeObject<List<CoinState>>(_jstring, mainXchg.JsonSettings);
