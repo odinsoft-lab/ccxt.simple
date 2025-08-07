@@ -10,10 +10,10 @@ namespace CCXT.Simple.Exchanges.Okex
     public class XOKEx : IExchange
     {
         /*
-		 * OK-EX Support Markets: USDT, BTC
+		 * OKX (formerly OKEx) Support Markets: USDT, BTC
 		 *
 		 * REST API
-		 *     https://www.okex.com/docs-v5/en/#market-maker-program
+		 *     https://www.okx.com/docs-v5/en/#market-maker-program
 		 *
 		 */
 
@@ -34,7 +34,7 @@ namespace CCXT.Simple.Exchanges.Okex
 
         public string ExchangeName { get; set; } = "okex";
 
-        public string ExchangeUrl { get; set; } = "https://www.okex.com";
+        public string ExchangeUrl { get; set; } = "https://www.okx.com";
 
         public bool Alive { get; set; }
         public string ApiKey { get; set; }
@@ -105,7 +105,7 @@ namespace CCXT.Simple.Exchanges.Okex
             {
                 using (var _client = new HttpClient())
                 {
-                    this.CreateSignature(_client);
+                    this.CreateSignature(_client, "GET", "/api/v5/asset/currencies");
 
                     var _response = await _client.GetAsync($"{ExchangeUrl}/api/v5/asset/currencies");
                     var _jstring = await _response.Content.ReadAsStringAsync();
@@ -205,11 +205,11 @@ namespace CCXT.Simple.Exchanges.Okex
             }
         }
 
-        public void CreateSignature(HttpClient client)
+        public void CreateSignature(HttpClient client, string method = "GET", string path = "/api/v5/asset/currencies", string body = "")
         {
             var _timestamp = DateTimeXts.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss'.'fff'Z'");
 
-            var _post_data = $"{_timestamp}GET/api/v5/asset/currencies";
+            var _post_data = $"{_timestamp}{method}{path}{body}";
             var _signature = Convert.ToBase64String(Encryptor.ComputeHash(Encoding.UTF8.GetBytes(_post_data)));
 
             client.DefaultRequestHeaders.Add("USER-AGENT", mainXchg.UserAgent);
@@ -530,79 +530,837 @@ namespace CCXT.Simple.Exchanges.Okex
 
         
 
-        public ValueTask<Orderbook> GetOrderbook(string symbol, int limit = 5)
+        /// <summary>
+        /// Get orderbook for a specific symbol
+        /// </summary>
+        public async ValueTask<Orderbook> GetOrderbook(string symbol, int limit = 5)
         {
-            throw new NotImplementedException("GetOrderbook not implemented for OKEx exchange");
+            var _result = new Orderbook
+            {
+                timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                asks = new List<OrderbookItem>(),
+                bids = new List<OrderbookItem>()
+            };
+
+            try
+            {
+                using (var _client = new HttpClient())
+                {
+                    var _response = await _client.GetAsync($"{ExchangeUrl}/api/v5/market/books?instId={symbol}&sz={limit}");
+                    var _jstring = await _response.Content.ReadAsStringAsync();
+                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+
+                    if (_jobject.code == "0")
+                    {
+                        var data = _jobject.data[0];
+                        
+                        // Parse asks
+                        foreach (var ask in data.asks)
+                        {
+                            _result.asks.Add(new OrderbookItem
+                            {
+                                price = decimal.Parse(ask[0].ToString()),
+                                quantity = decimal.Parse(ask[1].ToString()),
+                                total = int.Parse(ask[2].ToString())
+                            });
+                        }
+
+                        // Parse bids
+                        foreach (var bid in data.bids)
+                        {
+                            _result.bids.Add(new OrderbookItem
+                            {
+                                price = decimal.Parse(bid[0].ToString()),
+                                quantity = decimal.Parse(bid[1].ToString()),
+                                total = int.Parse(bid[2].ToString())
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                mainXchg.OnMessageEvent(ExchangeName, ex, 4113);
+            }
+
+            return _result;
         }
 
-        public ValueTask<List<decimal[]>> GetCandles(string symbol, string timeframe, long? since = null, int limit = 100)
+        /// <summary>
+        /// Get candlestick/OHLCV data
+        /// </summary>
+        public async ValueTask<List<decimal[]>> GetCandles(string symbol, string timeframe, long? since = null, int limit = 100)
         {
-            throw new NotImplementedException("GetCandles not implemented for OKEx exchange");
+            var _result = new List<decimal[]>();
+
+            try
+            {
+                using (var _client = new HttpClient())
+                {
+                    var bar = ConvertTimeframe(timeframe);
+                    var url = $"{ExchangeUrl}/api/v5/market/candles?instId={symbol}&bar={bar}&limit={limit}";
+                    
+                    if (since.HasValue)
+                    {
+                        url += $"&after={since.Value}";
+                    }
+
+                    var _response = await _client.GetAsync(url);
+                    var _jstring = await _response.Content.ReadAsStringAsync();
+                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+
+                    if (_jobject.code == "0")
+                    {
+                        foreach (var candle in _jobject.data)
+                        {
+                            _result.Add(new decimal[]
+                            {
+                                decimal.Parse(candle[0].ToString()),  // timestamp
+                                decimal.Parse(candle[1].ToString()),  // open
+                                decimal.Parse(candle[2].ToString()),  // high
+                                decimal.Parse(candle[3].ToString()),  // low
+                                decimal.Parse(candle[4].ToString()),  // close
+                                decimal.Parse(candle[5].ToString())   // volume
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                mainXchg.OnMessageEvent(ExchangeName, ex, 4114);
+            }
+
+            return _result;
         }
 
-        public ValueTask<List<TradeData>> GetTrades(string symbol, int limit = 50)
+        private string ConvertTimeframe(string timeframe)
         {
-            throw new NotImplementedException("GetTrades not implemented for OKEx exchange");
+            return timeframe switch
+            {
+                "1m" => "1m",
+                "3m" => "3m",
+                "5m" => "5m",
+                "15m" => "15m",
+                "30m" => "30m",
+                "1h" => "1H",
+                "2h" => "2H",
+                "4h" => "4H",
+                "6h" => "6H",
+                "12h" => "12H",
+                "1d" => "1D",
+                "1w" => "1W",
+                "1M" => "1M",
+                _ => "1H" // default
+            };
         }
 
-        public ValueTask<Dictionary<string, BalanceInfo>> GetBalance()
+        /// <summary>
+        /// Get recent trades for a symbol
+        /// </summary>
+        public async ValueTask<List<TradeData>> GetTrades(string symbol, int limit = 50)
         {
-            throw new NotImplementedException("GetBalance not implemented for OKEx exchange");
+            var _result = new List<TradeData>();
+
+            try
+            {
+                using (var _client = new HttpClient())
+                {
+                    var _response = await _client.GetAsync($"{ExchangeUrl}/api/v5/market/trades?instId={symbol}&limit={limit}");
+                    var _jstring = await _response.Content.ReadAsStringAsync();
+                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+
+                    if (_jobject.code == "0")
+                    {
+                        foreach (var trade in _jobject.data)
+                        {
+                            _result.Add(new TradeData
+                            {
+                                id = trade.tradeId.ToString(),
+                                timestamp = long.Parse(trade.ts.ToString()),
+                                price = decimal.Parse(trade.px.ToString()),
+                                amount = decimal.Parse(trade.sz.ToString()),
+                                side = trade.side.ToString() == "buy" ? SideType.Bid : SideType.Ask
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                mainXchg.OnMessageEvent(ExchangeName, ex, 4115);
+            }
+
+            return _result;
         }
 
-        public ValueTask<AccountInfo> GetAccount()
+        /// <summary>
+        /// Get account balance
+        /// </summary>
+        public async ValueTask<Dictionary<string, BalanceInfo>> GetBalance()
         {
-            throw new NotImplementedException("GetAccount not implemented for OKEx exchange");
+            var _result = new Dictionary<string, BalanceInfo>();
+
+            try
+            {
+                if (string.IsNullOrEmpty(ApiKey) || string.IsNullOrEmpty(SecretKey))
+                {
+                    throw new InvalidOperationException("API credentials are required for private endpoints");
+                }
+
+                using (var _client = new HttpClient())
+                {
+                    var path = "/api/v5/account/balance";
+                    CreateSignature(_client, "GET", path);
+
+                    var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
+                    var _jstring = await _response.Content.ReadAsStringAsync();
+                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+
+                    if (_jobject.code == "0")
+                    {
+                        foreach (var balance in _jobject.data[0].details)
+                        {
+                            var currency = balance.ccy.ToString();
+                            var available = decimal.Parse(balance.availBal.ToString());
+                            var frozen = decimal.Parse(balance.frozenBal.ToString());
+                            
+                            _result[currency] = new BalanceInfo
+                            {
+                                free = available,
+                                used = frozen,
+                                total = available + frozen
+                            };
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                mainXchg.OnMessageEvent(ExchangeName, ex, 4116);
+            }
+
+            return _result;
         }
 
-        public ValueTask<OrderInfo> PlaceOrder(string symbol, SideType side, string orderType, decimal amount, decimal? price = null, string clientOrderId = null)
+        /// <summary>
+        /// Get account information
+        /// </summary>
+        public async ValueTask<AccountInfo> GetAccount()
         {
-            throw new NotImplementedException("PlaceOrder not implemented for OKEx exchange");
+            var _result = new AccountInfo
+            {
+                id = "",
+                type = "trading",
+                balances = new Dictionary<string, BalanceInfo>(),
+                canTrade = true,
+                canWithdraw = true,
+                canDeposit = true
+            };
+
+            try
+            {
+                // Get balance information
+                _result.balances = await GetBalance();
+                
+                if (!string.IsNullOrEmpty(ApiKey))
+                {
+                    using (var _client = new HttpClient())
+                    {
+                        var path = "/api/v5/account/config";
+                        CreateSignature(_client, "GET", path);
+
+                        var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
+                        var _jstring = await _response.Content.ReadAsStringAsync();
+                        var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+
+                        if (_jobject.code == "0" && _jobject.data.Count > 0)
+                        {
+                            _result.id = _jobject.data[0].uid?.ToString() ?? "";
+                            var level = _jobject.data[0].level?.ToString() ?? "1";
+                            _result.type = $"Level {level}";
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                mainXchg.OnMessageEvent(ExchangeName, ex, 4117);
+            }
+
+            return _result;
         }
 
-        public ValueTask<bool> CancelOrder(string orderId, string symbol = null, string clientOrderId = null)
+        /// <summary>
+        /// Place a new order
+        /// </summary>
+        public async ValueTask<OrderInfo> PlaceOrder(string symbol, SideType side, string orderType, decimal amount, decimal? price = null, string clientOrderId = null)
         {
-            throw new NotImplementedException("CancelOrder not implemented for OKEx exchange");
+            var _result = new OrderInfo();
+
+            try
+            {
+                if (string.IsNullOrEmpty(ApiKey) || string.IsNullOrEmpty(SecretKey))
+                {
+                    throw new InvalidOperationException("API credentials are required for placing orders");
+                }
+
+                using (var _client = new HttpClient())
+                {
+                    var path = "/api/v5/trade/order";
+                    
+                    var orderData = new
+                    {
+                        instId = symbol,
+                        tdMode = "cash",  // Cash trading mode
+                        side = side == SideType.Bid ? "buy" : "sell",
+                        ordType = orderType.ToLower() == "market" ? "market" : "limit",
+                        sz = amount.ToString(),
+                        px = orderType.ToLower() == "limit" ? price?.ToString() : null,
+                        clOrdId = clientOrderId
+                    };
+
+                    var jsonContent = JsonConvert.SerializeObject(orderData);
+                    var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+                    
+                    CreateSignature(_client, "POST", path, jsonContent);
+                    _client.DefaultRequestHeaders.Add("Content-Type", "application/json");
+                    
+                    var _response = await _client.PostAsync($"{ExchangeUrl}{path}", content);
+                    var _jstring = await _response.Content.ReadAsStringAsync();
+                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+
+                    if (_jobject.code == "0" && _jobject.data.Count > 0)
+                    {
+                        var order = _jobject.data[0];
+                        _result = new OrderInfo
+                        {
+                            id = order.ordId?.ToString() ?? "",
+                            clientOrderId = order.clOrdId?.ToString() ?? clientOrderId ?? "",
+                            symbol = symbol,
+                            side = side,
+                            type = orderType,
+                            status = "new",
+                            amount = amount,
+                            price = price,
+                            filled = 0,
+                            remaining = amount,
+                            timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                            fee = 0,
+                            feeAsset = "USDT"
+                        };
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                mainXchg.OnMessageEvent(ExchangeName, ex, 4118);
+            }
+
+            return _result;
         }
 
-        public ValueTask<OrderInfo> GetOrder(string orderId, string symbol = null, string clientOrderId = null)
+        /// <summary>
+        /// Cancel an existing order
+        /// </summary>
+        public async ValueTask<bool> CancelOrder(string orderId, string symbol = null, string clientOrderId = null)
         {
-            throw new NotImplementedException("GetOrder not implemented for OKEx exchange");
+            var _result = false;
+
+            try
+            {
+                if (string.IsNullOrEmpty(ApiKey) || string.IsNullOrEmpty(SecretKey))
+                {
+                    throw new InvalidOperationException("API credentials are required for canceling orders");
+                }
+
+                if (string.IsNullOrEmpty(symbol))
+                {
+                    throw new ArgumentException("Symbol is required for OKX order cancellation");
+                }
+
+                using (var _client = new HttpClient())
+                {
+                    var path = "/api/v5/trade/cancel-order";
+                    
+                    var cancelData = new
+                    {
+                        instId = symbol,
+                        ordId = orderId,
+                        clOrdId = clientOrderId
+                    };
+
+                    var jsonContent = JsonConvert.SerializeObject(cancelData);
+                    var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+                    
+                    CreateSignature(_client, "POST", path, jsonContent);
+                    _client.DefaultRequestHeaders.Add("Content-Type", "application/json");
+                    
+                    var _response = await _client.PostAsync($"{ExchangeUrl}{path}", content);
+                    var _jstring = await _response.Content.ReadAsStringAsync();
+                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+
+                    _result = _jobject.code == "0";
+                }
+            }
+            catch (Exception ex)
+            {
+                mainXchg.OnMessageEvent(ExchangeName, ex, 4119);
+            }
+
+            return _result;
         }
 
-        public ValueTask<List<OrderInfo>> GetOpenOrders(string symbol = null)
+        /// <summary>
+        /// Get order information
+        /// </summary>
+        public async ValueTask<OrderInfo> GetOrder(string orderId, string symbol = null, string clientOrderId = null)
         {
-            throw new NotImplementedException("GetOpenOrders not implemented for OKEx exchange");
+            var _result = new OrderInfo();
+
+            try
+            {
+                if (string.IsNullOrEmpty(ApiKey) || string.IsNullOrEmpty(SecretKey))
+                {
+                    throw new InvalidOperationException("API credentials are required for getting order info");
+                }
+
+                if (string.IsNullOrEmpty(symbol))
+                {
+                    throw new ArgumentException("Symbol is required for OKX order query");
+                }
+
+                using (var _client = new HttpClient())
+                {
+                    var path = $"/api/v5/trade/order?instId={symbol}";
+                    if (!string.IsNullOrEmpty(orderId))
+                        path += $"&ordId={orderId}";
+                    else if (!string.IsNullOrEmpty(clientOrderId))
+                        path += $"&clOrdId={clientOrderId}";
+                    
+                    CreateSignature(_client, "GET", path);
+
+                    var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
+                    var _jstring = await _response.Content.ReadAsStringAsync();
+                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+
+                    if (_jobject.code == "0" && _jobject.data.Count > 0)
+                    {
+                        var order = _jobject.data[0];
+                        _result = new OrderInfo
+                        {
+                            id = order.ordId?.ToString() ?? "",
+                            clientOrderId = order.clOrdId?.ToString() ?? "",
+                            symbol = order.instId?.ToString() ?? symbol,
+                            side = order.side?.ToString() == "buy" ? SideType.Bid : SideType.Ask,
+                            type = order.ordType?.ToString() ?? "",
+                            status = order.state?.ToString() ?? "",
+                            amount = decimal.Parse(order.sz?.ToString() ?? "0"),
+                            price = !string.IsNullOrEmpty(order.px?.ToString()) ? decimal.Parse(order.px.ToString()) : (decimal?)null,
+                            filled = decimal.Parse(order.fillSz?.ToString() ?? "0"),
+                            remaining = decimal.Parse(order.sz?.ToString() ?? "0") - decimal.Parse(order.fillSz?.ToString() ?? "0"),
+                            timestamp = long.Parse(order.cTime?.ToString() ?? "0"),
+                            fee = decimal.Parse(order.fee?.ToString() ?? "0"),
+                            feeAsset = order.feeCcy?.ToString() ?? "USDT"
+                        };
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                mainXchg.OnMessageEvent(ExchangeName, ex, 4120);
+            }
+
+            return _result;
         }
 
-        public ValueTask<List<OrderInfo>> GetOrderHistory(string symbol = null, int limit = 100)
+        /// <summary>
+        /// Get open orders
+        /// </summary>
+        public async ValueTask<List<OrderInfo>> GetOpenOrders(string symbol = null)
         {
-            throw new NotImplementedException("GetOrderHistory not implemented for OKEx exchange");
+            var _result = new List<OrderInfo>();
+
+            try
+            {
+                if (string.IsNullOrEmpty(ApiKey) || string.IsNullOrEmpty(SecretKey))
+                {
+                    throw new InvalidOperationException("API credentials are required for getting open orders");
+                }
+
+                using (var _client = new HttpClient())
+                {
+                    var path = "/api/v5/trade/orders-pending";
+                    if (!string.IsNullOrEmpty(symbol))
+                        path += $"?instId={symbol}";
+                    else
+                        path += "?instType=SPOT";
+                    
+                    CreateSignature(_client, "GET", path);
+
+                    var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
+                    var _jstring = await _response.Content.ReadAsStringAsync();
+                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+
+                    if (_jobject.code == "0")
+                    {
+                        foreach (var order in _jobject.data)
+                        {
+                            _result.Add(new OrderInfo
+                            {
+                                id = order.ordId?.ToString() ?? "",
+                                clientOrderId = order.clOrdId?.ToString() ?? "",
+                                symbol = order.instId?.ToString() ?? "",
+                                side = order.side?.ToString() == "buy" ? SideType.Bid : SideType.Ask,
+                                type = order.ordType?.ToString() ?? "",
+                                status = order.state?.ToString() ?? "",
+                                amount = decimal.Parse(order.sz?.ToString() ?? "0"),
+                                price = !string.IsNullOrEmpty(order.px?.ToString()) ? decimal.Parse(order.px.ToString()) : (decimal?)null,
+                                filled = decimal.Parse(order.fillSz?.ToString() ?? "0"),
+                                remaining = decimal.Parse(order.sz?.ToString() ?? "0") - decimal.Parse(order.fillSz?.ToString() ?? "0"),
+                                timestamp = long.Parse(order.cTime?.ToString() ?? "0"),
+                                fee = decimal.Parse(order.fee?.ToString() ?? "0"),
+                                feeAsset = order.feeCcy?.ToString() ?? "USDT"
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                mainXchg.OnMessageEvent(ExchangeName, ex, 4121);
+            }
+
+            return _result;
         }
 
-        public ValueTask<List<TradeInfo>> GetTradeHistory(string symbol = null, int limit = 100)
+        /// <summary>
+        /// Get order history
+        /// </summary>
+        public async ValueTask<List<OrderInfo>> GetOrderHistory(string symbol = null, int limit = 100)
         {
-            throw new NotImplementedException("GetTradeHistory not implemented for OKEx exchange");
+            var _result = new List<OrderInfo>();
+
+            try
+            {
+                if (string.IsNullOrEmpty(ApiKey) || string.IsNullOrEmpty(SecretKey))
+                {
+                    throw new InvalidOperationException("API credentials are required for getting order history");
+                }
+
+                using (var _client = new HttpClient())
+                {
+                    var path = $"/api/v5/trade/orders-history?instType=SPOT&limit={limit}";
+                    if (!string.IsNullOrEmpty(symbol))
+                        path += $"&instId={symbol}";
+                    
+                    CreateSignature(_client, "GET", path);
+
+                    var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
+                    var _jstring = await _response.Content.ReadAsStringAsync();
+                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+
+                    if (_jobject.code == "0")
+                    {
+                        foreach (var order in _jobject.data)
+                        {
+                            _result.Add(new OrderInfo
+                            {
+                                id = order.ordId?.ToString() ?? "",
+                                clientOrderId = order.clOrdId?.ToString() ?? "",
+                                symbol = order.instId?.ToString() ?? "",
+                                side = order.side?.ToString() == "buy" ? SideType.Bid : SideType.Ask,
+                                type = order.ordType?.ToString() ?? "",
+                                status = order.state?.ToString() ?? "",
+                                amount = decimal.Parse(order.sz?.ToString() ?? "0"),
+                                price = !string.IsNullOrEmpty(order.px?.ToString()) ? decimal.Parse(order.px.ToString()) : (decimal?)null,
+                                filled = decimal.Parse(order.fillSz?.ToString() ?? "0"),
+                                remaining = 0,
+                                timestamp = long.Parse(order.cTime?.ToString() ?? "0"),
+                                fee = decimal.Parse(order.fee?.ToString() ?? "0"),
+                                feeAsset = order.feeCcy?.ToString() ?? "USDT"
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                mainXchg.OnMessageEvent(ExchangeName, ex, 4122);
+            }
+
+            return _result;
         }
 
-        public ValueTask<DepositAddress> GetDepositAddress(string currency, string network = null)
+        /// <summary>
+        /// Get trade history
+        /// </summary>
+        public async ValueTask<List<TradeInfo>> GetTradeHistory(string symbol = null, int limit = 100)
         {
-            throw new NotImplementedException("GetDepositAddress not implemented for OKEx exchange");
+            var _result = new List<TradeInfo>();
+
+            try
+            {
+                if (string.IsNullOrEmpty(ApiKey) || string.IsNullOrEmpty(SecretKey))
+                {
+                    throw new InvalidOperationException("API credentials are required for getting trade history");
+                }
+
+                using (var _client = new HttpClient())
+                {
+                    var path = $"/api/v5/trade/fills?instType=SPOT&limit={limit}";
+                    if (!string.IsNullOrEmpty(symbol))
+                        path += $"&instId={symbol}";
+                    
+                    CreateSignature(_client, "GET", path);
+
+                    var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
+                    var _jstring = await _response.Content.ReadAsStringAsync();
+                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+
+                    if (_jobject.code == "0")
+                    {
+                        foreach (var trade in _jobject.data)
+                        {
+                            _result.Add(new TradeInfo
+                            {
+                                id = trade.tradeId?.ToString() ?? "",
+                                orderId = trade.ordId?.ToString() ?? "",
+                                symbol = trade.instId?.ToString() ?? "",
+                                side = trade.side?.ToString() == "buy" ? SideType.Bid : SideType.Ask,
+                                amount = decimal.Parse(trade.fillSz?.ToString() ?? "0"),
+                                price = decimal.Parse(trade.fillPx?.ToString() ?? "0"),
+                                timestamp = long.Parse(trade.fillTime?.ToString() ?? "0"),
+                                fee = decimal.Parse(trade.fee?.ToString() ?? "0"),
+                                feeAsset = trade.feeCcy?.ToString() ?? "USDT"
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                mainXchg.OnMessageEvent(ExchangeName, ex, 4123);
+            }
+
+            return _result;
         }
 
-        public ValueTask<WithdrawalInfo> Withdraw(string currency, decimal amount, string address, string tag = null, string network = null)
+        /// <summary>
+        /// Get deposit address
+        /// </summary>
+        public async ValueTask<DepositAddress> GetDepositAddress(string currency, string network = null)
         {
-            throw new NotImplementedException("Withdraw not implemented for OKEx exchange");
+            var _result = new DepositAddress();
+
+            try
+            {
+                if (string.IsNullOrEmpty(ApiKey) || string.IsNullOrEmpty(SecretKey))
+                {
+                    throw new InvalidOperationException("API credentials are required for getting deposit address");
+                }
+
+                using (var _client = new HttpClient())
+                {
+                    var path = $"/api/v5/asset/deposit-address?ccy={currency}";
+                    CreateSignature(_client, "GET", path);
+
+                    var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
+                    var _jstring = await _response.Content.ReadAsStringAsync();
+                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+
+                    if (_jobject.code == "0" && _jobject.data.Count > 0)
+                    {
+                        var addressInfo = _jobject.data[0];
+                        _result = new DepositAddress
+                        {
+                            address = addressInfo.addr?.ToString() ?? "",
+                            tag = addressInfo.tag?.ToString() ?? "",
+                            network = addressInfo.chain?.ToString() ?? network ?? "",
+                            currency = currency
+                        };
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                mainXchg.OnMessageEvent(ExchangeName, ex, 4124);
+            }
+
+            return _result;
         }
 
-        public ValueTask<List<DepositInfo>> GetDepositHistory(string currency = null, int limit = 100)
+        /// <summary>
+        /// Withdraw funds
+        /// </summary>
+        public async ValueTask<WithdrawalInfo> Withdraw(string currency, decimal amount, string address, string tag = null, string network = null)
         {
-            throw new NotImplementedException("GetDepositHistory not implemented for OKEx exchange");
+            var _result = new WithdrawalInfo();
+
+            try
+            {
+                if (string.IsNullOrEmpty(ApiKey) || string.IsNullOrEmpty(SecretKey))
+                {
+                    throw new InvalidOperationException("API credentials are required for withdrawal");
+                }
+
+                using (var _client = new HttpClient())
+                {
+                    var path = "/api/v5/asset/withdrawal";
+                    
+                    var withdrawData = new
+                    {
+                        ccy = currency,
+                        amt = amount.ToString(),
+                        dest = "4",  // On-chain withdrawal
+                        toAddr = address,
+                        fee = "0",
+                        chain = network,
+                        tag = tag
+                    };
+
+                    var jsonContent = JsonConvert.SerializeObject(withdrawData);
+                    var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+                    
+                    CreateSignature(_client, "POST", path, jsonContent);
+                    _client.DefaultRequestHeaders.Add("Content-Type", "application/json");
+                    
+                    var _response = await _client.PostAsync($"{ExchangeUrl}{path}", content);
+                    var _jstring = await _response.Content.ReadAsStringAsync();
+                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+
+                    if (_jobject.code == "0" && _jobject.data.Count > 0)
+                    {
+                        var withdrawal = _jobject.data[0];
+                        _result = new WithdrawalInfo
+                        {
+                            id = withdrawal.wdId?.ToString() ?? "",
+                            currency = currency,
+                            amount = amount,
+                            address = address,
+                            tag = tag ?? "",
+                            network = network ?? withdrawal.chain?.ToString() ?? "",
+                            status = "pending",
+                            timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                            fee = decimal.Parse(withdrawal.fee?.ToString() ?? "0")
+                        };
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                mainXchg.OnMessageEvent(ExchangeName, ex, 4125);
+            }
+
+            return _result;
         }
 
-        public ValueTask<List<WithdrawalInfo>> GetWithdrawalHistory(string currency = null, int limit = 100)
+        /// <summary>
+        /// Get deposit history
+        /// </summary>
+        public async ValueTask<List<DepositInfo>> GetDepositHistory(string currency = null, int limit = 100)
         {
-            throw new NotImplementedException("GetWithdrawalHistory not implemented for OKEx exchange");
+            var _result = new List<DepositInfo>();
+
+            try
+            {
+                if (string.IsNullOrEmpty(ApiKey) || string.IsNullOrEmpty(SecretKey))
+                {
+                    throw new InvalidOperationException("API credentials are required for getting deposit history");
+                }
+
+                using (var _client = new HttpClient())
+                {
+                    var path = $"/api/v5/asset/deposit-history?limit={limit}";
+                    if (!string.IsNullOrEmpty(currency))
+                        path += $"&ccy={currency}";
+                    
+                    CreateSignature(_client, "GET", path);
+
+                    var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
+                    var _jstring = await _response.Content.ReadAsStringAsync();
+                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+
+                    if (_jobject.code == "0")
+                    {
+                        foreach (var deposit in _jobject.data)
+                        {
+                            _result.Add(new DepositInfo
+                            {
+                                id = deposit.depId?.ToString() ?? "",
+                                currency = deposit.ccy?.ToString() ?? "",
+                                amount = decimal.Parse(deposit.amt?.ToString() ?? "0"),
+                                address = deposit.to?.ToString() ?? "",
+                                tag = "",
+                                network = deposit.chain?.ToString() ?? "",
+                                status = deposit.state?.ToString() ?? "",
+                                timestamp = long.Parse(deposit.ts?.ToString() ?? "0"),
+                                txid = deposit.txId?.ToString() ?? ""
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                mainXchg.OnMessageEvent(ExchangeName, ex, 4126);
+            }
+
+            return _result;
+        }
+
+        /// <summary>
+        /// Get withdrawal history
+        /// </summary>
+        public async ValueTask<List<WithdrawalInfo>> GetWithdrawalHistory(string currency = null, int limit = 100)
+        {
+            var _result = new List<WithdrawalInfo>();
+
+            try
+            {
+                if (string.IsNullOrEmpty(ApiKey) || string.IsNullOrEmpty(SecretKey))
+                {
+                    throw new InvalidOperationException("API credentials are required for getting withdrawal history");
+                }
+
+                using (var _client = new HttpClient())
+                {
+                    var path = $"/api/v5/asset/withdrawal-history?limit={limit}";
+                    if (!string.IsNullOrEmpty(currency))
+                        path += $"&ccy={currency}";
+                    
+                    CreateSignature(_client, "GET", path);
+
+                    var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
+                    var _jstring = await _response.Content.ReadAsStringAsync();
+                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+
+                    if (_jobject.code == "0")
+                    {
+                        foreach (var withdrawal in _jobject.data)
+                        {
+                            _result.Add(new WithdrawalInfo
+                            {
+                                id = withdrawal.wdId?.ToString() ?? "",
+                                currency = withdrawal.ccy?.ToString() ?? "",
+                                amount = decimal.Parse(withdrawal.amt?.ToString() ?? "0"),
+                                address = withdrawal.to?.ToString() ?? "",
+                                tag = "",
+                                network = withdrawal.chain?.ToString() ?? "",
+                                status = withdrawal.state?.ToString() ?? "",
+                                timestamp = long.Parse(withdrawal.ts?.ToString() ?? "0"),
+                                fee = decimal.Parse(withdrawal.fee?.ToString() ?? "0")
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                mainXchg.OnMessageEvent(ExchangeName, ex, 4127);
+            }
+
+            return _result;
         }
     }
 }
