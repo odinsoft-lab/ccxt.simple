@@ -11,7 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
-		CHANGELOG.md = CHANGELOG.md
+		CLAUDE.md = CLAUDE.md
 		LICENSE.txt = LICENSE.txt
 		README.md = README.md
 	EndProjectSection
@@ -20,11 +20,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{BD060379-5
 	ProjectSection(SolutionItems) = preProject
 		docs\ccxt.simple.api.png = docs\ccxt.simple.api.png
 		docs\ccxt.simple.ico = docs\ccxt.simple.ico
+		docs\CHANGELOG.md = docs\CHANGELOG.md
+		docs\EXCHANGES.md = docs\EXCHANGES.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{5CFF9EB6-24F9-4119-812E-FEF29D600887}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CCXT.Simple.Samples", "samples\CCXT.Simple.Samples\CCXT.Simple.Samples.csproj", "{7C8D9E6B-2F35-8AA0-E1C8-5F6A1G3E4D5B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CCXT.Simple.Samples", "samples\CCXT.Simple.Samples\CCXT.Simple.Samples.csproj", "{D8500C41-1D24-469F-AA71-6876838F6295}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C8D5274F-AC00-46C7-1F8D-E88E81087A52}"
 EndProject
@@ -40,10 +42,10 @@ Global
 		{109065AF-D448-46FE-9F35-E6D22A92F362}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{109065AF-D448-46FE-9F35-E6D22A92F362}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{109065AF-D448-46FE-9F35-E6D22A92F362}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7C8D9E6B-2F35-8AA0-E1C8-5F6A1G3E4D5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7C8D9E6B-2F35-8AA0-E1C8-5F6A1G3E4D5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7C8D9E6B-2F35-8AA0-E1C8-5F6A1G3E4D5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7C8D9E6B-2F35-8AA0-E1C8-5F6A1G3E4D5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8500C41-1D24-469F-AA71-6876838F6295}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8500C41-1D24-469F-AA71-6876838F6295}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8500C41-1D24-469F-AA71-6876838F6295}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8500C41-1D24-469F-AA71-6876838F6295}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6B7C8D5A-1E24-7FF9-D0B7-4E5F0F2D3F4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6B7C8D5A-1E24-7FF9-D0B7-4E5F0F2D3F4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B7C8D5A-1E24-7FF9-D0B7-4E5F0F2D3F4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -54,7 +56,7 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{109065AF-D448-46FE-9F35-E6D22A92F362} = {CE2A5455-330A-4032-A60D-5005CAF4B125}
-		{7C8D9E6B-2F35-8AA0-E1C8-5F6A1G3E4D5B} = {5CFF9EB6-24F9-4119-812E-FEF29D600887}
+		{D8500C41-1D24-469F-AA71-6876838F6295} = {5CFF9EB6-24F9-4119-812E-FEF29D600887}
 		{6B7C8D5A-1E24-7FF9-D0B7-4E5F0F2D3F4A} = {C8D5274F-AC00-46C7-1F8D-E88E81087A52}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

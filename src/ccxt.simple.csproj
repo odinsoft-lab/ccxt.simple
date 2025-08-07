@@ -1,11 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net9.0</TargetFramework>
+		<TargetFrameworks>net8.0;net9.0</TargetFrameworks>
 		<AssemblyName>CCXT.Simple</AssemblyName>
 		<RootNamespace>CCXT.Simple</RootNamespace>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>disable</Nullable>
-		<NoWarn>CS1998</NoWarn>
 		<Title>CryptoCurrency eXchange Trading Library for .NET</Title>
 		<Product>CCXT</Product>
 		<Company>ODINSOFT</Company>
@@ -22,21 +21,41 @@
 		<GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<Version>1.1.6</Version>
-		<AssemblyVersion>1.1.6.0</AssemblyVersion>
-		<FileVersion>1.1.6.0</FileVersion>
+		<AssemblyVersion>1.1.6.7</AssemblyVersion>
+		<FileVersion>1.1.6.7</FileVersion>
 		<PackageReleaseNotes>Major API standardization release - Added 15 standardized exchange functions with unified interface across all 16 supported exchanges</PackageReleaseNotes>
 		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/ccxt.net/ccxt.simple</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<ApplicationIcon>ccxt.simple.ico</ApplicationIcon>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<NoWarn>CS1998</NoWarn>
+	</PropertyGroup>
+
 	<ItemGroup>
-	  <Content Include="ccxt.simple.ico" />
-	  <None Include="..\docs\ccxt.simple.api.png">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
+		<None Update="Exchanges\KR\Bithumb\CoinState.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Exchanges\KR\Upbit\CoinState.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<Content Include="ccxt.simple.ico" />
+		<None Include="..\docs\ccxt.simple.api.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\LICENSE.txt">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -46,12 +65,4 @@
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.13.0" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <None Update="Exchanges\Bithumb\CoinState.json">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <None Update="Exchanges\Upbit\CoinState.json">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	</ItemGroup>
 </Project>

@@ -1,23 +1,24 @@
 using CCXT.Simple.Converters;
 using CCXT.Simple.Models;
-using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace CCXT.Simple.Exchanges.Poloniex
+namespace CCXT.Simple.Exchanges.CoinbaseInternational
 {
-    public class XPoloniex : IExchange
+    public class XCoinbaseInternational : IExchange
     {
         /*
-         * Poloniex Exchange Implementation
+         * CoinbaseInternational Exchange Implementation
          * 
-         * API Documentation: 
-         *     https://api-docs.poloniex.com/spot/api/public/reference-data#symbol-information
+         * API Documentation: https://api.international.coinbase.com
          * 
          * Rate Limits: TBD
          */
 
-        public XPoloniex(Exchange mainXchg, string apiKey = "", string secretKey = "", string passPhrase = "")
+        public XCoinbaseInternational(Exchange mainXchg, string apiKey = "", string secretKey = "", string passPhrase = "")
         {
             this.mainXchg = mainXchg;
             this.ApiKey = apiKey;
@@ -26,8 +27,8 @@ namespace CCXT.Simple.Exchanges.Poloniex
         }
 
         public Exchange mainXchg { get; set; }
-        public string ExchangeName { get; set; } = "poloniex";
-        public string ExchangeUrl { get; set; } = "https://api.poloniex.com";
+        public string ExchangeName { get; set; } = "coinbaseinternational";
+        public string ExchangeUrl { get; set; } = "https://api.international.coinbase.com";
         public bool Alive { get; set; }
         public string ApiKey { get; set; }
         public string SecretKey { get; set; }

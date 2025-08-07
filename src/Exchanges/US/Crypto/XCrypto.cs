@@ -1,15 +1,10 @@
-using CCXT.Simple.Services;
+using CCXT.Simple.Converters;
 using CCXT.Simple.Models;
-using CCXT.Simple.Exchanges.Bithumb;
+using CCXT.Simple.Services;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.Diagnostics;
-using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
-using CCXT.Simple.Converters;
 
 namespace CCXT.Simple.Exchanges.Crypto
 {

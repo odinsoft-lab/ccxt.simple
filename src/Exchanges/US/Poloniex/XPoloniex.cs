@@ -1,22 +1,25 @@
 using CCXT.Simple.Converters;
 using CCXT.Simple.Models;
-using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace CCXT.Simple.Exchanges.Bingx
+namespace CCXT.Simple.Exchanges.Poloniex
 {
-    public class XBingx : IExchange
+    public class XPoloniex : IExchange
     {
         /*
-         * Bingx Exchange Implementation
+         * Poloniex Exchange Implementation
          * 
-         * API Documentation: https://api-swap-rest.bingx.com
+         * API Documentation: 
+         *     https://api-docs.poloniex.com/spot/api/public/reference-data#symbol-information
          * 
          * Rate Limits: TBD
          */
 
-        public XBingx(Exchange mainXchg, string apiKey = "", string secretKey = "", string passPhrase = "")
+        public XPoloniex(Exchange mainXchg, string apiKey = "", string secretKey = "", string passPhrase = "")
         {
             this.mainXchg = mainXchg;
             this.ApiKey = apiKey;
@@ -25,8 +28,8 @@ namespace CCXT.Simple.Exchanges.Bingx
         }
 
         public Exchange mainXchg { get; set; }
-        public string ExchangeName { get; set; } = "bingx";
-        public string ExchangeUrl { get; set; } = "https://api-swap-rest.bingx.com";
+        public string ExchangeName { get; set; } = "poloniex";
+        public string ExchangeUrl { get; set; } = "https://api.poloniex.com";
         public bool Alive { get; set; }
         public string ApiKey { get; set; }
         public string SecretKey { get; set; }

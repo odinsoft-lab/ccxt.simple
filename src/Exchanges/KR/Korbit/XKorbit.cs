@@ -9,6 +9,9 @@ using Newtonsoft.Json.Linq;
 using System.Diagnostics;
 using System.Net;
 using CCXT.Simple.Converters;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System;
 
 namespace CCXT.Simple.Exchanges.Korbit
 {

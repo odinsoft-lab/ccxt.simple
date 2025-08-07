@@ -1,22 +1,24 @@
 using CCXT.Simple.Converters;
 using CCXT.Simple.Models;
-using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace CCXT.Simple.Exchanges.CoinbaseInternational
+namespace CCXT.Simple.Exchanges.Bingx
 {
-    public class XCoinbaseInternational : IExchange
+    public class XBingx : IExchange
     {
         /*
-         * CoinbaseInternational Exchange Implementation
+         * Bingx Exchange Implementation
          * 
-         * API Documentation: https://api.international.coinbase.com
+         * API Documentation: https://api-swap-rest.bingx.com
          * 
          * Rate Limits: TBD
          */
 
-        public XCoinbaseInternational(Exchange mainXchg, string apiKey = "", string secretKey = "", string passPhrase = "")
+        public XBingx(Exchange mainXchg, string apiKey = "", string secretKey = "", string passPhrase = "")
         {
             this.mainXchg = mainXchg;
             this.ApiKey = apiKey;
@@ -25,8 +27,8 @@ namespace CCXT.Simple.Exchanges.CoinbaseInternational
         }
 
         public Exchange mainXchg { get; set; }
-        public string ExchangeName { get; set; } = "coinbaseinternational";
-        public string ExchangeUrl { get; set; } = "https://api.international.coinbase.com";
+        public string ExchangeName { get; set; } = "bingx";
+        public string ExchangeUrl { get; set; } = "https://api-swap-rest.bingx.com";
         public bool Alive { get; set; }
         public string ApiKey { get; set; }
         public string SecretKey { get; set; }
