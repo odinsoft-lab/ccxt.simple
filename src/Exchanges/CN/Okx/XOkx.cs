@@ -38,7 +38,7 @@ namespace CCXT.Simple.Exchanges.Okx
             set;
         }
 
-        public string ExchangeName { get; set; } = "okex";
+        public string ExchangeName { get; set; } = "okx";
 
         public string ExchangeUrl { get; set; } = "https://www.okx.com";
 
@@ -59,31 +59,39 @@ namespace CCXT.Simple.Exchanges.Okx
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl); 
+
                 var _response = await _client.GetAsync("/api/v5/public/instruments?instType=SPOT");
-                var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JsonConvert.DeserializeObject<CoinInfor>(_jstring, mainXchg.JsonSettings);
-
-                var _queue_info = mainXchg.GetXInfors(ExchangeName);
-
-                foreach (var s in _jarray.data)
+                if (!_response.IsSuccessStatusCode)
                 {
-                    var _base = s.baseCcy;
-                    var _quote = s.quoteCcy;
+                    var _jstring = await _response.Content.ReadAsStringAsync();
+                    var _jarray = JsonConvert.DeserializeObject<CoinInfor>(_jstring, mainXchg.JsonSettings);
 
-                    if (_quote == "USDT" || _quote == "BTC")
+                    var _queue_info = mainXchg.GetXInfors(ExchangeName);
+
+                    foreach (var s in _jarray.data)
                     {
-                        _queue_info.symbols.Add(new QueueSymbol
-                        {
-                            symbol = s.instId,
-                            compName = _base,
-                            baseName = _base,
-                            quoteName = _quote,
-                            tickSize = s.tickSz
-                        });
-                    }
-                }
+                        var _base = s.baseCcy;
+                        var _quote = s.quoteCcy;
 
-                _result = true;
+                        if (_quote == "USDT" || _quote == "BTC")
+                        {
+                            _queue_info.symbols.Add(new QueueSymbol
+                            {
+                                symbol = s.instId,
+                                compName = _base,
+                                baseName = _base,
+                                quoteName = _quote,
+                                tickSize = s.tickSz
+                            });
+                        }
+                    }
+
+                    _result = true;
+                }
+                else
+                {
+                    mainXchg.OnMessageEvent(ExchangeName, $"Failed to fetch symbols: {_response.ReasonPhrase}", 4100);
+                }
             }
             catch (Exception ex)
             {
@@ -111,77 +119,84 @@ namespace CCXT.Simple.Exchanges.Okx
                 this.CreateSignature(_client, "GET", "/api/v5/asset/currencies");
 
                 var _response = await _client.GetAsync("/api/v5/asset/currencies");
-                var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JsonConvert.DeserializeObject<CoinState>(_jstring);
-
-                foreach (var c in _jarray.data)
+                if (_response.IsSuccessStatusCode)
                 {
-                    var _currency = c.ccy;
+                    var _jstring = await _response.Content.ReadAsStringAsync();
+                    var _jarray = JsonConvert.DeserializeObject<CoinState>(_jstring);
 
-                    var _state = tickers.states.SingleOrDefault(x => x.baseName == _currency);
-                    if (_state == null)
+                    foreach (var c in _jarray.data)
                     {
-                        _state = new WState
+                        var _currency = c.ccy;
+
+                        var _state = tickers.states.SingleOrDefault(x => x.baseName == _currency);
+                        if (_state == null)
                         {
-                            baseName = _currency,
-                            active = true,
-                            deposit = c.canDep,
-                            withdraw = c.canWd,
-                            networks = new List<WNetwork>()
-                        };
+                            _state = new WState
+                            {
+                                baseName = _currency,
+                                active = true,
+                                deposit = c.canDep,
+                                withdraw = c.canWd,
+                                networks = new List<WNetwork>()
+                            };
 
-                        tickers.states.Add(_state);
-                    }
-                    else
-                    {
-                        _state.deposit = c.canDep;
-                        _state.withdraw = c.canWd;
-                    }
-
-                    var _t_items = tickers.items.Where(x => x.compName == _state.baseName);
-                    if (_t_items != null)
-                    {
-                        foreach (var t in _t_items)
+                            tickers.states.Add(_state);
+                        }
+                        else
                         {
-                            t.active = _state.active;
-                            t.deposit = _state.deposit;
-                            t.withdraw = _state.withdraw;
+                            _state.deposit = c.canDep;
+                            _state.withdraw = c.canWd;
+                        }
+
+                        var _t_items = tickers.items.Where(x => x.compName == _state.baseName);
+                        if (_t_items != null)
+                        {
+                            foreach (var t in _t_items)
+                            {
+                                t.active = _state.active;
+                                t.deposit = _state.deposit;
+                                t.withdraw = _state.withdraw;
+                            }
+                        }
+
+                        var _name = c.chain;
+
+                        var _network = _state.networks.SingleOrDefault(x => x.name == _name);
+                        if (_network == null)
+                        {
+                            var _splits = c.chain.Split('-');
+
+                            _state.networks.Add(new WNetwork
+                            {
+                                name = _name,
+                                network = c.ccy,
+                                chain = _splits[_splits.Length - 1],
+
+                                deposit = c.canDep,
+                                withdraw = c.canWd,
+
+                                withdrawFee = c.maxFee,
+                                minWithdrawal = c.minWd,
+                                maxWithdrawal = c.maxWd,
+
+                                minConfirm = c.minDepArrivalConfirm
+                            });
+                        }
+                        else
+                        {
+                            _network.deposit = c.canDep;
+                            _network.withdraw = c.canWd;
                         }
                     }
 
-                    var _name = c.chain;
-
-                    var _network = _state.networks.SingleOrDefault(x => x.name == _name);
-                    if (_network == null)
-                    {
-                        var _splits = c.chain.Split('-');
-
-                        _state.networks.Add(new WNetwork
-                        {
-                            name = _name,
-                            network = c.ccy,
-                            chain = _splits[_splits.Length - 1],
-
-                            deposit = c.canDep,
-                            withdraw = c.canWd,
-
-                            withdrawFee = c.maxFee,
-                            minWithdrawal = c.minWd,
-                            maxWithdrawal = c.maxWd,
-
-                            minConfirm = c.minDepArrivalConfirm
-                        });
-                    }
-                    else
-                    {
-                        _network.deposit = c.canDep;
-                        _network.withdraw = c.canWd;
-                    }
-
                     _result = true;
-                }
 
-                mainXchg.OnMessageEvent(ExchangeName, $"checking deposit & withdraw status...", 4102);
+                    mainXchg.OnMessageEvent(ExchangeName, $"checking deposit & withdraw status...", 4102);
+                }
+                else
+                {
+                    mainXchg.OnMessageEvent(ExchangeName, $"Failed to fetch deposit & withdraw status: {_response.ReasonPhrase}", 4102);
+                }
             }
             catch (Exception ex)
             {
