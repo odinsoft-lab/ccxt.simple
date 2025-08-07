@@ -175,7 +175,7 @@ namespace CCXT.Simple.Exchanges.Coinbase
                                 minWithdrawal = n.min_withdrawal_amount,
                                 maxWithdrawal = n.max_withdrawal_amount,
 
-                                minConfirm = n.network_confirmations,
+                                minConfirm = n.network_confirmations ?? 0,
                                 arrivalTime = n.processing_time_seconds != null ? n.processing_time_seconds.Value : 0
                             };
 

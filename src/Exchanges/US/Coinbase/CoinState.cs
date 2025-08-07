@@ -54,7 +54,7 @@ namespace CCXT.Simple.Exchanges.Coinbase
 
         [JsonConverter(typeof(XDecimalNullConverter))]
         public decimal max_withdrawal_amount { get; set; }
-        public int network_confirmations { get; set; }
+        public int? network_confirmations { get; set; }
         public int? processing_time_seconds { get; set; }
     }
 }

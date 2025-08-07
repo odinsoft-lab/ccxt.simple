@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using System.Globalization;
 
 namespace CCXT.Simple.Data
 {
@@ -17,11 +18,16 @@ namespace CCXT.Simple.Data
             {
                 if (reader.TokenType == JsonToken.String)
                 {
-                    if (!string.IsNullOrEmpty(reader.Value.ToString()))
-                        _result = Convert.ToDecimal(reader.Value);
+                    var stringValue = reader.Value?.ToString();
+                    if (!string.IsNullOrEmpty(stringValue))
+                    {
+                        // Handle scientific notation (e.g., "8.9e-7")
+                        _result = decimal.Parse(stringValue, NumberStyles.Float, CultureInfo.InvariantCulture);
+                    }
                 }
-                else
+                else if (reader.TokenType == JsonToken.Float || reader.TokenType == JsonToken.Integer)
                 {
+                    // For numeric tokens, convert directly
                     _result = Convert.ToDecimal(reader.Value);
                 }
             }
