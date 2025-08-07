@@ -15,7 +15,7 @@ A simplified cryptocurrency trading library for .NET that provides unified acces
 - **Error Handling**: Consistent error reporting and exception handling
 
 ### **Comprehensive Exchange Support**
-- **16 Major Exchanges**: Binance, Bitget, Bithumb, Bittrex, ByBit, Coinbase, Coinone, Crypto.com, Gate.io, Huobi, Korbit, KuCoin, OKX, Upbit
+- **14 Major Exchanges**: Binance, Bitget, Bithumb, Bittrex, ByBit, Coinbase, Coinone, Crypto.com, Gate.io, Huobi, Korbit, KuCoin, OKX, Upbit
 - **Market Data**: Real-time tickers, order books, trading pairs, volume data
 - **Account Management**: Balance queries, account information, deposit/withdrawal history
 - **Trading Operations**: Order placement, cancellation, order history, trade history
