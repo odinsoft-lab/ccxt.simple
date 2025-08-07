@@ -21,12 +21,10 @@
 		<GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<Version>1.1.6</Version>
-		<AssemblyVersion>1.1.6.7</AssemblyVersion>
-		<FileVersion>1.1.6.7</FileVersion>
-		<PackageReleaseNotes>ccxt.net simple version</PackageReleaseNotes>
+		<AssemblyVersion>1.1.6.0</AssemblyVersion>
+		<FileVersion>1.1.6.0</FileVersion>
+		<PackageReleaseNotes>Major API standardization release - Added 15 standardized exchange functions with unified interface across all 16 supported exchanges</PackageReleaseNotes>
 		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/ccxt.net/ccxt.simple</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<ApplicationIcon>ccxt.simple.ico</ApplicationIcon>

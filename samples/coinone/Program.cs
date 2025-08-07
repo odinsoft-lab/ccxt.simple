@@ -13,21 +13,10 @@ class Program
     {
         try
         {
-            Console.WriteLine("=== Coinone Exchange Sample ===");
-            Console.WriteLine("Available options:");
-            Console.WriteLine("1. Get Tickers");
-            Console.WriteLine("2. Get Markets");
-            Console.WriteLine("3. Get Volumes");
-            Console.WriteLine("4. Get Book Tickers");
-            Console.WriteLine("5. Get Price (specific symbol)");
-            Console.Write("Select option (1-5): ");
-
-            var input = Console.ReadLine();
-            if (string.IsNullOrEmpty(input))
-            {
-                Console.WriteLine("Invalid input. Exiting...");
-                return;
-            }
+            Console.WriteLine("=== Coinone Exchange Sample (Auto Test) ===");
+            
+            // Auto-select option 1 for testing
+            var input = "1";
 
             var exchange = new Exchange("KRW");
             var coinone = new XCoinone(exchange, _api_key, _secret_key, _pass_phrase);
@@ -53,10 +42,10 @@ class Program
                     if (tickerResult)
                     {
                         Console.WriteLine($"Successfully retrieved {tickers.items.Count} tickers");
-                        var activeTickers = tickers.items.Where(t => t != null && t.last > 0).Take(5);
+                        var activeTickers = tickers.items.Where(t => t != null && t.lastPrice > 0).Take(5);
                         foreach (var ticker in activeTickers)
                         {
-                            Console.WriteLine($"{ticker.symbol}: Last={ticker.last:F2}, Volume={ticker.baseVolume:F2}");
+                            Console.WriteLine($"{ticker.symbol}: Last={ticker.lastPrice:F2}, Volume={ticker.volume24h:F2}");
                         }
                     }
                     else
@@ -92,13 +81,13 @@ class Program
                     {
                         Console.WriteLine("Successfully retrieved volume data");
                         var topVolumes = tickers.items
-                            .Where(t => t != null && t.baseVolume > 0)
-                            .OrderByDescending(t => t.baseVolume)
+                            .Where(t => t != null && t.volume24h > 0)
+                            .OrderByDescending(t => t.volume24h)
                             .Take(5);
                         
                         foreach (var volume in topVolumes)
                         {
-                            Console.WriteLine($"{volume.symbol}: Volume={volume.baseVolume:F2}, Quote Volume={volume.quoteVolume:F2}");
+                            Console.WriteLine($"{volume.symbol}: Volume={volume.volume24h:F2}");
                         }
                     }
                     else
@@ -114,10 +103,10 @@ class Program
                     if (bookTickerResult)
                     {
                         Console.WriteLine("Successfully retrieved book ticker data");
-                        var bookTickers = tickers.items.Where(t => t != null && t.bid > 0 && t.ask > 0).Take(5);
+                        var bookTickers = tickers.items.Where(t => t != null && t.bidPrice > 0 && t.askPrice > 0).Take(5);
                         foreach (var bookTicker in bookTickers)
                         {
-                            Console.WriteLine($"{bookTicker.symbol}: Bid={bookTicker.bid:F2}, Ask={bookTicker.ask:F2}, Spread={bookTicker.ask - bookTicker.bid:F2}");
+                            Console.WriteLine($"{bookTicker.symbol}: Bid={bookTicker.bidPrice:F2}, Ask={bookTicker.askPrice:F2}, Spread={bookTicker.askPrice - bookTicker.bidPrice:F2}");
                         }
                     }
                     else
@@ -156,8 +145,7 @@ class Program
         }
         finally
         {
-            Console.WriteLine("\nPress any key to exit...");
-            Console.ReadKey();
+            Console.WriteLine("\nTest completed.");
         }
     }
 }
