@@ -35,7 +35,21 @@ dotnet run --project samples/bitget/bitget.csproj
 ```
 
 ### Testing and Validation
-Currently no automated test framework is configured. Manual testing should be done using the sample applications in the `samples/` directory.
+```bash
+# Run all tests
+dotnet test
+
+# Run specific exchange tests
+dotnet test tests/Bithumb/Bithumb.csproj
+dotnet test tests/Bitget/Bitget.csproj
+dotnet test tests/Coinone/Coinone.csproj
+
+# Run with verbosity
+dotnet test --logger "console;verbosity=detailed"
+```
+
+**Test Framework**: xUnit with Microsoft.Extensions.Configuration for settings
+**Test Structure**: Tests are located in `tests/{ExchangeName}/` directories
 
 ## Project Architecture
 
@@ -47,18 +61,25 @@ The project follows a **multi-exchange adapter pattern** where each cryptocurren
 **Exchange Interface (`IExchange`)**
 - Defines the contract all exchange implementations must follow
 - Located at `src/Exchanges/IExchange.cs`
-- Core methods: `GetTickers()`, `GetBookTickers()`, `GetMarkets()`, `GetVolumes()`, `GetPrice()`, `VerifySymbols()`, `VerifyStates()`
+- Legacy methods: `GetTickers()`, `GetBookTickers()`, `GetMarkets()`, `GetVolumes()`, `GetPrice()`, `VerifySymbols()`, `VerifyStates()`
+- New standardized API methods (v1.1.6+):
+  - Market Data: `GetOrderbook()`, `GetCandles()`, `GetTrades()`
+  - Account: `GetBalance()`, `GetAccount()`
+  - Trading: `PlaceOrder()`, `CancelOrder()`, `GetOrder()`, `GetOpenOrders()`, `GetOrderHistory()`, `GetTradeHistory()`
+  - Funding: `GetDepositAddress()`, `Withdraw()`, `GetDepositHistory()`, `GetWithdrawalHistory()`
 
 **Exchange Base Class (`Exchange`)**
 - Central coordination hub located at `src/Exchanges/Exchange.cs`
 - Manages concurrent collections for tickers, queues, and exchange data
 - Implements event-driven architecture with `MessageEvent`, `UsdPriceEvent`, `KrwPriceEvent`
 - Uses `ConcurrentDictionary` for thread-safe data management
+- Provides `HttpClientService` for pooled HTTP client management per exchange
 
 **Exchange Implementations**
 - Each exchange has its own folder under `src/Exchanges/`
 - Naming convention: `X{ExchangeName}.cs` (e.g., `XBinance.cs`, `XBithumb.cs`)
-- Currently supports: Binance, Bitget, Bithumb, ByBit, Coinbase, Coinone, Crypto, GateIO, Huobi, Korbit, Kucoin, OkEX, Upbit, Bittrex
+- Currently supports: Binance, Bitget, Bithumb, ByBit, Coinbase, Coinone, Crypto, GateIO, Huobi, Korbit, Kucoin, OKX (formerly OkEX), Upbit, Bittrex
+- Most new API methods throw `NotImplementedException` pending full implementation
 
 **Data Models**
 - Core data structures in `src/Data/`
@@ -135,8 +156,9 @@ exchange.ApiCallDelaySeconds = 1;    // Rate limiting
 The `samples/` directory contains example implementations:
 - **bithumb**: Demonstrates limit order creation with concurrent bid/ask operations
 - **bitget**: Shows exchange integration patterns
+- **coinone**: Example Coinone exchange integration
 
-These samples are the primary way to test exchange implementations and demonstrate usage patterns.
+These samples serve as both integration tests and usage examples.
 
 ## Important Notes
 
@@ -144,7 +166,8 @@ These samples are the primary way to test exchange implementations and demonstra
 - The project uses `ImplicitUsings` and has `Nullable` disabled
 - All exchange operations are asynchronous using `ValueTask<T>`
 - Thread safety is critical - the library is designed for concurrent access
-- The project is actively maintained with the latest version being 1.1.5 (.NET 8.0 upgrade)
+- Current version: 1.1.6 (major API standardization release)
+- NuGet package: `CCXT.Simple`
 
 ## Development Guidelines
 
@@ -153,3 +176,5 @@ These samples are the primary way to test exchange implementations and demonstra
 - Implement proper error handling through the `Exchange.OnMessageEvent` mechanism
 - Maintain consistent API patterns across different exchange implementations
 - Document any exchange-specific rate limits or authentication requirements in code comments
+- When implementing new standardized API methods, refer to existing implementations (e.g., Binance's `GetOrderbook()`)
+- Use `NotImplementedException` for methods pending implementation

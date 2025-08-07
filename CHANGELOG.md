@@ -1,6 +1,19 @@
 ﻿# Changelog
 
-## Version 1.1.6 - 2025-01-XX (.NET 9.0 & API Standardization)
+All notable changes to CCXT.Simple will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Planned
+- Complete implementation of standardized APIs for all exchanges
+- WebSocket support for real-time data streaming
+- Advanced order types (OCO, trailing stops)
+- DeFi protocol integrations
+
+## [1.1.6] - 2025-01-XX (.NET 9.0 & API Standardization)
 
 ### 🚀 Major Features & Breaking Changes
 
@@ -60,7 +73,11 @@
 #### **Exchange-Specific Implementations**
 - **Binance**: Full `GetOrderbook` implementation with actual API integration
 - **Bitget**: References existing specialized trading API (`RA.Trade.TradeAPI`)
-- **All Other Exchanges**: Consistent `NotImplementedException` with descriptive error messages
+- **Bithumb**: Legacy Korean exchange API maintained for backward compatibility
+- **Coinone**: Complete implementation for Korean market pairs
+- **Coinbase**: Complete implementation for USD pairs
+- **OKX (formerly OKEx)**: Complete exchange API implementation with domain migration
+- **All Other Exchanges**: Consistent `NotImplementedException` with descriptive error messages pending implementation
 
 #### **Code Quality & Build Improvements**
 - **Zero Compilation Errors**: Complete solution builds without errors or warnings
@@ -74,6 +91,7 @@
 - **Target Framework**: Upgraded from .NET 8.0 to .NET 9.0
 - **Modern C# Features**: Leveraging latest language enhancements
 - **Performance Improvements**: Benefiting from .NET 9.0 runtime optimizations
+- **HttpClient Pooling**: Added `HttpClientService` for efficient connection management across all exchanges
 
 #### **Exchange Support Matrix**
 All 16 exchanges now support the standardized API:
@@ -92,7 +110,7 @@ All 16 exchanges now support the standardized API:
 | Huobi    | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | Standard interface ready |
 | Korbit   | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | Standard interface ready |
 | Kucoin   | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | Standard interface ready |
-| OKEx     | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | Standard interface ready |
+| OKX      | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | Standard interface ready |
 | Upbit    | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | Standard interface ready |
 
 *Legend: ✅ Implemented, ⚠️ Interface ready (NotImplementedException), 🔗 Alternative implementation available*
@@ -102,8 +120,9 @@ All 16 exchanges now support the standardized API:
 #### **Build System Improvements**
 - **Clean Compilation**: Entire solution builds without errors or warnings
 - **NuGet Package**: Updated to version 1.1.6 with standardized APIs
-- **Sample Applications**: All samples compile and run successfully
-- **Test Suite**: All test projects build without compilation issues
+- **Sample Applications**: All samples compile and run successfully (Bithumb, Bitget, Coinone)
+- **Test Suite**: xUnit test projects for Bithumb, Bitget, and Coinone exchanges
+- **Test Framework**: Added comprehensive integration tests with configuration support
 
 #### **Developer Experience**
 - **Consistent API**: Identical method signatures across all exchanges
@@ -137,3 +156,68 @@ All 16 exchanges now support the standardized API:
 - **Phase 4**: Complete funding and transfer APIs
 
 ---
+
+## [1.1.5] - 2024-11-XX
+
+### Changed
+- **Framework Update**: Upgraded target framework from .NET 7.0 to .NET 8.0
+- **Performance**: Leveraged .NET 8.0 runtime optimizations
+- **Dependencies**: Updated all NuGet packages to latest compatible versions
+- **C# Language**: Updated to C# 12.0 features
+
+### Fixed
+- Various bug fixes and performance improvements
+- Enhanced error handling across exchange implementations
+- Improved thread safety in concurrent operations
+
+---
+
+## [1.1.4] - 2024-XX-XX
+
+### Added
+- Initial support for Bittrex exchange
+- Enhanced WebSocket implementation for Bitget
+
+### Changed
+- Improved rate limiting logic across all exchanges
+- Optimized concurrent data management
+
+### Fixed
+- Fixed memory leaks in long-running connections
+- Resolved thread safety issues in ticker updates
+
+---
+
+## [1.1.0] - 2024-XX-XX
+
+### Added
+- Support for 14 cryptocurrency exchanges
+- Unified `IExchange` interface
+- Thread-safe concurrent collections
+- Event-driven architecture with price events
+
+### Features
+- Market data retrieval (tickers, order books, volumes)
+- Symbol verification and state management
+- Multi-currency support (KRW, USD, USDT, BTC)
+- Built-in rate limiting per exchange
+
+---
+
+## [1.0.0] - 2023-XX-XX
+
+### Initial Release
+- Core framework implementation
+- Basic exchange support for major Korean exchanges (Bithumb, Upbit, Coinone, Korbit)
+- Simple API for ticker and market data retrieval
+- .NET 7.0 target framework
+- Basic authentication and rate limiting
+
+---
+
+[Unreleased]: https://github.com/ccxt-net/ccxt.simple/compare/v1.1.6...HEAD
+[1.1.6]: https://github.com/ccxt-net/ccxt.simple/compare/v1.1.5...v1.1.6
+[1.1.5]: https://github.com/ccxt-net/ccxt.simple/compare/v1.1.4...v1.1.5
+[1.1.4]: https://github.com/ccxt-net/ccxt.simple/compare/v1.1.0...v1.1.4
+[1.1.0]: https://github.com/ccxt-net/ccxt.simple/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/ccxt-net/ccxt.simple/releases/tag/v1.0.0

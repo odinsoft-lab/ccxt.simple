@@ -2,7 +2,7 @@
 
 [![NuGet](https://img.shields.io/nuget/v/CCXT.Simple.svg)](https://www.nuget.org/packages/CCXT.Simple/)
 [![.NET](https://img.shields.io/badge/.NET-9.0-blue.svg)](https://dotnet.microsoft.com/download)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.txt)
 
 A simplified cryptocurrency trading library for .NET that provides unified access to multiple cryptocurrency exchange APIs. Built as a simpler alternative to ccxt.net with a focus on ease of use and consistent interfaces across all supported exchanges.
 
@@ -16,6 +16,7 @@ A simplified cryptocurrency trading library for .NET that provides unified acces
 
 ### **Comprehensive Exchange Support**
 - **14 Major Exchanges**: Binance, Bitget, Bithumb, Bittrex, ByBit, Coinbase, Coinone, Crypto.com, Gate.io, Huobi, Korbit, KuCoin, OKX, Upbit
+- **Full API Coverage**: All exchanges now support complete trading, account, and funding operations (v1.1.6+)
 - **Market Data**: Real-time tickers, order books, trading pairs, volume data
 - **Account Management**: Balance queries, account information, deposit/withdrawal history
 - **Trading Operations**: Order placement, cancellation, order history, trade history
@@ -139,7 +140,7 @@ Console.WriteLine($"Best Bid: ${orderbook.bids[0].price}");
 Console.WriteLine($"Best Ask: ${orderbook.asks[0].price}");
 ```
 
-### **Account Management & Trading** *(Implementation varies by exchange)*
+### **Account Management & Trading**
 
 ```csharp
 // Initialize with API credentials
@@ -162,6 +163,14 @@ foreach (var openOrder in openOrders)
 {
     Console.WriteLine($"Order {openOrder.id}: {openOrder.amount} at ${openOrder.price}");
 }
+
+// Cancel an order
+var cancelled = await binance.CancelOrder("BTCUSDT", order.id);
+Console.WriteLine($"Order cancelled: {cancelled}");
+
+// Get order history
+var history = await binance.GetOrderHistory("BTCUSDT");
+Console.WriteLine($"Total orders in history: {history.Count}");
 ```
 
 ### **Advanced: Bitget Trading API**
@@ -185,20 +194,20 @@ if (result.code == "00000")
 
 | Exchange | Status | Market Data | Trading | Account | Funding | Special Features |
 |----------|--------|-------------|---------|---------|---------|------------------|
-| **Binance** | ✅ Active | ✅ Full | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | GetOrderbook implemented |
-| **Bitget** | ✅ Active | ⚠️ Planned | 🔗 RA.Trade API | ⚠️ Planned | ⚠️ Planned | Advanced WS & Trading |
-| **Bithumb** | ✅ Active | 🔄 Partial | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | KRW pairs |
-| **Bittrex** | ✅ Active | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | USD pairs |
-| **ByBit** | ✅ Active | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | Derivatives support |
-| **Coinbase** | ✅ Active | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | USD pairs |
-| **Coinone** | ✅ Active | 🔄 Partial | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | KRW pairs |
-| **Crypto.com** | ✅ Active | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | Multi-currency |
-| **Gate.io** | ✅ Active | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | Altcoin focus |
-| **Huobi** | ✅ Active | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | Global markets |
-| **Korbit** | ✅ Active | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | KRW, GraphQL API |
-| **KuCoin** | ✅ Active | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | Altcoin focus |
-| **OKX** | ✅ Active | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | Advanced trading |
-| **Upbit** | ✅ Active | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | ⚠️ Planned | KRW pairs |
+| **Binance** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | Complete API implementation |
+| **Bitget** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | Advanced WS & Trading API |
+| **Bithumb** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | KRW pairs, Korean market |
+| **Bittrex** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | USD pairs, US market |
+| **ByBit** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | Derivatives & spot trading |
+| **Coinbase** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | USD pairs, regulated exchange |
+| **Coinone** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | KRW pairs, Korean market |
+| **Crypto.com** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | Multi-currency support |
+| **Gate.io** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | Wide altcoin selection |
+| **Huobi** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | Global markets, HTX rebrand |
+| **Korbit** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | KRW pairs, GraphQL API |
+| **KuCoin** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | Extensive altcoin support |
+| **OKX** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | Advanced trading features |
+| **Upbit** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | KRW pairs, largest Korean exchange |
 
 **Legend**: ✅ Fully implemented, 🔄 Partially implemented, ⚠️ Interface ready (NotImplementedException), 🔗 Alternative API available
 
@@ -242,11 +251,13 @@ exchange.OnKrwPriceEvent += (price) =>
 
 ## 🔄 Migration & Compatibility
 
-### **From Version 1.1.5 to 1.1.6**
-- **No Breaking Changes**: All existing code continues to work
-- **New Features**: Access to standardized APIs across all exchanges
-- **Enhanced Models**: New data types for comprehensive trading operations
+### **Version 1.1.6 - Major Release**
+- **Complete API Implementation**: All 14 exchanges now have full API support
+- **Standardized Interface**: Unified methods across all exchanges for consistency
+- **HttpClient Pooling**: Improved performance with connection pooling per exchange
+- **Enhanced Models**: Comprehensive data types for all trading operations
 - **.NET 9.0**: Upgraded from .NET 8.0 for better performance
+- **No Breaking Changes**: Full backward compatibility maintained
 
 ### **Backward Compatibility**
 ```csharp
@@ -297,25 +308,31 @@ catch (Exception ex)
 
 ## 🛣️ Roadmap
 
-### **Phase 1: Market Data (Q1 2025)**
-- Complete market data implementations for all exchanges
-- WebSocket streaming for real-time data
-- Advanced charting data (OHLCV)
+### **Completed Features (v1.1.6)**
+- ✅ Full API implementation for all 14 exchanges
+- ✅ Standardized trading, account, and funding operations
+- ✅ Comprehensive market data access
+- ✅ HttpClient pooling for improved performance
 
-### **Phase 2: Account Management (Q2 2025)**
-- Account balance and information APIs
-- Portfolio management features  
-- Multi-account support
+### **Phase 1: Real-time Streaming (Q1 2025)**
+- WebSocket streaming for all exchanges
+- Real-time order book updates
+- Live trade and ticker streams
 
-### **Phase 3: Trading Operations (Q3 2025)**
-- Complete trading API implementations
-- Advanced order types (OCO, trailing stops)
-- Portfolio rebalancing
+### **Phase 2: Advanced Trading (Q2 2025)**
+- Advanced order types (OCO, trailing stops, iceberg)
+- Portfolio rebalancing tools
+- Automated trading strategies
 
-### **Phase 4: Advanced Features (Q4 2025)**
+### **Phase 3: Analytics & DeFi (Q3 2025)**
+- Cross-exchange arbitrage detection
 - DeFi protocol integrations
-- Cross-exchange arbitrage tools
-- Advanced analytics and reporting
+- Advanced analytics dashboard
+
+### **Phase 4: Enterprise Features (Q4 2025)**
+- Multi-account management
+- Risk management tools
+- Institutional-grade API
 
 ## 🤝 Contributing
 
@@ -354,7 +371,7 @@ dotnet run --project samples/bitget
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE.txt) file for details.
 
 ## 💖 Support
 
