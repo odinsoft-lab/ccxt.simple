@@ -259,6 +259,207 @@ public async ValueTask<Orderbook> GetOrderbook(string symbol, int limit = 100)
 }
 ```
 
+### 📁 Exchange Folder Organization by Country
+
+When adding a new exchange, please follow the country-based folder structure:
+
+#### Country Code Directory Structure
+All exchanges are organized by ISO 3166-1 alpha-2 country codes based on their headquarters location:
+
+```
+src/Exchanges/
+├── AE/         # United Arab Emirates (Dubai)
+│   └── Deribit/
+├── AU/         # Australia
+│   ├── Btcmarkets/
+│   └── Coinspot/
+├── BR/         # Brazil
+│   ├── Foxbit/
+│   ├── Mercado/
+│   └── Novadax/
+├── BS/         # Bahamas
+│   └── Fmfwio/
+├── CA/         # Canada
+│   ├── Ndax/
+│   └── Timex/
+├── CN/         # China/Hong Kong
+│   ├── Bigone/
+│   ├── Bingx/
+│   ├── Bitget/
+│   ├── ByBit/
+│   ├── Coinex/
+│   ├── Digifinex/
+│   ├── GateIO/
+│   ├── Gate/
+│   ├── Hashkey/
+│   ├── HitBTC/
+│   ├── Htx/
+│   ├── Huobi/
+│   ├── Kucoin/
+│   ├── Kucoinfutures/
+│   ├── Lbank/
+│   ├── Mexc/
+│   ├── OkEX/
+│   ├── Okx/
+│   ├── Woo/
+│   ├── Woofipro/
+│   └── Xt/
+├── EE/         # Estonia
+│   └── Latoken/
+├── EU/         # European Union (Multiple Countries)
+│   ├── Bit2c/      # Israel
+│   ├── Bitfinex/   # Italy
+│   ├── Bitopro/    # Taiwan
+│   ├── Bitvavo/    # Netherlands
+│   ├── Btcalpha/   # Lithuania
+│   ├── Btcturk/    # Turkey
+│   ├── Coinmate/   # Czech Republic
+│   ├── Exmo/       # UK/Russia
+│   ├── Onetrading/ # Austria
+│   ├── Paymium/    # France
+│   ├── Wavesexchange/ # Russia
+│   ├── Whitebit/   # Ukraine
+│   ├── Yobit/      # Russia
+│   └── Zonda/      # Poland
+├── GB/         # United Kingdom
+│   ├── Bitstamp/
+│   ├── Bitteam/
+│   ├── Blockchaincom/
+│   ├── Cex/
+│   ├── Coinmetro/
+│   └── Luno/
+├── GLOBAL/     # International/Decentralized/Unknown
+│   ├── Coincatch/
+│   ├── Defx/
+│   ├── Hollaex/
+│   ├── Myokx/
+│   ├── Oceanex/
+│   ├── Oxfun/
+│   ├── P2b/
+│   └── Tradeogre/
+├── ID/         # Indonesia
+│   ├── Indodax/
+│   └── Tokocrypto/
+├── IN/         # India
+│   ├── Bitbns/
+│   └── Modetrade/
+├── JP/         # Japan
+│   ├── Bitbank/
+│   ├── Bitflyer/
+│   ├── Bittrade/
+│   ├── Btcbox/
+│   ├── Coincheck/
+│   └── Zaif/
+├── KR/         # South Korea
+│   ├── Bithumb/
+│   ├── Coinone/
+│   ├── Korbit/
+│   ├── Probit/
+│   └── Upbit/
+├── KY/         # Cayman Islands
+│   ├── Bitmart/
+│   └── Blofin/
+├── LT/         # Lithuania
+│   └── Cryptomus/
+├── MT/         # Malta
+│   └── Bequant/
+├── MX/         # Mexico
+│   └── Bitso/
+├── SC/         # Seychelles
+│   └── Bitmex/
+├── SG/         # Singapore
+│   ├── Bitrue/
+│   ├── Coinsph/
+│   ├── Delta/
+│   ├── Derive/
+│   ├── Ellipx/
+│   ├── Hibachi/
+│   ├── Hyperliquid/
+│   └── Independentreserve/
+└── US/         # United States
+    ├── Alpaca/
+    ├── Apex/
+    ├── Ascendex/
+    ├── Binance/
+    ├── BinanceCoinm/
+    ├── BinanceUs/
+    ├── BinanceUsdm/
+    ├── Bittrex/
+    ├── Coinbase/
+    ├── CoinbaseAdvanced/
+    ├── CoinbaseExchange/
+    ├── CoinbaseInternational/
+    ├── Crypto/
+    ├── Cryptocom/
+    ├── Gemini/
+    ├── Kraken/
+    ├── Krakenfutures/
+    ├── Okcoin/
+    ├── Okxus/
+    ├── Paradex/
+    ├── Phemex/
+    ├── Poloniex/
+    └── Vertex/
+```
+
+#### How to Add a New Exchange
+
+1. **Research the Exchange Headquarters**
+   - Find the official headquarters location of the exchange
+   - Check their official website, documentation, or regulatory filings
+   - Use resources like CoinMarketCap, CoinGecko, or CCXT documentation
+
+2. **Determine the Country Code**
+   - Use ISO 3166-1 alpha-2 code for the country
+   - For exchanges with multiple offices, use the primary headquarters location
+   - If headquarters is unclear or decentralized, use the `GLOBAL` folder
+
+3. **Create the Exchange Folder**
+   ```bash
+   # Example: Adding a new exchange "NewExchange" headquartered in Japan
+   mkdir src/Exchanges/JP/NewExchange
+   ```
+
+4. **Implement the Exchange Class**
+   - Create `XNewExchange.cs` in the folder
+   - Follow the existing exchange implementation patterns
+   - Namespace should be `CCXT.Simple.Exchanges.NewExchange` (without country code)
+
+5. **Update Documentation**
+   - Add the exchange to this EXCHANGES.md file
+   - Include headquarters information in the documentation
+
+#### Special Cases
+
+- **Multi-national Exchanges**: Use the primary headquarters location
+- **Decentralized Exchanges (DEX)**: Place in `GLOBAL` folder
+- **Relocated Exchanges**: Use current headquarters, not original
+- **Unclear Headquarters**: Place in `GLOBAL` folder until confirmed
+
+#### Country Code Reference
+
+Common country codes used in this project:
+- **AE**: United Arab Emirates
+- **AU**: Australia
+- **BR**: Brazil
+- **BS**: Bahamas
+- **CA**: Canada
+- **CN**: China (includes Hong Kong)
+- **EE**: Estonia
+- **EU**: European Union (for multi-EU country exchanges)
+- **GB**: United Kingdom
+- **ID**: Indonesia
+- **IN**: India
+- **JP**: Japan
+- **KR**: South Korea
+- **KY**: Cayman Islands
+- **LT**: Lithuania
+- **MT**: Malta
+- **MX**: Mexico
+- **SC**: Seychelles
+- **SG**: Singapore
+- **US**: United States
+
 ### Priority Contributions Needed
 
 1. **Kraken** - Major US exchange, high volume

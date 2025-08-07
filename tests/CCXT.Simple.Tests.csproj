@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\ccxt.simple.csproj" />
+    <ProjectReference Include="..\src\ccxt.simple.csproj" />
   </ItemGroup>
 
   <ItemGroup>
