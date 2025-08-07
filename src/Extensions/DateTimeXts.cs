@@ -13,7 +13,7 @@ namespace CCXT.Simple.Services
         private static DateTime DateTimeUnixEpochStart { get; } = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         /// <summary>
-        /// 1970년 1월 1일 00:00:00 협정 세계시(UTC)
+        /// January 1, 1970 00:00:00 Coordinated Universal Time (UTC)
         /// </summary>
         public static DateTime UnixEpoch
         {
@@ -24,7 +24,7 @@ namespace CCXT.Simple.Services
         }
 
         /// <summary>
-        ///  이 컴퓨터의 현재 UTC(협정 세계시) 부터의 경과 시간을 초로 환산하여 정수로 나타낸 것
+        /// The elapsed time from the current UTC (Coordinated Universal Time) of this computer, converted to seconds as an integer
         /// </summary>
         public static Int64 Now
         {
@@ -35,7 +35,7 @@ namespace CCXT.Simple.Services
         }
 
         /// <summary>
-        ///  이 컴퓨터의 현재 UTC(협정 세계시) 부터의 경과 시간을 밀리초로 환산하여 정수로 나타낸 것
+        /// The elapsed time from the current UTC (Coordinated Universal Time) of this computer, converted to milliseconds as an integer
         /// </summary>
         public static Int64 NowMilli
         {
@@ -46,7 +46,7 @@ namespace CCXT.Simple.Services
         }
 
         /// <summary>
-        /// 이 컴퓨터의 현재 날짜와 시간으로 설정되고 UTC(협정 세계시)로 표시되는 System.DateTime 개체를 가져옵니다.
+        /// Gets a System.DateTime object that is set to the current date and time on this computer, expressed as the Coordinated Universal Time (UTC).
         /// </summary>
         public static DateTime UtcNow
         {
@@ -57,7 +57,7 @@ namespace CCXT.Simple.Services
         }
 
         /// <summary>
-        /// 이 컴퓨터의 현재 날짜와 시간으로 설정되고 현지 시간으로 표시되는 System.DateTime 개체를 가져옵니다.
+        /// Gets a System.DateTime object that is set to the current date and time on this computer, expressed as the local time.
         /// </summary>
         public static DateTime LocalNow
         {
@@ -94,7 +94,7 @@ namespace CCXT.Simple.Services
         //-----------------------------------------------------------------------------------------------------------------------------
 
         /// <summary>
-        /// 1970년 1월 1일 00:00:00 협정 세계시(UTC) 부터의 경과 시간을 초로 환산하여 정수로 나타낸 것
+        /// The elapsed time from January 1, 1970 00:00:00 Coordinated Universal Time (UTC), converted to seconds as an integer
         /// </summary>
         /// <param name="datetime"></param>
         /// <returns></returns>
@@ -104,7 +104,7 @@ namespace CCXT.Simple.Services
         }
 
         /// <summary>
-        /// 1970년 1월 1일 00:00:00 협정 세계시(UTC) 부터의 경과 시간을 밀리초로 환산하여 정수로 나타낸 것
+        /// The elapsed time from January 1, 1970 00:00:00 Coordinated Universal Time (UTC), converted to milliseconds as an integer
         /// </summary>
         /// <param name="datetime"></param>
         /// <returns></returns>
@@ -114,7 +114,7 @@ namespace CCXT.Simple.Services
         }
 
         /// <summary>
-        /// string문자를 datetime으로 변환 후 UTC를 초로 환산 합니다.
+        /// Converts a string to datetime and then converts UTC to seconds.
         /// </summary>
         /// <param name="timeString"></param>
         /// <returns></returns>
@@ -124,7 +124,7 @@ namespace CCXT.Simple.Services
         }
 
         /// <summary>
-        /// string문자를 datetime으로 변환 후 UTC를 밀리초로 환산 합니다.
+        /// Converts a string to datetime and then converts UTC to milliseconds.
         /// </summary>
         /// <param name="timeString"></param>
         /// <returns></returns>
@@ -134,7 +134,7 @@ namespace CCXT.Simple.Services
         }
 
         /// <summary>
-        /// 현재 세계시(UTC)에 offset의 시간을 더한 값을 계산한다.
+        /// Calculates the value by adding the offset time to the current UTC time.
         /// </summary>
         /// <param name="offset"></param>
         /// <returns></returns>
@@ -144,7 +144,7 @@ namespace CCXT.Simple.Services
         }
 
         /// <summary>
-        /// 현재 세계시(UTC)에 timespan의 초를 더한 값을 계산한다.
+        /// Calculates the value by adding the timespan seconds to the current UTC time.
         /// </summary>
         /// <param name="offset"></param>
         /// <returns></returns>
@@ -178,7 +178,7 @@ namespace CCXT.Simple.Services
         //-----------------------------------------------------------------------------------------------------------------------------
 
         /// <summary>
-        /// 지정된 초 수를 더한 새로운 (UTC) System.DateTime을 반환합니다.
+        /// Returns a new (UTC) System.DateTime that adds the specified number of seconds.
         /// </summary>
         /// <param name="seconds"></param>
         /// <returns></returns>
@@ -188,7 +188,7 @@ namespace CCXT.Simple.Services
         }
 
         /// <summary>
-        /// 지정된 밀리초 수를 더한 새로운 (UTC) System.DateTime을 반환합니다.
+        /// Returns a new (UTC) System.DateTime that adds the specified number of milliseconds.
         /// </summary>
         /// <param name="milliSeconds"></param>
         /// <returns></returns>
@@ -198,7 +198,7 @@ namespace CCXT.Simple.Services
         }
 
         /// <summary>
-        /// 지정된 초에 timespan 수를 더한 새로운 (UTC) System.DateTime을 반환합니다.
+        /// Returns a new (UTC) System.DateTime that adds the timespan to the specified seconds.
         /// </summary>
         /// <param name="unixtime"></param>
         /// <param name="offset"></param>
@@ -209,7 +209,7 @@ namespace CCXT.Simple.Services
         }
 
         /// <summary>
-        /// 지정된 밀리초에 timespan 수를 더한 새로운 (UTC) System.DateTime을 반환합니다.
+        /// Returns a new (UTC) System.DateTime that adds the timespan to the specified milliseconds.
         /// </summary>
         /// <param name="unixtime"></param>
         /// <param name="offset"></param>
@@ -220,7 +220,7 @@ namespace CCXT.Simple.Services
         }
 
         /// <summary>
-        /// string 문자열을 UTC로 반환합니다.(문자열은 항상 timezone 형식을 포함 하여야 합니다.)
+        /// Returns a string as UTC. (The string must always include the timezone format.)
         /// </summary>
         /// <param name="timeWithZone"></param>
         /// <example>"2015-04-20T15:49:46.427+09:00"</example>
@@ -231,7 +231,7 @@ namespace CCXT.Simple.Services
         }
 
         /// <summary>
-        /// UTC 값에 해당 하는 세계시(UTC)를 string 형식으로 반환 합니다.
+        /// Returns the UTC time corresponding to the UTC value as a string format.
         /// </summary>
         /// <param name="unixtime"></param>
         /// <returns></returns>
@@ -241,7 +241,7 @@ namespace CCXT.Simple.Services
         }
 
         /// <summary>
-        /// UTC 값에 해당 하는 로컬 시간을 string 형식으로 반환 합니다.
+        /// Returns the local time corresponding to the UTC value as a string format.
         /// </summary>
         /// <param name="unixTimeMilli"></param>
         /// <returns></returns>
@@ -251,7 +251,7 @@ namespace CCXT.Simple.Services
         }
 
         /// <summary>
-        /// datetime에 해당 하는 값을 string 형식으로 반환 합니다.
+        /// Returns the value corresponding to datetime as a string format.
         /// </summary>
         /// <param name="datetime"></param>
         /// <returns></returns>
@@ -265,7 +265,7 @@ namespace CCXT.Simple.Services
         //-----------------------------------------------------------------------------------------------------------------------------
 
         /// <summary>
-        /// UTC 값에 해당 하는 로컬 시간을 datetiem 형식으로 반환 합니다.
+        /// Returns the local time corresponding to the UTC value as a datetime format.
         /// </summary>
         /// <param name="seconds"></param>
         /// <returns></returns>
@@ -275,7 +275,7 @@ namespace CCXT.Simple.Services
         }
 
         /// <summary>
-        /// UTC 값에 해당 하는 로컬 시간을 datetiem 형식으로 반환 합니다.
+        /// Returns the local time corresponding to the UTC value as a datetime format.
         /// </summary>
         /// <param name="milliSeconds"></param>
         /// <returns></returns>
@@ -285,7 +285,7 @@ namespace CCXT.Simple.Services
         }
 
         /// <summary>
-        /// string 문자열을 Local 시간으로 반환합니다.(문자열은 항상 timezone 형식을 포함 하여야 합니다.)
+        /// Returns a string as local time. (The string must always include the timezone format.)
         /// </summary>
         /// <param name="timeWithZone"></param>
         /// <example>"2015-04-20T15:49:46.427+09:00"</example>
@@ -296,7 +296,7 @@ namespace CCXT.Simple.Services
         }
 
         /// <summary>
-        /// UTC 값에 해당 하는 로컬 시간을 string 형식으로 반환 합니다.
+        /// Returns the local time corresponding to the UTC value as a string format.
         /// </summary>
         /// <param name="unixtime"></param>
         /// <returns></returns>
@@ -306,7 +306,7 @@ namespace CCXT.Simple.Services
         }
 
         /// <summary>
-        /// UTC 값에 해당 하는 로컬 시간을 string 형식으로 반환 합니다.
+        /// Returns the local time corresponding to the UTC value as a string format.
         /// </summary>
         /// <param name="unixTimeMilli"></param>
         /// <returns></returns>
@@ -316,7 +316,7 @@ namespace CCXT.Simple.Services
         }
 
         /// <summary>
-        /// datetime에 해당 하는 값을 string 형식으로 반환 합니다.
+        /// Returns the value corresponding to datetime as a string format.
         /// </summary>
         /// <param name="localtime"></param>
         /// <returns></returns>
@@ -330,20 +330,20 @@ namespace CCXT.Simple.Services
         //-----------------------------------------------------------------------------------------------------------------------------
 
         /// <summary>
-        /// 문자열이 datetime으로 변환 가능 한지 여부를 확인 합니다.
+        /// Checks whether a string can be converted to datetime.
         /// </summary>
-        /// <param name="timeString">날짜와 시간이 포함된 변환할 문자열입니다.</param>
-        /// <returns>s 매개 변수가 변환되면 true이고, 그렇지 않으면 false입니다.</returns>
+        /// <param name="timeString">The string to convert that contains the date and time.</param>
+        /// <returns>true if the s parameter is converted; otherwise, false.</returns>
         public static bool IsDateTimeFormat(string timeString)
         {
             return DateTime.TryParse(timeString, out _);
         }
 
         /// <summary>
-        /// 날짜 및 시간에 대한 지정된 문자열 표현을 해당 System.DateTime으로 변환합니다.
+        /// Converts the specified string representation of a date and time to its System.DateTime equivalent.
         /// </summary>
-        /// <param name="s">날짜와 시간이 포함된 변환할 문자열입니다.</param>
-        /// <returns>s에 포함된 날짜 및 시간에 해당하는 개체입니다.</returns>
+        /// <param name="s">The string to convert that contains the date and time.</param>
+        /// <returns>An object that is equivalent to the date and time contained in s.</returns>
         public static DateTime Parse(string s)
         {
             return DateTime.Parse(s);

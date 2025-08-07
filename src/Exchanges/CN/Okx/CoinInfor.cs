@@ -1,4 +1,4 @@
-namespace CCXT.Simple.Exchanges.Okex
+namespace CCXT.Simple.Exchanges.Okx
 {
     public class CoinInforItem
     {

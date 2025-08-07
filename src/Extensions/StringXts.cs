@@ -34,7 +34,7 @@
         }
 
         /// <summary>
-        /// 연-월-일T시:분:초.Zone(yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffK) 형식으로 변환 합니다.
+        /// Converts to Year-Month-DayTHour:Minute:Second.Zone (yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffK) format.
         /// </summary>
         /// <param name="d"></param>
         /// <returns></returns>
@@ -44,7 +44,7 @@
         }
 
         /// <summary>
-        /// 연-월-일 시:분:초(yyyy-MM-dd HH:mm:ss) 형식으로 변환 합니다.
+        /// Converts to Year-Month-Day Hour:Minute:Second (yyyy-MM-dd HH:mm:ss) format.
         /// </summary>
         /// <param name="d"></param>
         /// <returns></returns>
