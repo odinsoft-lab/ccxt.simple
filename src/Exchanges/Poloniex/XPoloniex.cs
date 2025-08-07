@@ -11,7 +11,8 @@ namespace CCXT.Simple.Exchanges.Poloniex
         /*
          * Poloniex Exchange Implementation
          * 
-         * API Documentation: https://api.poloniex.com
+         * API Documentation: 
+         *     https://api-docs.poloniex.com/spot/api/public/reference-data#symbol-information
          * 
          * Rate Limits: TBD
          */

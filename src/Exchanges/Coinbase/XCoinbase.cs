@@ -13,7 +13,9 @@ namespace CCXT.Simple.Exchanges.Coinbase
         /*
 		 * CoinbasePro Support Markets: BTC,USDC,USDT,USD
 		 *
-		 * REST API
+		 * API Documentation:
+		 *     https://developers.coinbase.com/api/v2
+		 *     https://docs.cloud.coinbase.com/advanced-trade/docs/welcome
 		 *     https://docs.cloud.coinbase.com/exchange/reference
 		 *
 		 * Rate Limit

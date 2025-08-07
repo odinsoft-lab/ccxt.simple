@@ -11,7 +11,9 @@ namespace CCXT.Simple.Exchanges.Mexc
         /*
          * Mexc Exchange Implementation
          * 
-         * API Documentation: https://api.mexc.com
+         * API Documentation: 
+         *     https://mexcdevelop.github.io/apidocs/spot_v3_en/
+         *     https://mexcdevelop.github.io/apidocs/contract_v1_en/
          * 
          * Rate Limits: TBD
          */

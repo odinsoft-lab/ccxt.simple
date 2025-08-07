@@ -12,8 +12,8 @@ namespace CCXT.Simple.Exchanges.Upbit
 		 * Upbit Support Markets: KRW, USDT, BTC
 		 *
 		 * API Documentation:
-		 *     Korean: https://docs.upbit.com/kr/reference/
-		 *     Global: https://global-docs.upbit.com/reference/
+		 *     Korean: https://docs.upbit.com/docs/%EC%9A%94%EC%B2%AD-%EC%88%98-%EC%A0%9C%ED%95%9C
+		 *     Global: https://global-docs.upbit.com/reference/today-trades-history
 		 *
 		 * REST API
 		 *     https://docs.upbit.com/reference

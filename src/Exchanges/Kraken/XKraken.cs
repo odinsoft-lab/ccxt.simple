@@ -11,7 +11,7 @@ namespace CCXT.Simple.Exchanges.Kraken
         /*
          * Kraken Exchange Implementation
          * 
-         * REST API
+         * API Documentation:
          *     https://docs.kraken.com/rest/
          * 
          * Fees:

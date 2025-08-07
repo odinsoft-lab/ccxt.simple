@@ -18,8 +18,10 @@ namespace CCXT.Simple.Exchanges.Crypto
         /*
 		 * Crypto Support Markets: USDT, USDC, BTC
 		 *
-		 * REST API
+		 * API Documentation:
 		 *     https://exchange-docs.crypto.com/exchange/v1/rest-ws/index.html
+		 *     https://exchange-docs.crypto.com/spot/index.html
+		 *     https://exchange-docs.crypto.com/derivatives/index.html
 		 *
 		 * Fees:
 		 *     https://crypto.com/exchange/document/fees-limits

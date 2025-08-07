@@ -11,7 +11,8 @@ namespace CCXT.Simple.Exchanges.Bitstamp
         /*
          * Bitstamp Exchange Implementation
          * 
-         * API Documentation: https://www.bitstamp.net
+         * API Documentation: 
+         *     https://www.bitstamp.net/api/
          * 
          * Rate Limits: TBD
          */

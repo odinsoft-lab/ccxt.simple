@@ -11,7 +11,9 @@ namespace CCXT.Simple.Exchanges.Bitfinex
         /*
          * Bitfinex Exchange Implementation
          * 
-         * API Documentation: https://api.bitfinex.com
+         * API Documentation: 
+         *     https://docs.bitfinex.com/v2/docs/
+         *     https://github.com/bitfinexcom/bitfinex-api-node
          * 
          * Rate Limits: TBD
          */

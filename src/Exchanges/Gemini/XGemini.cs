@@ -11,7 +11,9 @@ namespace CCXT.Simple.Exchanges.Gemini
         /*
          * Gemini Exchange Implementation
          * 
-         * API Documentation: https://api.gemini.com
+         * API Documentation: 
+         *     https://docs.gemini.com/rest-api
+         *     https://docs.sandbox.gemini.com
          * 
          * Rate Limits: TBD
          */

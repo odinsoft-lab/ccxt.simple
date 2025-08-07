@@ -13,7 +13,7 @@ namespace CCXT.Simple.Exchanges.Kucoin
         /*
 		 * Kucoin Support Markets: USDT, BTC
 		 *
-		 * REST API
+		 * API Documentation:
 		 *     https://docs.kucoin.com
 		 *
 		 */

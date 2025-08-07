@@ -10,8 +10,8 @@ namespace CCXT.Simple.Exchanges.GateIO
         /*
 		 * Gate Support Markets: USDT, BTC
 		 *
-		 * REST API
-		 *     https://www.gate.io/docs/developers/apiv4
+		 * API Documentation:
+		 *     https://www.gate.io/docs/developers/apiv4/en/
 		 *
 		 */
 
