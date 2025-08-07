@@ -425,6 +425,48 @@ catch (Exception ex)
 
 We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting pull requests.
 
+### 📢 Request Exchange Implementation
+
+**Want a specific exchange implemented sooner?**
+
+If you need a particular exchange from our skeleton implementations (96 exchanges ready), simply [create an issue](https://github.com/ccxt-net/ccxt.simple/issues/new) with the exchange name.
+
+We prioritize implementation based on community demand! Exchanges with more requests will be implemented first.
+
+### 🚀 Request New API Functions
+
+**Need additional API functions beyond our standard interface?**
+
+We're always looking to expand our API coverage! Please [create an issue](https://github.com/ccxt-net/ccxt.simple/issues/new) for:
+
+#### **1. Standard API Functions (All Exchanges)**
+API functions that should be standardized across all exchanges:
+- `GetFundingRate()` - Perpetual contract funding rates
+- `GetLeverageBrackets()` - Margin tier information
+- `GetIndexPrice()` - Index price for derivatives
+- `GetMarkPrice()` - Mark price for futures
+- `GetPositions()` - Open positions for margin/futures
+- `GetSubAccounts()` - Sub-account management
+- `TransferBetweenAccounts()` - Internal transfers
+- `GetTradingFees()` - Current fee structure
+
+#### **2. Exchange-Specific API Functions**
+Unique APIs that certain exchanges offer:
+- `CopyTrade()` - Copy trading API (Bitget, ByBit)
+- `GetStakingProducts()` - Staking opportunities (Binance)
+- `PlaceGridOrder()` - Grid trading (KuCoin, Gate.io)
+- `GetDualInvestment()` - Dual investment products (Binance)
+- `GetOptions()` - Options chain data (Deribit)
+- `GetInsurance()` - Insurance fund data (ByBit)
+- `GetLaunchpad()` - IEO/Launchpad info (multiple exchanges)
+
+When requesting API functions, please specify:
+- Whether it should be standard (all exchanges) or exchange-specific
+- The exact API endpoint from exchange documentation
+- Return data structure you expect
+
+Your feedback helps us identify missing APIs!
+
 ### **Development Setup**
 ```bash
 # Clone repository
@@ -477,7 +519,6 @@ dotnet add package CCXT.Simple
 - **Homepage**: https://www.odinsoft.co.kr
 - **Email**: help@odinsoft.co.kr
 - **Issues**: [GitHub Issues](https://github.com/ccxt-net/ccxt.simple/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/ccxt-net/ccxt.simple/discussions)
 
 ## 👥 Team
 
