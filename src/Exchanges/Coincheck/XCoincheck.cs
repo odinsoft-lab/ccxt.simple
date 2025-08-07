@@ -1,8 +1,6 @@
 using CCXT.Simple.Converters;
 using CCXT.Simple.Models;
-using CCXT.Simple.Services;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -52,32 +50,32 @@ namespace CCXT.Simple.Exchanges.Coincheck
             throw new NotImplementedException();
         }
 
-        public async ValueTask<bool> VerifyStates()
+        public async ValueTask<bool> VerifyStates(Tickers tickers)
         {
             throw new NotImplementedException();
         }
 
-        public async ValueTask<Tickers> GetTickers()
+        public async ValueTask<bool> GetTickers(Tickers tickers)
         {
             throw new NotImplementedException();
         }
 
-        public async ValueTask<Tickers> GetBookTickers()
+        public async ValueTask<bool> GetBookTickers(Tickers tickers)
         {
             throw new NotImplementedException();
         }
 
-        public async ValueTask<List<CMarket>> GetMarkets()
+        public async ValueTask<bool> GetMarkets(Tickers tickers)
         {
             throw new NotImplementedException();
         }
 
-        public async ValueTask<Dictionary<string, decimal>> GetVolumes()
+        public async ValueTask<bool> GetVolumes(Tickers tickers)
         {
             throw new NotImplementedException();
         }
 
-        public async ValueTask<Dictionary<string, decimal>> GetPrice(List<string> btcToBaseNames)
+        public async ValueTask<decimal> GetPrice(string symbol)
         {
             throw new NotImplementedException();
         }
@@ -85,59 +83,59 @@ namespace CCXT.Simple.Exchanges.Coincheck
         // New Standardized API Methods (v1.1.6+)
         
         // Market Data
-        public async ValueTask<Orderbook> GetOrderbook(string symbol, int limit = 100)
+        public async ValueTask<Orderbook> GetOrderbook(string symbol, int limit = 5)
         {
             throw new NotImplementedException();
         }
 
-        public async ValueTask<List<Candle>> GetCandles(string symbol, string timeframe, DateTime? since = null, int limit = 100)
+        public async ValueTask<List<decimal[]>> GetCandles(string symbol, string timeframe, long? since = null, int limit = 100)
         {
             throw new NotImplementedException();
         }
 
-        public async ValueTask<List<Trade>> GetTrades(string symbol, DateTime? since = null, int limit = 100)
+        public async ValueTask<List<TradeData>> GetTrades(string symbol, int limit = 50)
         {
             throw new NotImplementedException();
         }
 
         // Account
-        public async ValueTask<Balance> GetBalance()
+        public async ValueTask<Dictionary<string, BalanceInfo>> GetBalance()
         {
             throw new NotImplementedException();
         }
 
-        public async ValueTask<Account> GetAccount()
+        public async ValueTask<AccountInfo> GetAccount()
         {
             throw new NotImplementedException();
         }
 
         // Trading
-        public async ValueTask<Order> PlaceOrder(string symbol, string side, string type, decimal amount, decimal? price = null, Dictionary<string, object> parameters = null)
+        public async ValueTask<OrderInfo> PlaceOrder(string symbol, SideType side, string orderType, decimal amount, decimal? price = null, string clientOrderId = null)
         {
             throw new NotImplementedException();
         }
 
-        public async ValueTask<Order> CancelOrder(string orderId, string symbol = null)
+        public async ValueTask<bool> CancelOrder(string orderId, string symbol = null, string clientOrderId = null)
         {
             throw new NotImplementedException();
         }
 
-        public async ValueTask<Order> GetOrder(string orderId, string symbol = null)
+        public async ValueTask<OrderInfo> GetOrder(string orderId, string symbol = null, string clientOrderId = null)
         {
             throw new NotImplementedException();
         }
 
-        public async ValueTask<List<Order>> GetOpenOrders(string symbol = null, DateTime? since = null, int limit = 100)
+        public async ValueTask<List<OrderInfo>> GetOpenOrders(string symbol = null)
         {
             throw new NotImplementedException();
         }
 
-        public async ValueTask<List<Order>> GetOrderHistory(string symbol = null, DateTime? since = null, int limit = 100)
+        public async ValueTask<List<OrderInfo>> GetOrderHistory(string symbol = null, int limit = 100)
         {
             throw new NotImplementedException();
         }
 
-        public async ValueTask<List<Trade>> GetTradeHistory(string symbol = null, DateTime? since = null, int limit = 100)
+        public async ValueTask<List<TradeInfo>> GetTradeHistory(string symbol = null, int limit = 100)
         {
             throw new NotImplementedException();
         }
@@ -148,17 +146,17 @@ namespace CCXT.Simple.Exchanges.Coincheck
             throw new NotImplementedException();
         }
 
-        public async ValueTask<WithdrawalResponse> Withdraw(string currency, decimal amount, string address, string tag = null, string network = null, Dictionary<string, object> parameters = null)
+        public async ValueTask<WithdrawalInfo> Withdraw(string currency, decimal amount, string address, string tag = null, string network = null)
         {
             throw new NotImplementedException();
         }
 
-        public async ValueTask<List<Deposit>> GetDepositHistory(string currency = null, DateTime? since = null, int limit = 100)
+        public async ValueTask<List<DepositInfo>> GetDepositHistory(string currency = null, int limit = 100)
         {
             throw new NotImplementedException();
         }
 
-        public async ValueTask<List<Withdrawal>> GetWithdrawalHistory(string currency = null, DateTime? since = null, int limit = 100)
+        public async ValueTask<List<WithdrawalInfo>> GetWithdrawalHistory(string currency = null, int limit = 100)
         {
             throw new NotImplementedException();
         }

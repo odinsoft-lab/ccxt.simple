@@ -5,6 +5,7 @@
 		<RootNamespace>CCXT.Simple</RootNamespace>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>disable</Nullable>
+		<NoWarn>CS1998</NoWarn>
 		<Title>CryptoCurrency eXchange Trading Library for .NET</Title>
 		<Product>CCXT</Product>
 		<Company>ODINSOFT</Company>
