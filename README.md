@@ -15,9 +15,9 @@ A simplified cryptocurrency trading library for .NET that provides unified acces
 - **Error Handling**: Consistent error reporting and exception handling
 
 ### **Comprehensive Exchange Support**
-- **111 Total Exchanges**: 14 fully implemented, 97 in development (skeleton code ready)
-- **Implemented Exchanges**: Binance, Bitget, Bithumb, Bittrex, ByBit, Coinbase, Coinone, Crypto.com, Gate.io, Huobi, Korbit, KuCoin, OKX, Upbit
-- **In Development**: 97 additional exchanges from CCXT library (see full list below)
+- **111 Total Exchanges**: 15 fully implemented, 96 in development (skeleton code ready)
+- **Implemented Exchanges**: Binance, Bitget, Bithumb, Bittrex, ByBit, Coinbase, Coinone, Crypto.com, Gate.io, Huobi, Korbit, Kraken, KuCoin, OKX, Upbit
+- **In Development**: 96 additional exchanges from CCXT library (see full list below)
 - **Full API Coverage**: Implemented exchanges support complete trading, account, and funding operations (v1.1.6+)
 - **Market Data**: Real-time tickers, order books, trading pairs, volume data
 - **Account Management**: Balance queries, account information, deposit/withdrawal history
@@ -326,12 +326,13 @@ exchange.OnKrwPriceEvent += (price) =>
 
 ## 🔄 Migration & Compatibility
 
-### **Version 1.1.6 - Major Release**
-- **Complete API Implementation**: All 14 exchanges now have full API support
-- **Standardized Interface**: Unified methods across all exchanges for consistency
-- **HttpClient Pooling**: Improved performance with connection pooling per exchange
-- **Enhanced Models**: Comprehensive data types for all trading operations
-- **.NET 9.0**: Upgraded from .NET 8.0 for better performance
+### **Version 1.1.7 - Technical Improvements**
+- **Build System Updates**: Removed netstandard2.1 support, focusing on .NET 8.0 and .NET 9.0
+- **Dependency Cleanup**: Replaced System.Net.Http.Json with Newtonsoft.Json for better compatibility
+- **Documentation**: Translated all Korean comments to English for international developers
+- **Bug Fixes**: Fixed CoinState.json file path issue in Bithumb exchange
+- **Code Organization**: Added GlobalUsings.cs for common namespace imports
+- **Testing**: Unified test project structure with improved test coverage
 - **No Breaking Changes**: Full backward compatibility maintained
 
 ### **Backward Compatibility**
@@ -383,15 +384,17 @@ catch (Exception ex)
 
 ## 🛣️ Roadmap
 
-### **Completed Features (v1.1.6)**
-- ✅ Full API implementation for all 14 initial exchanges
+### **Completed Features (v1.1.7)**
+- ✅ Full API implementation for 15 exchanges (including Kraken)
 - ✅ Standardized trading, account, and funding operations
 - ✅ Comprehensive market data access
 - ✅ HttpClient pooling for improved performance
-- ✅ Skeleton code for 97 additional exchanges from CCXT
+- ✅ Skeleton code for 96 additional exchanges from CCXT
 - ✅ Complete Kraken exchange implementation
 - ✅ Unified test project structure (CCXT.Simple.Tests)
 - ✅ Unified samples project structure (CCXT.Simple.Samples)
+- ✅ .NET 8.0 and .NET 9.0 support (removed netstandard2.1)
+- ✅ English documentation throughout codebase
 
 ### **Phase 1: Exchange Expansion (Q1 2025)**
 - Complete implementation of top 20 priority exchanges
@@ -476,6 +479,13 @@ dotnet add package CCXT.Simple
 - **Issues**: [GitHub Issues](https://github.com/ccxt-net/ccxt.simple/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/ccxt-net/ccxt.simple/discussions)
 
+## 👥 Team
+
+### **Core Development Team**
+- **SEONGAHN** - Lead Developer & Project Architect
+- **YUJIN** - Senior Developer & Exchange Integration Specialist
+- **SEJIN** - Software Developer & API Implementation
+
 ---
 
-**Built with ❤️ by the CCXT.Simple Team**
+**Built with ❤️ by the ODINSOFT Team**

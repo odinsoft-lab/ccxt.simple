@@ -13,20 +13,27 @@
 		<Authors>SEONGAHN LEE</Authors>
 		<PackageId>CCXT.SIMPLE</PackageId>
 		<PackageTags>bitcoin;cryptocurrency;exchange;trading;market-data;ccxt;exchange-markets;altcoin;api;arbitrage;bot;crypto;e-commerce;invest;library;strategy;trade;merchant;cryptocoin</PackageTags>
-		<PackageProjectUrl>https://github.com/ccxt.net/ccxt.simple</PackageProjectUrl>
+		<PackageProjectUrl>https://github.com/ccxt-net/ccxt.simple</PackageProjectUrl>
 		<PackageIcon>ccxt.simple.api.png</PackageIcon>
 		<GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
 		<GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
 		<GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<Version>1.1.6</Version>
-		<AssemblyVersion>1.1.6.7</AssemblyVersion>
-		<FileVersion>1.1.6.7</FileVersion>
-		<PackageReleaseNotes>Major API standardization release - Added 15 standardized exchange functions with unified interface across all 16 supported exchanges</PackageReleaseNotes>
+		<Version>1.1.7</Version>
+		<AssemblyVersion>1.1.7.8</AssemblyVersion>
+		<FileVersion>1.1.7.8</FileVersion>
+		<PackageReleaseNotes>v1.1.7 - Technical Improvements
+• Breaking: Removed netstandard2.1 support (now .NET 8.0 and 9.0 only)
+• Fixed: System.Net.Http.Json dependency replaced with Newtonsoft.Json
+• Fixed: CoinState.json file path issue in Bithumb exchange
+• Improved: All Korean comments translated to English
+• Added: GlobalUsings.cs for common namespace imports
+• Enhanced: Test coverage with all 23 tests passing
+Full changelog: https://github.com/ccxt-net/ccxt.simple/blob/main/docs/CHANGELOG.md</PackageReleaseNotes>
 		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<RepositoryUrl>https://github.com/ccxt.net/ccxt.simple</RepositoryUrl>
+		<RepositoryUrl>https://github.com/ccxt-net/ccxt.simple</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<ApplicationIcon>ccxt.simple.ico</ApplicationIcon>
 	</PropertyGroup>

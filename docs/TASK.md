@@ -82,4 +82,42 @@ The PowerShell migration script is saved at: `D:\github.com\lisa3907\ccxt.simple
 
 ---
 
-*Last Updated: 2024-08-07*
+---
+
+## Version 1.1.7 Updates (Status: Completed)
+
+### Build System Improvements
+- ✅ **Removed netstandard2.1 support** - Focus on .NET 8.0 and .NET 9.0
+- ✅ **Fixed System.Net.Http.Json dependency** - Replaced with Newtonsoft.Json for better compatibility
+- ✅ **Added GlobalUsings.cs** - Centralized common namespace imports
+
+### Code Quality Improvements
+- ✅ **English Documentation** - Translated all Korean comments to English in Extensions folder
+- ✅ **Bug Fixes**:
+  - Fixed `CoinState.json` file path issue in Bithumb exchange (now uses assembly location)
+  - Fixed build errors related to global using directives
+
+### Project Structure
+- ✅ **Target Frameworks**: .NET 8.0, .NET 9.0
+- ✅ **Removed Dependencies**: System.Net.Http.Json (replaced with Newtonsoft.Json)
+- ✅ **Test Coverage**: All 23 tests passing
+
+### Files Modified
+- `src/ccxt.simple.csproj` - Removed netstandard2.1, updated target frameworks
+- `src/GlobalUsings.cs` - Added for common namespace imports
+- `src/Exchanges/US/Crypto/XCrypto.cs` - Replaced PostAsJsonAsync with manual JSON serialization
+- `src/Exchanges/KR/Bithumb/XBithumb.cs` - Fixed CoinState.json file path
+- `src/Extensions/DateTimeXts.cs` - Translated 23 Korean comments to English
+- `src/Extensions/StringXts.cs` - Translated 2 Korean comments to English
+
+### Test Results
+```
+Total Tests: 23
+Passed: 23
+Failed: 0
+Skipped: 0
+```
+
+---
+
+*Last Updated: 2025-08-07*

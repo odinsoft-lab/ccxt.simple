@@ -10,10 +10,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **CCXT.Simple** is a cryptocurrency exchange trading library for .NET that provides a simplified interface for accessing cryptocurrency exchange APIs. It's designed as a simpler alternative to the more complex ccxt.net library.
 
-- **Target Framework**: .NET 9.0
+- **Target Frameworks**: .NET 8.0, .NET 9.0
 - **Language**: C# with modern async/await patterns
 - **Architecture**: Multi-exchange adapter pattern with unified interfaces
 - **Purpose**: Cryptocurrency trading, market data access, and exchange integration
+- **Version**: 1.1.7
 
 ## Build and Development Commands
 
@@ -80,9 +81,10 @@ The project follows a **multi-exchange adapter pattern** where each cryptocurren
 - Provides `HttpClientService` for pooled HTTP client management per exchange
 
 **Exchange Implementations**
-- Each exchange has its own folder under `src/Exchanges/`
+- Each exchange has its own folder under `src/Exchanges/{CountryCode}/{ExchangeName}/`
 - Naming convention: `X{ExchangeName}.cs` (e.g., `XBinance.cs`, `XBithumb.cs`)
-- Currently supports: Binance, Bitget, Bithumb, ByBit, Coinbase, Coinone, Crypto, GateIO, Huobi, Korbit, Kucoin, OKX (formerly OkEX), Upbit, Bittrex
+- Currently supports: Binance, Bitget, Bithumb, ByBit, Coinbase, Coinone, Crypto, GateIO, Huobi, Korbit, Kraken, Kucoin, OKX (formerly OkEX), Upbit, Bittrex
+- Exchanges are organized by country/region codes (US, KR, CN, EU, etc.)
 - Most new API methods throw `NotImplementedException` pending full implementation
 
 **Data Models**
@@ -166,12 +168,14 @@ These samples serve as both integration tests and usage examples.
 
 ## Important Notes
 
-- This library targets .NET 9.0 and uses modern C# async patterns
-- The project uses `ImplicitUsings` and has `Nullable` disabled
+- This library targets .NET 8.0 and .NET 9.0 with modern C# async patterns
+- The project uses `GlobalUsings.cs` for common namespace imports
+- Has `Nullable` disabled
 - All exchange operations are asynchronous using `ValueTask<T>`
 - Thread safety is critical - the library is designed for concurrent access
-- Current version: 1.1.6 (major API standardization release)
+- Current version: 1.1.7 (technical improvements and bug fixes)
 - NuGet package: `CCXT.Simple`
+- No longer supports netstandard2.1 (removed in v1.1.7)
 
 ## Development Guidelines
 

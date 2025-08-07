@@ -5,7 +5,29 @@ All notable changes to CCXT.Simple will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 2025-01-08
+## [1.1.7] - 2025-01-08
+
+### Changed
+- **Breaking**: Removed netstandard2.1 support - now targets .NET 8.0 and .NET 9.0 only
+- Replaced System.Net.Http.Json dependency with Newtonsoft.Json for better compatibility
+- Translated all Korean comments to English for international developer accessibility
+- Reorganized project structure with GlobalUsings.cs for common namespace imports
+
+### Fixed
+- Fixed CoinState.json file path issue in Bithumb exchange (now uses assembly-relative path)
+- Fixed build errors related to global using directives in different target frameworks
+- Fixed XCrypto.cs PostAsJsonAsync compatibility issue
+
+### Added
+- GlobalUsings.cs file for centralized namespace imports
+- Improved test coverage with all 23 tests passing
+
+### Technical Details
+- **Target Frameworks**: .NET 8.0, .NET 9.0
+- **Removed**: netstandard2.1 support
+- **Dependencies**: Replaced System.Net.Http.Json with manual JSON serialization using Newtonsoft.Json
+
+## [1.1.6] - 2025-01-08
 
 ### 🆕 Added
 - **97 New Exchange Skeletons**: Added skeleton implementations for 97 additional exchanges from CCXT library
