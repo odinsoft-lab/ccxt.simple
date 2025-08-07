@@ -32,11 +32,14 @@ dotnet pack src/ccxt.simple.csproj --configuration Release
 
 ### Running Sample Applications
 ```bash
-# Run Bithumb sample
-dotnet run --project samples/bithumb/bithumb.csproj
+# Run unified samples application (interactive menu)
+dotnet run --project samples/CCXT.Simple.Samples.csproj
 
-# Run Bitget sample  
-dotnet run --project samples/bitget/bitget.csproj
+# The application will show a menu to select exchanges:
+# 1. Bithumb
+# 2. Bitget
+# 3. Coinone
+# 4. Kraken
 ```
 
 ### Testing and Validation
@@ -44,17 +47,15 @@ dotnet run --project samples/bitget/bitget.csproj
 # Run all tests
 dotnet test
 
-# Run specific exchange tests
-dotnet test tests/Bithumb/Bithumb.csproj
-dotnet test tests/Bitget/Bitget.csproj
-dotnet test tests/Coinone/Coinone.csproj
+# Run unified test project
+dotnet test tests/CCXT.Simple.Tests.csproj
 
 # Run with verbosity
 dotnet test --logger "console;verbosity=detailed"
 ```
 
 **Test Framework**: xUnit with Microsoft.Extensions.Configuration for settings
-**Test Structure**: Tests are located in `tests/{ExchangeName}/` directories
+**Test Structure**: Unified test project at `tests/CCXT.Simple.Tests.csproj` with tests organized by exchange
 
 ## Project Architecture
 
@@ -122,11 +123,11 @@ The `Exchange` class uses several concurrent collections:
 ## Working with Exchange Implementations
 
 ### Adding New Exchange Support
-1. Create new folder under `src/Exchanges/{ExchangeName}/`
+1. Create new folder under `src/Exchanges/{CountryCode}/{ExchangeName}/`
 2. Implement `IExchange` interface in `X{ExchangeName}.cs`
 3. Add exchange-specific data models (CoinInfor, CoinState, etc.)
 4. Follow existing patterns for API authentication and rate limiting
-5. Add sample application under `samples/{exchangename}/`
+5. Add sample class to `samples/Exchanges/{ExchangeName}Sample.cs`
 
 ### Common Exchange Implementation Patterns
 - **API Authentication**: Use HMAC-SHA256 for most exchanges
@@ -159,10 +160,11 @@ exchange.ApiCallDelaySeconds = 1;    // Rate limiting
 
 ## Sample Applications
 
-The `samples/` directory contains example implementations:
-- **bithumb**: Demonstrates limit order creation with concurrent bid/ask operations
-- **bitget**: Shows exchange integration patterns
-- **coinone**: Example Coinone exchange integration
+The `samples/` directory contains a unified sample application:
+- **CCXT.Simple.Samples**: Interactive menu-driven application
+- Includes samples for: Bithumb, Bitget, Coinone, Kraken
+- Each exchange has its own sample class in `samples/Exchanges/`
+- Run with `dotnet run --project samples/CCXT.Simple.Samples.csproj`
 
 These samples serve as both integration tests and usage examples.
 

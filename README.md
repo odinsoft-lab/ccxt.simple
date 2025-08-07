@@ -384,42 +384,14 @@ catch (Exception ex)
 
 ## 🛣️ Roadmap
 
-### **Completed Features (v1.1.7)**
-- ✅ Full API implementation for 15 exchanges (including Kraken)
-- ✅ Standardized trading, account, and funding operations
-- ✅ Comprehensive market data access
-- ✅ HttpClient pooling for improved performance
-- ✅ Skeleton code for 96 additional exchanges from CCXT
-- ✅ Complete Kraken exchange implementation
-- ✅ Unified test project structure (CCXT.Simple.Tests)
-- ✅ Unified samples project structure (CCXT.Simple.Samples)
-- ✅ .NET 8.0 and .NET 9.0 support (removed netstandard2.1)
-- ✅ English documentation throughout codebase
+See our detailed [Development Roadmap](docs/ROADMAP.md) for:
+- Quarterly development phases
+- Monthly implementation milestones  
+- Priority exchange queue
+- Community involvement opportunities
+- Success metrics and goals
 
-### **Phase 1: Exchange Expansion (Q1 2025)**
-- Complete implementation of top 20 priority exchanges
-- Focus on major markets: ~~Kraken~~, Bitstamp, Bitfinex, Gemini, Poloniex
-- WebSocket streaming for implemented exchanges
-- Real-time order book and trade streams
-
-### **Phase 2: Global Coverage (Q2 2025)**
-- Complete 30+ additional exchange implementations
-- Regional exchange focus: Japan, Europe, Latin America
-- Derivatives exchanges: Deribit, Bitmex, Phemex
-- Advanced order types (OCO, trailing stops, iceberg)
-
-### **Phase 3: Complete Integration (Q3 2025)**
-- Target 50+ fully implemented exchanges
-- DeFi bridge integrations (DEX support)
-- Cross-exchange arbitrage detection
-- Advanced analytics dashboard
-
-### **Phase 4: Enterprise & Optimization (Q4 2025)**
-- Complete all 111 exchange implementations
-- Multi-account management
-- Risk management tools
-- Performance optimization for 100+ concurrent exchanges
-- Institutional-grade API
+**Current Focus**: Q1 2025 - Implementing top 20 priority exchanges
 
 ## 🤝 Contributing
 
@@ -479,9 +451,8 @@ dotnet build
 # Run tests
 dotnet test
 
-# Build samples
-dotnet run --project samples/bithumb
-dotnet run --project samples/bitget
+# Run samples (interactive menu)
+dotnet run --project samples/CCXT.Simple.Samples.csproj
 ```
 
 ### **Implementation Guidelines**
