@@ -12,6 +12,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Total exchange support increased from 14 to 111 exchanges
   - All new exchanges implement the standardized `IExchange` interface
   - Ready for community contributions and gradual implementation
+- **Kraken Exchange**: Complete implementation with all standard API methods
+  - Full market data support (orderbook, candles, trades)
+  - Account management and balance queries
+  - Trading operations (place, cancel, query orders)
+  - Funding operations (deposits, withdrawals, history)
+- **Unified Test Project**: Consolidated all exchange tests into single CCXT.Simple.Tests project
+  - Comprehensive test coverage for Kraken exchange
+  - Organized test structure by exchange
+  - Simplified test maintenance and execution
+- **Unified Samples Project**: Consolidated all sample applications into CCXT.Simple.Samples
+  - Interactive menu-driven interface for all exchanges
+  - Kraken sample with market data, account, and trading demos
+  - Consistent sample structure across all exchanges
 
 ### 📋 New Exchange Categories
 
@@ -40,14 +53,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bitfinex, Bitmex, Gemini, Kraken, Krakenfutures, Mexc, Phemex, Poloniex
 - Exmo, Hitbtc, Htx, Gate, Hashkey
 
+### ✅ Completed Implementations
+- **Kraken** - Major US exchange (Fully implemented)
+
 ### 🚧 Development Status
 
 #### **Priority Implementation Queue (Q1 2025)**
-1. **Kraken** - Major US exchange
-2. **Bitstamp** - European market leader
-3. **Bitfinex** - Advanced trading features
-4. **Gemini** - US regulated exchange
-5. **Poloniex** - Wide altcoin selection
+1. **Bitstamp** - European market leader
+2. **Bitfinex** - Advanced trading features
+3. **Gemini** - US regulated exchange
+4. **Poloniex** - Wide altcoin selection
+5. **Mexc** - High-volume derivatives
 
 ### Planned
 - Complete implementation of standardized APIs for all 111 exchanges

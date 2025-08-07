@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace CCXT.Simple.Tests.Bithumb
+namespace CCXT.Simple.Tests.Exchanges
 {
     public class BithumbExchangeTests : IDisposable
     {
