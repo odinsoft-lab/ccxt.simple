@@ -5,11 +5,53 @@ All notable changes to CCXT.Simple will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [Unreleased] - 2025-01-08
+
+### 🆕 Added
+- **97 New Exchange Skeletons**: Added skeleton implementations for 97 additional exchanges from CCXT library
+  - Total exchange support increased from 14 to 111 exchanges
+  - All new exchanges implement the standardized `IExchange` interface
+  - Ready for community contributions and gradual implementation
+
+### 📋 New Exchange Categories
+
+#### **Binance Ecosystem** (3 exchanges)
+- BinanceCoinm - Binance COIN-M Futures
+- BinanceUs - Binance US 
+- BinanceUsdm - Binance USD-M Futures
+
+#### **Major International Exchanges** (22 exchanges)
+- Alpaca, Apex, Ascendex, Bequant, Bigone, Bingx, Bit2c, Bitbank, Bitbns
+- Bitmart, Bitopro, Bitrue, Bitso, Bitteam, Bittrade
+- Blockchaincom, Blofin, Btcalpha, Btcbox, Btcmarkets, Cex
+
+#### **Derivatives & DeFi** (7 exchanges)
+- Defx, Delta, Deribit, Derive, Hyperliquid, Paradex, Vertex
+
+#### **Regional Exchanges** (15 exchanges)
+- Japanese: Bitflyer, Coincheck, Zaif
+- European: Bitstamp, Bitvavo
+- Turkish: Btcturk
+- Brazilian: Foxbit, Mercado, Novadax
+- Indonesian: Indodax
+- Others: Coinsph, Coinspot, Luno
+
+#### **Established Exchanges** (16 exchanges)
+- Bitfinex, Bitmex, Gemini, Kraken, Krakenfutures, Mexc, Phemex, Poloniex
+- Exmo, Hitbtc, Htx, Gate, Hashkey
+
+### 🚧 Development Status
+
+#### **Priority Implementation Queue (Q1 2025)**
+1. **Kraken** - Major US exchange
+2. **Bitstamp** - European market leader
+3. **Bitfinex** - Advanced trading features
+4. **Gemini** - US regulated exchange
+5. **Poloniex** - Wide altcoin selection
 
 ### Planned
-- Complete implementation of standardized APIs for all exchanges
-- WebSocket support for real-time data streaming
+- Complete implementation of standardized APIs for all 111 exchanges
+- WebSocket support for real-time data streaming  
 - Advanced order types (OCO, trailing stops)
 - DeFi protocol integrations
 
