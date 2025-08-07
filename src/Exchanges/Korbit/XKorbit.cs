@@ -1,5 +1,5 @@
-﻿using CCXT.Simple.Base;
-using CCXT.Simple.Data;
+﻿using CCXT.Simple.Services;
+using CCXT.Simple.Models;
 using CCXT.Simple.Exchanges.Crypto;
 using GraphQL;
 using GraphQL.Client.Http;
@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
 using System.Net;
+using CCXT.Simple.Converters;
 
 namespace CCXT.Simple.Exchanges.Korbit
 {
@@ -433,7 +434,7 @@ namespace CCXT.Simple.Exchanges.Korbit
                                 _volume *= _last_price;
                                 _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
 
-                                var _curr_timestamp = CUnixTime.NowMilli;
+                                var _curr_timestamp = DateTimeXts.NowMilli;
                                 if (_curr_timestamp > _next_timestamp)
                                 {
                                     _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
@@ -503,7 +504,7 @@ namespace CCXT.Simple.Exchanges.Korbit
                                 _volume *= _last_price;
                                 _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
 
-                                var _curr_timestamp = CUnixTime.NowMilli;
+                                var _curr_timestamp = DateTimeXts.NowMilli;
                                 if (_curr_timestamp > _next_timestamp)
                                 {
                                     _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
@@ -529,6 +530,83 @@ namespace CCXT.Simple.Exchanges.Korbit
             }
 
             return _result;
+        }
+
+        
+
+        public ValueTask<Orderbook> GetOrderbook(string symbol, int limit = 5)
+        {
+            throw new NotImplementedException("GetOrderbook not implemented for Korbit exchange");
+        }
+
+        public ValueTask<List<decimal[]>> GetCandles(string symbol, string timeframe, long? since = null, int limit = 100)
+        {
+            throw new NotImplementedException("GetCandles not implemented for Korbit exchange");
+        }
+
+        public ValueTask<List<TradeData>> GetTrades(string symbol, int limit = 50)
+        {
+            throw new NotImplementedException("GetTrades not implemented for Korbit exchange");
+        }
+
+        public ValueTask<Dictionary<string, BalanceInfo>> GetBalance()
+        {
+            throw new NotImplementedException("GetBalance not implemented for Korbit exchange");
+        }
+
+        public ValueTask<AccountInfo> GetAccount()
+        {
+            throw new NotImplementedException("GetAccount not implemented for Korbit exchange");
+        }
+
+        public ValueTask<OrderInfo> PlaceOrder(string symbol, SideType side, string orderType, decimal amount, decimal? price = null, string clientOrderId = null)
+        {
+            throw new NotImplementedException("PlaceOrder not implemented for Korbit exchange");
+        }
+
+        public ValueTask<bool> CancelOrder(string orderId, string symbol = null, string clientOrderId = null)
+        {
+            throw new NotImplementedException("CancelOrder not implemented for Korbit exchange");
+        }
+
+        public ValueTask<OrderInfo> GetOrder(string orderId, string symbol = null, string clientOrderId = null)
+        {
+            throw new NotImplementedException("GetOrder not implemented for Korbit exchange");
+        }
+
+        public ValueTask<List<OrderInfo>> GetOpenOrders(string symbol = null)
+        {
+            throw new NotImplementedException("GetOpenOrders not implemented for Korbit exchange");
+        }
+
+        public ValueTask<List<OrderInfo>> GetOrderHistory(string symbol = null, int limit = 100)
+        {
+            throw new NotImplementedException("GetOrderHistory not implemented for Korbit exchange");
+        }
+
+        public ValueTask<List<TradeInfo>> GetTradeHistory(string symbol = null, int limit = 100)
+        {
+            throw new NotImplementedException("GetTradeHistory not implemented for Korbit exchange");
+        }
+
+        public ValueTask<DepositAddress> GetDepositAddress(string currency, string network = null)
+        {
+            throw new NotImplementedException("GetDepositAddress not implemented for Korbit exchange");
+        }
+
+        public ValueTask<WithdrawalInfo> Withdraw(string currency, decimal amount, string address, string tag = null, string network = null)
+        {
+            throw new NotImplementedException("Withdraw not implemented for Korbit exchange");
+        }
+
+        public ValueTask<List<DepositInfo>> GetDepositHistory(string currency = null, int limit = 100)
+        {
+            throw new NotImplementedException("GetDepositHistory not implemented for Korbit exchange");
+        }
+
+        public ValueTask<List<WithdrawalInfo>> GetWithdrawalHistory(string currency = null, int limit = 100)
+        {
+            throw new NotImplementedException("GetWithdrawalHistory not implemented for Korbit exchange");
         }
     }
 }

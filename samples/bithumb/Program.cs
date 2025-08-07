@@ -1,4 +1,5 @@
-﻿using CCXT.Simple.Exchanges;
+﻿using CCXT.Simple.Converters;
+using CCXT.Simple.Exchanges;
 using CCXT.Simple.Exchanges.Bithumb;
 
 var _api_key = "";

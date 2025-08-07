@@ -2,7 +2,7 @@
 using CCXT.Simple.Exchanges.Bitget.RA.Public;
 using CCXT.Simple.Exchanges.Bitget.RA.Trade;
 using CCXT.Simple.Exchanges.Bitget.WS;
-using CCXT.Simple.Base;
+using CCXT.Simple.Services;
 using CCXT.Simple.Exchanges;
 
 namespace CCXT.Bitget;
@@ -13,7 +13,7 @@ class Program
     public const string _secret_key = "secret_key";
     public const string _pass_phrase = "pass_phrase";
 
-    private static CancellationTokenSource __main_token_source;
+    private static CancellationTokenSource? __main_token_source;
 
     public static CancellationTokenSource MainTokenSource
     {
@@ -58,8 +58,8 @@ class Program
                     if (_inst_id.IsEmpty())
                         break;
 
-                    var _symbols = _inst_id.Split(',');
-                    if (_symbols.Length < 1)
+                    var _symbols = _inst_id?.Split(',');
+                    if (_symbols == null || _symbols.Length < 1)
                         break;
 
                     var _ws = new WebSocket(_exchange, _api_key, _secret_key, _pass_phrase);

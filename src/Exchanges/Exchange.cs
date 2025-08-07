@@ -1,4 +1,4 @@
-﻿using CCXT.Simple.Data;
+﻿using CCXT.Simple.Models;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;

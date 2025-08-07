@@ -1,4 +1,5 @@
-﻿using CCXT.Simple.Data;
+﻿using CCXT.Simple.Converters;
+using CCXT.Simple.Models;
 using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
@@ -445,7 +446,7 @@ namespace CCXT.Simple.Exchanges.Upbit
             return _result;
         }
 
-        public async ValueTask<bool> GetOrderbook(Tickers tickers)
+        public async ValueTask<bool> GetOrderbookForTickers(Tickers tickers)
         {
             var _result = false;
 
@@ -504,6 +505,83 @@ namespace CCXT.Simple.Exchanges.Upbit
         ValueTask<bool> IExchange.GetBookTickers(Tickers tickers)
         {
             throw new NotImplementedException();
+        }
+
+        
+
+        public ValueTask<Orderbook> GetOrderbook(string symbol, int limit = 5)
+        {
+            throw new NotImplementedException("GetOrderbook not implemented for Upbit exchange");
+        }
+
+        public ValueTask<List<decimal[]>> GetCandles(string symbol, string timeframe, long? since = null, int limit = 100)
+        {
+            throw new NotImplementedException("GetCandles not implemented for Upbit exchange");
+        }
+
+        public ValueTask<List<TradeData>> GetTrades(string symbol, int limit = 50)
+        {
+            throw new NotImplementedException("GetTrades not implemented for Upbit exchange");
+        }
+
+        public ValueTask<Dictionary<string, BalanceInfo>> GetBalance()
+        {
+            throw new NotImplementedException("GetBalance not implemented for Upbit exchange");
+        }
+
+        public ValueTask<AccountInfo> GetAccount()
+        {
+            throw new NotImplementedException("GetAccount not implemented for Upbit exchange");
+        }
+
+        public ValueTask<OrderInfo> PlaceOrder(string symbol, SideType side, string orderType, decimal amount, decimal? price = null, string clientOrderId = null)
+        {
+            throw new NotImplementedException("PlaceOrder not implemented for Upbit exchange");
+        }
+
+        public ValueTask<bool> CancelOrder(string orderId, string symbol = null, string clientOrderId = null)
+        {
+            throw new NotImplementedException("CancelOrder not implemented for Upbit exchange");
+        }
+
+        public ValueTask<OrderInfo> GetOrder(string orderId, string symbol = null, string clientOrderId = null)
+        {
+            throw new NotImplementedException("GetOrder not implemented for Upbit exchange");
+        }
+
+        public ValueTask<List<OrderInfo>> GetOpenOrders(string symbol = null)
+        {
+            throw new NotImplementedException("GetOpenOrders not implemented for Upbit exchange");
+        }
+
+        public ValueTask<List<OrderInfo>> GetOrderHistory(string symbol = null, int limit = 100)
+        {
+            throw new NotImplementedException("GetOrderHistory not implemented for Upbit exchange");
+        }
+
+        public ValueTask<List<TradeInfo>> GetTradeHistory(string symbol = null, int limit = 100)
+        {
+            throw new NotImplementedException("GetTradeHistory not implemented for Upbit exchange");
+        }
+
+        public ValueTask<DepositAddress> GetDepositAddress(string currency, string network = null)
+        {
+            throw new NotImplementedException("GetDepositAddress not implemented for Upbit exchange");
+        }
+
+        public ValueTask<WithdrawalInfo> Withdraw(string currency, decimal amount, string address, string tag = null, string network = null)
+        {
+            throw new NotImplementedException("Withdraw not implemented for Upbit exchange");
+        }
+
+        public ValueTask<List<DepositInfo>> GetDepositHistory(string currency = null, int limit = 100)
+        {
+            throw new NotImplementedException("GetDepositHistory not implemented for Upbit exchange");
+        }
+
+        public ValueTask<List<WithdrawalInfo>> GetWithdrawalHistory(string currency = null, int limit = 100)
+        {
+            throw new NotImplementedException("GetWithdrawalHistory not implemented for Upbit exchange");
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace CCXT.Simple.Data
+﻿namespace CCXT.Simple.Models
 {
     public class XLogger
     {

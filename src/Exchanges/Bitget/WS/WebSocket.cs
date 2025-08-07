@@ -1,4 +1,4 @@
-﻿using CCXT.Simple.Base;
+﻿using CCXT.Simple.Services;
 using Newtonsoft.Json;
 using System.Net.WebSockets;
 using System.Text;
@@ -68,7 +68,7 @@ public class WebSocket : XBitget
                         var _jstring = Encoding.UTF8.GetString(_buffer, 0, _offset);
                         Console.WriteLine($">> {_jstring}");
 
-                        var _curr_timestamp = CUnixTime.Now;
+                        var _curr_timestamp = DateTimeXts.Now;
                         {
                             if (_jstring == "pong")
                             {

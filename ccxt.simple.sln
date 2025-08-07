@@ -12,7 +12,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
 		CHANGELOG.md = CHANGELOG.md
-		LICENSE = LICENSE
 		LICENSE.txt = LICENSE.txt
 		README.md = README.md
 	EndProjectSection
@@ -25,27 +24,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{BD060379-5
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{5CFF9EB6-24F9-4119-812E-FEF29D600887}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "bithumb", "samples\bithumb\bithumb.csproj", "{4A66A4F7-FB69-4E79-99E2-C732856FA623}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bithumb", "samples\bithumb\Bithumb.csproj", "{4A66A4F7-FB69-4E79-99E2-C732856FA623}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "bitget", "samples\bitget\bitget.csproj", "{1AB45E04-7269-4CBB-AD33-23F05C3BBD28}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bitget", "samples\bitget\Bitget.csproj", "{1AB45E04-7269-4CBB-AD33-23F05C3BBD28}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Exchanges", "Exchanges", "{84454372-E406-4CE3-AA92-5DD61FD0C183}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Coinone", "samples\coinone\Coinone.csproj", "{2BC46E14-8360-4DDD-BE44-34F16C4C4C29}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bitget", "bitget", "{01F8A5E6-FD57-4F90-B3FE-4036EC01B4A4}"
-	ProjectSection(SolutionItems) = preProject
-		docs\exchanges\bitget\CoinInfor.json = docs\exchanges\bitget\CoinInfor.json
-		docs\exchanges\bitget\CoinState.json = docs\exchanges\bitget\CoinState.json
-		docs\exchanges\bitget\RaTickers.json = docs\exchanges\bitget\RaTickers.json
-		docs\exchanges\bitget\WsTickers.json = docs\exchanges\bitget\WsTickers.json
-	EndProjectSection
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C8D5274F-AC00-46C7-1F8D-E88E81087A52}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bithumb", "bithumb", "{6BEB8974-A10E-4A28-88BD-EE55F23E4A56}"
-	ProjectSection(SolutionItems) = preProject
-		docs\exchanges\bithumb\CoinInfor.json = docs\exchanges\bithumb\CoinInfor.json
-		docs\exchanges\bithumb\CoinState.json = docs\exchanges\bithumb\CoinState.json
-		docs\exchanges\bithumb\Orderbook.json = docs\exchanges\bithumb\Orderbook.json
-		docs\exchanges\bithumb\WalletState.json = docs\exchanges\bithumb\WalletState.json
-	EndProjectSection
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bithumb", "tests\Bithumb\Bithumb.csproj", "{3E4F5A2D-8B91-4CC6-A7E4-1D2E8C9F0A1B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bitget", "tests\Bitget\Bitget.csproj", "{4F5A6B3E-9C02-5DD7-B8F5-2E3F9D0B1C2D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Coinone", "tests\Coinone\Coinone.csproj", "{5A6B7C4F-0D13-6EE8-C9A6-3F4A0E1C2D3E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -65,6 +56,22 @@ Global
 		{1AB45E04-7269-4CBB-AD33-23F05C3BBD28}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1AB45E04-7269-4CBB-AD33-23F05C3BBD28}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1AB45E04-7269-4CBB-AD33-23F05C3BBD28}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2BC46E14-8360-4DDD-BE44-34F16C4C4C29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BC46E14-8360-4DDD-BE44-34F16C4C4C29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BC46E14-8360-4DDD-BE44-34F16C4C4C29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BC46E14-8360-4DDD-BE44-34F16C4C4C29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E4F5A2D-8B91-4CC6-A7E4-1D2E8C9F0A1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E4F5A2D-8B91-4CC6-A7E4-1D2E8C9F0A1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E4F5A2D-8B91-4CC6-A7E4-1D2E8C9F0A1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E4F5A2D-8B91-4CC6-A7E4-1D2E8C9F0A1B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F5A6B3E-9C02-5DD7-B8F5-2E3F9D0B1C2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F5A6B3E-9C02-5DD7-B8F5-2E3F9D0B1C2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F5A6B3E-9C02-5DD7-B8F5-2E3F9D0B1C2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F5A6B3E-9C02-5DD7-B8F5-2E3F9D0B1C2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A6B7C4F-0D13-6EE8-C9A6-3F4A0E1C2D3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A6B7C4F-0D13-6EE8-C9A6-3F4A0E1C2D3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A6B7C4F-0D13-6EE8-C9A6-3F4A0E1C2D3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A6B7C4F-0D13-6EE8-C9A6-3F4A0E1C2D3E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -73,9 +80,10 @@ Global
 		{109065AF-D448-46FE-9F35-E6D22A92F362} = {CE2A5455-330A-4032-A60D-5005CAF4B125}
 		{4A66A4F7-FB69-4E79-99E2-C732856FA623} = {5CFF9EB6-24F9-4119-812E-FEF29D600887}
 		{1AB45E04-7269-4CBB-AD33-23F05C3BBD28} = {5CFF9EB6-24F9-4119-812E-FEF29D600887}
-		{84454372-E406-4CE3-AA92-5DD61FD0C183} = {BD060379-51BD-40C9-9B57-DA65393CAD0E}
-		{01F8A5E6-FD57-4F90-B3FE-4036EC01B4A4} = {84454372-E406-4CE3-AA92-5DD61FD0C183}
-		{6BEB8974-A10E-4A28-88BD-EE55F23E4A56} = {84454372-E406-4CE3-AA92-5DD61FD0C183}
+		{2BC46E14-8360-4DDD-BE44-34F16C4C4C29} = {5CFF9EB6-24F9-4119-812E-FEF29D600887}
+		{3E4F5A2D-8B91-4CC6-A7E4-1D2E8C9F0A1B} = {C8D5274F-AC00-46C7-1F8D-E88E81087A52}
+		{4F5A6B3E-9C02-5DD7-B8F5-2E3F9D0B1C2D} = {C8D5274F-AC00-46C7-1F8D-E88E81087A52}
+		{5A6B7C4F-0D13-6EE8-C9A6-3F4A0E1C2D3E} = {C8D5274F-AC00-46C7-1F8D-E88E81087A52}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8A43CE4D-B9B0-41CE-82A0-0D2F87CA10E5}

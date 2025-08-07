@@ -1,4 +1,4 @@
-﻿namespace CCXT.Simple.Data
+﻿namespace CCXT.Simple.Models
 {
     public class Tickers
     {
@@ -241,6 +241,39 @@
             get;
             set;
         }
+
+        // ===== COMPATIBILITY PROPERTIES =====
+        // These properties provide backward compatibility for existing code
+        
+        /// <summary>
+        /// Alias for bidPrice - best bid price
+        /// </summary>
+        public decimal bid => bidPrice;
+
+        /// <summary>
+        /// Alias for askPrice - best ask price
+        /// </summary>
+        public decimal ask => askPrice;
+
+        /// <summary>
+        /// Alias for lastPrice - last trade price
+        /// </summary>
+        public decimal last => lastPrice;
+
+        /// <summary>
+        /// Alias for volume24h - 24 hour volume
+        /// </summary>
+        public decimal baseVolume => volume24h;
+
+        /// <summary>
+        /// Alias for volume24h - quote currency volume (24 hours)
+        /// </summary>
+        public decimal quoteVolume => volume24h;
+
+        /// <summary>
+        /// Minimum order size for this trading pair
+        /// </summary>
+        public decimal minOrderSize { get; set; }
     }
 
     public class TickerComparer : IEqualityComparer<Ticker>

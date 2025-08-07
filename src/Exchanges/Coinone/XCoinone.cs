@@ -1,4 +1,5 @@
-﻿using CCXT.Simple.Data;
+﻿using CCXT.Simple.Converters;
+using CCXT.Simple.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
@@ -214,7 +215,7 @@ namespace CCXT.Simple.Exchanges.Coinone
         /// </summary>
         /// <param name="symbol"></param>
         /// <returns></returns>
-        public async ValueTask<(BestOrder best_ask, BestOrder best_bid)> GetOrderbook(string symbol)
+        public async ValueTask<(BestOrder best_ask, BestOrder best_bid)> GetBestOrders(string symbol)
         {
             var _result = (best_ask: new BestOrder(), best_bid: new BestOrder());
 
@@ -316,24 +317,96 @@ namespace CCXT.Simple.Exchanges.Coinone
             return _result;
         }
 
-        ValueTask<bool> IExchange.GetBookTickers(Tickers tickers)
+        public ValueTask<bool> GetBookTickers(Tickers tickers)
         {
-            throw new NotImplementedException();
+            return GetMarkets(tickers);
         }
 
-        ValueTask<bool> IExchange.GetMarkets(Tickers tickers)
+        public ValueTask<bool> GetTickers(Tickers tickers)
         {
-            throw new NotImplementedException();
+            return GetMarkets(tickers);
         }
 
-        ValueTask<bool> IExchange.GetTickers(Tickers tickers)
+        public ValueTask<bool> GetVolumes(Tickers tickers)
         {
-            throw new NotImplementedException();
+            return GetMarkets(tickers);
         }
 
-        ValueTask<bool> IExchange.GetVolumes(Tickers tickers)
+        
+
+        public ValueTask<Orderbook> GetOrderbook(string symbol, int limit = 5)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException("GetOrderbook not implemented for Coinone exchange");
+        }
+
+        public ValueTask<List<decimal[]>> GetCandles(string symbol, string timeframe, long? since = null, int limit = 100)
+        {
+            throw new NotImplementedException("GetCandles not implemented for Coinone exchange");
+        }
+
+        public ValueTask<List<TradeData>> GetTrades(string symbol, int limit = 50)
+        {
+            throw new NotImplementedException("GetTrades not implemented for Coinone exchange");
+        }
+
+        public ValueTask<Dictionary<string, BalanceInfo>> GetBalance()
+        {
+            throw new NotImplementedException("GetBalance not implemented for Coinone exchange");
+        }
+
+        public ValueTask<AccountInfo> GetAccount()
+        {
+            throw new NotImplementedException("GetAccount not implemented for Coinone exchange");
+        }
+
+        public ValueTask<OrderInfo> PlaceOrder(string symbol, SideType side, string orderType, decimal amount, decimal? price = null, string clientOrderId = null)
+        {
+            throw new NotImplementedException("PlaceOrder not implemented for Coinone exchange");
+        }
+
+        public ValueTask<bool> CancelOrder(string orderId, string symbol = null, string clientOrderId = null)
+        {
+            throw new NotImplementedException("CancelOrder not implemented for Coinone exchange");
+        }
+
+        public ValueTask<OrderInfo> GetOrder(string orderId, string symbol = null, string clientOrderId = null)
+        {
+            throw new NotImplementedException("GetOrder not implemented for Coinone exchange");
+        }
+
+        public ValueTask<List<OrderInfo>> GetOpenOrders(string symbol = null)
+        {
+            throw new NotImplementedException("GetOpenOrders not implemented for Coinone exchange");
+        }
+
+        public ValueTask<List<OrderInfo>> GetOrderHistory(string symbol = null, int limit = 100)
+        {
+            throw new NotImplementedException("GetOrderHistory not implemented for Coinone exchange");
+        }
+
+        public ValueTask<List<TradeInfo>> GetTradeHistory(string symbol = null, int limit = 100)
+        {
+            throw new NotImplementedException("GetTradeHistory not implemented for Coinone exchange");
+        }
+
+        public ValueTask<DepositAddress> GetDepositAddress(string currency, string network = null)
+        {
+            throw new NotImplementedException("GetDepositAddress not implemented for Coinone exchange");
+        }
+
+        public ValueTask<WithdrawalInfo> Withdraw(string currency, decimal amount, string address, string tag = null, string network = null)
+        {
+            throw new NotImplementedException("Withdraw not implemented for Coinone exchange");
+        }
+
+        public ValueTask<List<DepositInfo>> GetDepositHistory(string currency = null, int limit = 100)
+        {
+            throw new NotImplementedException("GetDepositHistory not implemented for Coinone exchange");
+        }
+
+        public ValueTask<List<WithdrawalInfo>> GetWithdrawalHistory(string currency = null, int limit = 100)
+        {
+            throw new NotImplementedException("GetWithdrawalHistory not implemented for Coinone exchange");
         }
     }
 }

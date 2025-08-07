@@ -1,3 +1,4 @@
+using CCXT.Simple.Converters;
 using Newtonsoft.Json;
 
 namespace CCXT.Simple.Exchanges.Huobi
