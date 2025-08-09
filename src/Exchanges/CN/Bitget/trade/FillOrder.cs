@@ -1,4 +1,4 @@
-﻿namespace CCXT.Simple.Exchanges.Bitget.RA.Trade
+﻿namespace CCXT.Simple.Exchanges.Bitget.Trade
 {
     /// <summary>
     /// POST /api/spot/v1/trade/fills

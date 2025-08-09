@@ -1,5 +1,5 @@
-using CCXT.Simple.Data;
-using CCXT.Simple.Exchanges;
+using CCXT.Simple.Core.Converters;
+using CCXT.Simple.Core;
 using CCXT.Simple.Exchanges.Bithumb;
 using Microsoft.Extensions.Configuration;
 

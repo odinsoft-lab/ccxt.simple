@@ -1,11 +1,13 @@
-using CCXT.Simple.Data;
-using CCXT.Simple.Exchanges;
+using CCXT.Simple.Core;
+using CCXT.Simple.Core.Converters;
 using CCXT.Simple.Exchanges.Coinbase;
-using CCXT.Simple.Models;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Xunit;
 using Xunit.Abstractions;
+using CCXT.Simple.Models.Funding;
+using CCXT.Simple.Models.Market;
+using CCXT.Simple.Models.Trading;
 
 namespace CCXT.Simple.Tests.Exchanges
 {

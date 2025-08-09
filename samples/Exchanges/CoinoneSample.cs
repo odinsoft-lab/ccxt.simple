@@ -1,6 +1,8 @@
+using CCXT.Simple.Core;
 using CCXT.Simple.Exchanges;
 using CCXT.Simple.Exchanges.Coinone;
 using Microsoft.Extensions.Configuration;
+using CCXT.Simple.Models.Market;
 
 namespace CCXT.Simple.Samples.Samples
 {

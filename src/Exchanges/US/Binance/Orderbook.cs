@@ -1,3 +1,4 @@
+using CCXT.Simple.Models.Market;
 ﻿namespace CCXT.Simple.Exchanges.Binance
 {
     public class Orderbook

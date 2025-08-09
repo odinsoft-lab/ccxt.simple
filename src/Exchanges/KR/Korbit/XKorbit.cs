@@ -1,18 +1,18 @@
-using CCXT.Simple.Services;
-using CCXT.Simple.Models;
-using CCXT.Simple.Exchanges.Crypto;
 using GraphQL;
 using GraphQL.Client.Http;
 using GraphQL.Client.Serializer.SystemTextJson;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
-using System.Net;
-using CCXT.Simple.Data;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System;
-using CCXT.Simple.Extensions;
+using CCXT.Simple.Core.Converters;
+using CCXT.Simple.Core.Extensions;
+using CCXT.Simple.Core.Interfaces;
+using CCXT.Simple.Core;
+using CCXT.Simple.Models.Account;
+using CCXT.Simple.Models.Funding;
+using CCXT.Simple.Models.Market;
+using CCXT.Simple.Models.Trading;
+using CCXT.Simple.Core.Utilities;
 
 namespace CCXT.Simple.Exchanges.Korbit
 {

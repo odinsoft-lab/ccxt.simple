@@ -1,4 +1,4 @@
-﻿namespace CCXT.Simple.Exchanges.Bitget.RA.Public
+﻿namespace CCXT.Simple.Exchanges.Bitget.Public
 {
     /// <summary>
     /// GET /api/spot/v1/market/candles?symbol=BTCUSDT_SPBL&period=1min&limit=100

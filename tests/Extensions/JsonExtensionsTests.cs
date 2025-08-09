@@ -1,4 +1,4 @@
-using CCXT.Simple.Extensions;
+using CCXT.Simple.Core.Extensions;
 using Newtonsoft.Json.Linq;
 using Xunit;
 using Xunit.Abstractions;

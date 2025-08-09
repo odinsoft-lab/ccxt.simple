@@ -1,4 +1,5 @@
-﻿namespace CCXT.Simple.Exchanges.Bitget.RA.Trade
+using CCXT.Simple.Models.Trading;
+﻿namespace CCXT.Simple.Exchanges.Bitget.Trade
 {
     /// <summary>
     /// POST /api/spot/v1/trade/orderInfo

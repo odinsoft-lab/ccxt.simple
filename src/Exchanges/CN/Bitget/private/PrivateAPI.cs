@@ -1,7 +1,8 @@
+using CCXT.Simple.Core;
 using Newtonsoft.Json;
 using System.Diagnostics;
 
-namespace CCXT.Simple.Exchanges.Bitget.RA.Private
+namespace CCXT.Simple.Exchanges.Bitget.Private
 {
     public class PrivatePI : XBitget
     {

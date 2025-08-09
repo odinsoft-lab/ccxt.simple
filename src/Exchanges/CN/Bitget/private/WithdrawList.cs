@@ -1,4 +1,4 @@
-﻿namespace CCXT.Simple.Exchanges.Bitget.RA.Private
+﻿namespace CCXT.Simple.Exchanges.Bitget.Private
 {
     /// <summary>
     /// GET /api/spot/v1/wallet/withdrawal-list?coin=USDT&startTime=1659036670000&endTime=1659076670000&pageNo=1&pageSize=20

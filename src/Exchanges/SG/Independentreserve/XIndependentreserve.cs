@@ -1,9 +1,14 @@
-using CCXT.Simple.Data;
-using CCXT.Simple.Models;
+using CCXT.Simple.Core.Converters;
 using Newtonsoft.Json;
 using System.Security.Cryptography;
 using System.Text;
 
+using CCXT.Simple.Core.Interfaces;
+using CCXT.Simple.Core;
+using CCXT.Simple.Models.Account;
+using CCXT.Simple.Models.Funding;
+using CCXT.Simple.Models.Market;
+using CCXT.Simple.Models.Trading;
 namespace CCXT.Simple.Exchanges.Independentreserve
 {
     public class XIndependentreserve : IExchange

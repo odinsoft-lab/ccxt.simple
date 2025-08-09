@@ -1,12 +1,18 @@
-using CCXT.Simple.Services;
-using CCXT.Simple.Data;
-using CCXT.Simple.Models;
+using CCXT.Simple.Core.Services;
+using CCXT.Simple.Core.Converters;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using CCXT.Simple.Extensions;
+using CCXT.Simple.Core.Extensions;
 
+using CCXT.Simple.Core.Interfaces;
+using CCXT.Simple.Core;
+using CCXT.Simple.Models.Account;
+using CCXT.Simple.Models.Funding;
+using CCXT.Simple.Models.Market;
+using CCXT.Simple.Models.Trading;
+using CCXT.Simple.Core.Utilities;
 namespace CCXT.Simple.Exchanges.Kucoin
 {
     public class XKucoin : IExchange

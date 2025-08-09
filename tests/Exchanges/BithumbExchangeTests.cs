@@ -1,8 +1,9 @@
-using CCXT.Simple.Exchanges;
+using CCXT.Simple.Core;
 using CCXT.Simple.Exchanges.Bithumb;
 using Microsoft.Extensions.Configuration;
 using Xunit;
 using Xunit.Abstractions;
+using CCXT.Simple.Models.Market;
 
 namespace CCXT.Simple.Tests.Exchanges
 {

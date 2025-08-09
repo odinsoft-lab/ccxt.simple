@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using CCXT.Simple.Core;
+using Newtonsoft.Json;
 
 namespace CCXT.Simple.Exchanges.Bithumb
 {

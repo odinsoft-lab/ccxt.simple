@@ -1,7 +1,9 @@
+using CCXT.Simple.Core;
 using Newtonsoft.Json;
 using System.Diagnostics;
+using CCXT.Simple.Models.Trading;
 
-namespace CCXT.Simple.Exchanges.Bitget.RA.Trade
+namespace CCXT.Simple.Exchanges.Bitget.Trade
 {
     public class TradeAPI : XBitget
     {

@@ -1,8 +1,13 @@
-using CCXT.Simple.Data;
-using CCXT.Simple.Models;
+using CCXT.Simple.Core.Converters;
+using CCXT.Simple.Core.Interfaces;
+using CCXT.Simple.Core;
 using Newtonsoft.Json;
 using System.Security.Cryptography;
 using System.Text;
+using CCXT.Simple.Models.Account;
+using CCXT.Simple.Models.Funding;
+using CCXT.Simple.Models.Market;
+using CCXT.Simple.Models.Trading;
 
 namespace CCXT.Simple.Exchanges.BinanceUs
 {

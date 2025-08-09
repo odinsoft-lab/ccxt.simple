@@ -1,7 +1,7 @@
-using CCXT.Simple.Exchanges;
-using CCXT.Simple.Exchanges.Bitget.RA.Private;
-using CCXT.Simple.Exchanges.Bitget.RA.Public;
-using CCXT.Simple.Exchanges.Bitget.RA.Trade;
+using CCXT.Simple.Core;
+using CCXT.Simple.Exchanges.Bitget.Private;
+using CCXT.Simple.Exchanges.Bitget.Public;
+using CCXT.Simple.Exchanges.Bitget.Trade;
 using Microsoft.Extensions.Configuration;
 
 namespace CCXT.Simple.Samples.Samples

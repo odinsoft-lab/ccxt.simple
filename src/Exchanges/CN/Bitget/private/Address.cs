@@ -1,4 +1,4 @@
-﻿namespace CCXT.Simple.Exchanges.Bitget.RA.Private
+﻿namespace CCXT.Simple.Exchanges.Bitget.Private
 {
     /// <summary>
     /// GET /api/spot/v1/wallet/deposit-address?coin=USDT&chain=trc20

@@ -1,4 +1,5 @@
-﻿namespace CCXT.Simple.Exchanges.Bitget.RA.Public
+using CCXT.Simple.Models.Market;
+﻿namespace CCXT.Simple.Exchanges.Bitget.Public
 {
     /// <summary>
     /// GET /api/spot/v1/market/depth?symbol=BTCUSDT_SPBL&type=step0&limit=100

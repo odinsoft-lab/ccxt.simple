@@ -1,4 +1,4 @@
-﻿namespace CCXT.Simple.Exchanges.Bitget.RA
+﻿namespace CCXT.Simple.Exchanges.Bitget
 {
     public class RResult<T>
     {

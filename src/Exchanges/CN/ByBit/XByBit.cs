@@ -1,11 +1,17 @@
-using CCXT.Simple.Services;
-using CCXT.Simple.Models;
+using CCXT.Simple.Core.Services;
 using Newtonsoft.Json;
 using System.Security.Cryptography;
 using System.Text;
-using CCXT.Simple.Data;
-using CCXT.Simple.Extensions;
+using CCXT.Simple.Core.Converters;
+using CCXT.Simple.Core.Extensions;
 
+using CCXT.Simple.Core.Interfaces;
+using CCXT.Simple.Core;
+using CCXT.Simple.Models.Account;
+using CCXT.Simple.Models.Funding;
+using CCXT.Simple.Models.Market;
+using CCXT.Simple.Models.Trading;
+using CCXT.Simple.Core.Utilities;
 namespace CCXT.Simple.Exchanges.Bybit
 {
     public class XByBit : IExchange
@@ -147,7 +153,7 @@ namespace CCXT.Simple.Exchanges.Bybit
             client.DefaultRequestHeaders.Add("X-BAPI-RECV-WINDOW", _recv_window.ToString());
         }
 
-        public async ValueTask<bool> VerifyStates(Models.Tickers tickers)
+        public async ValueTask<bool> VerifyStates(Tickers tickers)
         {
             var _result = false;
 
@@ -243,7 +249,7 @@ namespace CCXT.Simple.Exchanges.Bybit
         }
 
 
-        public async ValueTask<bool> GetMarkets(Models.Tickers tickers)
+        public async ValueTask<bool> GetMarkets(Tickers tickers)
         {
             var _result = false;
 
@@ -312,7 +318,7 @@ namespace CCXT.Simple.Exchanges.Bybit
             return _result;
         }
 
-        ValueTask<bool> IExchange.GetBookTickers(Models.Tickers tickers)
+        ValueTask<bool> IExchange.GetBookTickers(Tickers tickers)
         {
             throw new NotImplementedException();
         }
@@ -322,12 +328,12 @@ namespace CCXT.Simple.Exchanges.Bybit
             throw new NotImplementedException();
         }
 
-        ValueTask<bool> IExchange.GetTickers(Models.Tickers tickers)
+        ValueTask<bool> IExchange.GetTickers(Tickers tickers)
         {
             throw new NotImplementedException();
         }
 
-        ValueTask<bool> IExchange.GetVolumes(Models.Tickers tickers)
+        ValueTask<bool> IExchange.GetVolumes(Tickers tickers)
         {
             throw new NotImplementedException();
         }

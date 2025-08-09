@@ -178,7 +178,7 @@ Console.WriteLine($"Total orders in history: {history.Count}");
 ### **Advanced: Bitget Trading API**
 
 ```csharp
-using CCXT.Simple.Exchanges.Bitget.RA.Trade;
+using CCXT.Simple.Exchanges.Bitget.Trade;
 
 // Bitget has specialized trading API
 var tradeApi = new TradeAPI(exchange, "api_key", "secret_key", "pass_phrase");

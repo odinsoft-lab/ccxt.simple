@@ -1,7 +1,6 @@
-using CCXT.Simple.Data;
-using CCXT.Simple.Exchanges;
+using CCXT.Simple.Core;
+using CCXT.Simple.Core.Converters;
 using CCXT.Simple.Exchanges.Kraken;
-using CCXT.Simple.Models;
 using Microsoft.Extensions.Configuration;
 using Xunit;
 using Xunit.Abstractions;

@@ -1,7 +1,9 @@
+using CCXT.Simple.Core;
 using Newtonsoft.Json;
 using System.Diagnostics;
+using CCXT.Simple.Models.Market;
 
-namespace CCXT.Simple.Exchanges.Bitget.RA.Public
+namespace CCXT.Simple.Exchanges.Bitget.Public
 {
     public class PublicAPI : XBitget
     {

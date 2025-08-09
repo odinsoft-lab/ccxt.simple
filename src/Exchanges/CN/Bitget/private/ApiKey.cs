@@ -1,4 +1,4 @@
-﻿namespace CCXT.Simple.Exchanges.Bitget.RA.Private
+﻿namespace CCXT.Simple.Exchanges.Bitget.Private
 {
     /// <summary>
     /// POST /api/spot/v1/account/getInfo
