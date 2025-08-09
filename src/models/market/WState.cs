@@ -1,25 +1,5 @@
 namespace CCXT.Simple.Models.Market
 {
-    //public class WStates
-    //{
-    //    public WStates()
-    //    {
-    //        this.states = new List<WState>();
-    //    }
-
-    //    public string exchange
-    //    {
-    //        get;
-    //        set;
-    //    }
-
-    //    public List<WState> states
-    //    {
-    //        get;
-    //        set;
-    //    }
-    //}
-
     public class WState
     {
         public string baseName
