@@ -70,7 +70,7 @@ Full changelog: https://github.com/ccxt-net/ccxt.simple/blob/main/docs/CHANGELOG
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />		
 		<PackageReference Include="GraphQL.Client" Version="6.1.0" />
 		<PackageReference Include="GraphQL.Client.Serializer.SystemTextJson" Version="6.1.0" />
-		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.13.0" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.13.1" />
 	</ItemGroup>
 
 </Project>
