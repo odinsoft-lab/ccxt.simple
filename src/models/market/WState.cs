@@ -1,7 +1,13 @@
 namespace CCXT.Simple.Models.Market
 {
+    /// <summary>
+    /// Represents wallet/coin state information including network status and limits
+    /// </summary>
     public class WState
     {
+        /// <summary>
+        /// Base currency name (e.g., "BTC", "ETH")
+        /// </summary>
         public string baseName
         {
             get;
@@ -9,7 +15,7 @@ namespace CCXT.Simple.Models.Market
         }
 
         /// <summary>
-        /// wallet state
+        /// Indicates whether the wallet/currency is active for operations
         /// </summary>
         public bool active
         {
@@ -18,7 +24,7 @@ namespace CCXT.Simple.Models.Market
         }
 
         /// <summary>
-        /// 
+        /// Indicates whether withdrawals are enabled for this currency
         /// </summary>
         public bool withdraw
         {
@@ -27,7 +33,7 @@ namespace CCXT.Simple.Models.Market
         }
 
         /// <summary>
-        /// 
+        /// Indicates whether deposits are enabled for this currency
         /// </summary>
         public bool deposit
         {
@@ -36,7 +42,7 @@ namespace CCXT.Simple.Models.Market
         }
 
         /// <summary>
-        /// travle-rule
+        /// Indicates whether travel rule compliance is required (for regulatory compliance)
         /// </summary>
         public bool travelRule
         {
@@ -45,7 +51,7 @@ namespace CCXT.Simple.Models.Market
         }
 
         /// <summary>
-        /// block state
+        /// Indicates whether blockchain operations are currently blocked
         /// </summary>
         public bool block
         {
@@ -54,7 +60,7 @@ namespace CCXT.Simple.Models.Market
         }
 
         /// <summary>
-        /// block height
+        /// Current blockchain height for this currency
         /// </summary>
         public long height
         {
@@ -63,7 +69,7 @@ namespace CCXT.Simple.Models.Market
         }
 
         /// <summary>
-        /// block updated at
+        /// Last time the blockchain state was updated
         /// </summary>
         public DateTime updated
         {
@@ -72,7 +78,7 @@ namespace CCXT.Simple.Models.Market
         }
 
         /// <summary>
-        /// block elapsed minutes
+        /// Minutes elapsed since last blockchain update
         /// </summary>
         public int elapsed
         {
@@ -81,7 +87,7 @@ namespace CCXT.Simple.Models.Market
         }
 
         /// <summary>
-        /// transaction minimum fee withdraw
+        /// Maker fee rate for trading (as a decimal, e.g., 0.001 = 0.1%)
         /// </summary>
         public decimal makerFee
         {
@@ -90,7 +96,7 @@ namespace CCXT.Simple.Models.Market
         }
 
         /// <summary>
-        /// transaction maximum fee withdraw
+        /// Taker fee rate for trading (as a decimal, e.g., 0.002 = 0.2%)
         /// </summary>
         public decimal takerFee
         {
@@ -98,6 +104,9 @@ namespace CCXT.Simple.Models.Market
             set;
         }
 
+        /// <summary>
+        /// List of supported blockchain networks for this currency
+        /// </summary>
         public List<WNetwork> networks
         {
             get;
@@ -105,10 +114,13 @@ namespace CCXT.Simple.Models.Market
         }
     }
 
+    /// <summary>
+    /// Represents a specific blockchain network configuration for a currency
+    /// </summary>
     public class WNetwork
     {
         /// <summary>
-        /// chain name by exchange
+        /// Network name as defined by the exchange
         /// </summary>
         public string name
         {
@@ -117,7 +129,7 @@ namespace CCXT.Simple.Models.Market
         }
 
         /// <summary>
-        /// ETH, BSC, TRX, etc...
+        /// Blockchain network identifier (e.g., "ETH", "BSC", "TRX", "MATIC")
         /// </summary>
         public string network
         {
@@ -126,7 +138,7 @@ namespace CCXT.Simple.Models.Market
         }
 
         /// <summary>
-        /// ERC20, BEP20, TRC20, etc...
+        /// Token standard or chain type (e.g., "ERC20", "BEP20", "TRC20", "SPL")
         /// </summary>
         public string chain
         {
@@ -135,7 +147,7 @@ namespace CCXT.Simple.Models.Market
         }
 
         /// <summary>
-        /// 
+        /// Indicates whether withdrawals are enabled on this network
         /// </summary>
         public bool withdraw
         {
@@ -144,7 +156,7 @@ namespace CCXT.Simple.Models.Market
         }
 
         /// <summary>
-        /// 
+        /// Indicates whether deposits are enabled on this network
         /// </summary>
         public bool deposit
         {
@@ -152,36 +164,54 @@ namespace CCXT.Simple.Models.Market
             set;
         }
 
+        /// <summary>
+        /// Withdrawal fee for this network
+        /// </summary>
         public decimal withdrawFee
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Deposit fee for this network (usually 0)
+        /// </summary>
         public decimal depositFee
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Sell trading fee for this network
+        /// </summary>
         public decimal sellFee
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Buy trading fee for this network
+        /// </summary>
         public decimal buyFee
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Minimum withdrawal amount for this network
+        /// </summary>
         public decimal minWithdrawal
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Maximum withdrawal amount for this network
+        /// </summary>
         public decimal maxWithdrawal
         {
             get;
@@ -189,7 +219,7 @@ namespace CCXT.Simple.Models.Market
         }
 
         /// <summary>
-        /// 
+        /// Minimum number of blockchain confirmations required
         /// </summary>
         public int minConfirm
         {
@@ -198,7 +228,7 @@ namespace CCXT.Simple.Models.Market
         }
 
         /// <summary>
-        /// 
+        /// Estimated arrival time in minutes for deposits
         /// </summary>
         public int arrivalTime
         {

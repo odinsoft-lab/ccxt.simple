@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 namespace CCXT.Simple.Exchanges.Bitstamp
 {
     // Trading pair information
-    public class BitstampTradingPair
+    internal class BitstampTradingPair
     {
         [JsonProperty("name")]
         public string Name { get; set; }
@@ -34,7 +34,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
     }
 
     // Ticker data
-    public class BitstampTicker
+    internal class BitstampTicker
     {
         [JsonProperty("last")]
         public decimal Last { get; set; }
@@ -65,7 +65,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
     }
 
     // Order book data
-    public class BitstampOrderbook
+    internal class BitstampOrderbook
     {
         [JsonProperty("timestamp")]
         public long Timestamp { get; set; }
@@ -81,13 +81,13 @@ namespace CCXT.Simple.Exchanges.Bitstamp
     }
 
     // OHLC data
-    public class BitstampOHLC
+    internal class BitstampOHLC
     {
         [JsonProperty("data")]
         public BitstampOHLCData Data { get; set; }
     }
 
-    public class BitstampOHLCData
+    internal class BitstampOHLCData
     {
         [JsonProperty("ohlc")]
         public List<BitstampCandle> Ohlc { get; set; }
@@ -96,7 +96,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
         public string Pair { get; set; }
     }
 
-    public class BitstampCandle
+    internal class BitstampCandle
     {
         [JsonProperty("high")]
         public string High { get; set; }
@@ -118,7 +118,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
     }
 
     // Transactions/Trades
-    public class BitstampTransaction
+    internal class BitstampTransaction
     {
         [JsonProperty("date")]
         public long Date { get; set; }
@@ -137,7 +137,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
     }
 
     // Account balance
-    public class BitstampBalance
+    internal class BitstampBalance
     {
         [JsonProperty("usd_balance")]
         public decimal UsdBalance { get; set; }
@@ -207,7 +207,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
     }
 
     // Order information
-    public class BitstampOrder
+    internal class BitstampOrder
     {
         [JsonProperty("id")]
         public long Id { get; set; }
@@ -232,7 +232,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
     }
 
     // Order status
-    public class BitstampOrderStatus
+    internal class BitstampOrderStatus
     {
         [JsonProperty("status")]
         public string Status { get; set; }
@@ -247,7 +247,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
         public List<BitstampOrderTransaction> Transactions { get; set; }
     }
 
-    public class BitstampOrderTransaction
+    internal class BitstampOrderTransaction
     {
         [JsonProperty("fee")]
         public decimal Fee { get; set; }

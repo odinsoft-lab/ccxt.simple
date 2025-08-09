@@ -1,12 +1,24 @@
 using CCXT.Simple.Core.Utilities;
 namespace CCXT.Simple.Models.Market
 {
+    /// <summary>
+    /// Container for multiple ticker data and wallet states from an exchange
+    /// </summary>
     public class Tickers
     {
+        /// <summary>
+        /// Initializes a new instance with the specified exchange name
+        /// </summary>
+        /// <param name="exchange">Exchange name</param>
         public Tickers(string exchange) : this(exchange, 0)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance with the specified exchange name and coin capacity
+        /// </summary>
+        /// <param name="exchange">Exchange name</param>
+        /// <param name="no_coins">Number of coins to allocate space for</param>
         public Tickers(string exchange, int no_coins)
         {
             this.exchange = exchange;
@@ -36,48 +48,72 @@ namespace CCXT.Simple.Models.Market
             }
         }
 
+        /// <summary>
+        /// Exchange name identifier
+        /// </summary>
         public string exchange
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Data timestamp in milliseconds since Unix epoch
+        /// </summary>
         public long timestamp
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Indicates whether the exchange connection is active
+        /// </summary>
         public bool connected
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Exchange rate for fiat currency conversion
+        /// </summary>
         public decimal exchgRate
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Flag to indicate if cache should be reset
+        /// </summary>
         public bool resetCache
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Timestamp for next state check in milliseconds
+        /// </summary>
         public long nextStateCheck
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// List of ticker data for trading pairs
+        /// </summary>
         public List<Ticker> items
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// List of wallet/coin states
+        /// </summary>
         public List<WState> states
         {
             get;
@@ -85,6 +121,9 @@ namespace CCXT.Simple.Models.Market
         }
     }
 
+    /// <summary>
+    /// Represents market ticker data for a single trading pair
+    /// </summary>
     public class Ticker
     {
         /// <summary>
@@ -96,24 +135,36 @@ namespace CCXT.Simple.Models.Market
             set;
         }
 
+        /// <summary>
+        /// Component name for internal use
+        /// </summary>
         public string compName
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Display name for UI presentation
+        /// </summary>
         public string dispName
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Base currency name (e.g., "BTC" in BTC/USD)
+        /// </summary>
         public string baseName
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Quote currency name (e.g., "USD" in BTC/USD)
+        /// </summary>
         public string quoteName
         {
             get;
@@ -193,7 +244,7 @@ namespace CCXT.Simple.Models.Market
         }
 
         /// <summary>
-        /// 
+        /// Indicates whether this trading pair is active for trading
         /// </summary>
         public bool active
         {
@@ -202,7 +253,7 @@ namespace CCXT.Simple.Models.Market
         }
 
         /// <summary>
-        /// 
+        /// Indicates whether deposits are enabled for this currency
         /// </summary>
         public bool deposit
         {
@@ -211,7 +262,7 @@ namespace CCXT.Simple.Models.Market
         }
 
         /// <summary>
-        /// 
+        /// Indicates whether withdrawals are enabled for this currency
         /// </summary>
         public bool withdraw
         {
@@ -220,7 +271,7 @@ namespace CCXT.Simple.Models.Market
         }
 
         /// <summary>
-        /// 
+        /// Indicates whether the network is operational for this currency
         /// </summary>
         public bool network
         {
@@ -229,7 +280,7 @@ namespace CCXT.Simple.Models.Market
         }
 
         /// <summary>
-        /// 
+        /// Ticker data timestamp in milliseconds since Unix epoch
         /// </summary>
         public long timestamp
         {
@@ -237,6 +288,9 @@ namespace CCXT.Simple.Models.Market
             set;
         }
 
+        /// <summary>
+        /// Associated order book data for this trading pair
+        /// </summary>
         public Orderbook orderbook
         {
             get;
@@ -277,8 +331,17 @@ namespace CCXT.Simple.Models.Market
         public decimal minOrderSize { get; set; }
     }
 
+    /// <summary>
+    /// Comparer for Ticker objects based on symbol equality
+    /// </summary>
     public class TickerComparer : IEqualityComparer<Ticker>
     {
+        /// <summary>
+        /// Determines whether two Ticker objects are equal based on their symbol
+        /// </summary>
+        /// <param name="x">First ticker to compare</param>
+        /// <param name="y">Second ticker to compare</param>
+        /// <returns>True if symbols are equal (case-insensitive), false otherwise</returns>
         public bool Equals(Ticker x, Ticker y)
         {
             if (String.Equals(x.symbol, y.symbol, StringComparison.OrdinalIgnoreCase))
@@ -288,6 +351,11 @@ namespace CCXT.Simple.Models.Market
             return false;
         }
 
+        /// <summary>
+        /// Returns a hash code for the specified Ticker object
+        /// </summary>
+        /// <param name="ticker">Ticker object to get hash code for</param>
+        /// <returns>Hash code based on the ticker's symbol</returns>
         public int GetHashCode(Ticker ticker)
         {
             return ticker.symbol.GetHashCode();
