@@ -202,7 +202,7 @@ namespace CCXT.Simple.Exchanges.Upbit
                             {
                                 name = _name,
                                 network = c.code,
-                                chain = (c.net_type == null || c.net_type == "���γ�") ? c.code : c.net_type.Replace("-", ""),
+                                chain = c.net_type == null ? c.code : c.net_type.Replace("-", ""),
 
                                 withdrawFee = c.withdraw_fee
                             };
@@ -335,7 +335,6 @@ namespace CCXT.Simple.Exchanges.Upbit
                     var _jitem = _jmarkets.SingleOrDefault(x => x.market == _ticker.symbol);
                     if (_jitem != null)
                     {
-                        // UTC 0�� ���� ���� �ŷ���
                         var _volume = _jitem.acc_trade_price;
 
                         var _prev_volume24h = _ticker.previous24h;
@@ -414,7 +413,6 @@ namespace CCXT.Simple.Exchanges.Upbit
                         }
                     }
 
-                    // UTC 0�� ���� ���� �ŷ���
                     var _volume = m.acc_trade_price;
                     {
                         var _prev_volume24h = _ticker.previous24h;

@@ -5,6 +5,20 @@ All notable changes to CCXT.Simple will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.8] - 2025-08-10
+
+### Added
+- **Bitstamp Exchange**: Full implementation with complete API support
+  - Market data endpoints (orderbook, trades, candles)
+  - Trading operations (place/cancel orders, order history)
+  - Account management (balance, account info)
+  - Funding operations (deposits, withdrawals)
+  - Located in `src/exchanges/gb/bitstamp/`
+
+### Changed
+- Updated functional exchange count from 10 to 11
+- Bitstamp moved from "Priority Development Queue" to "Fully Functional"
+
 ## [Documentation Update] - 2025-08-09
 
 ### 📊 Implementation Status Analysis & Documentation Corrections

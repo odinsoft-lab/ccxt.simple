@@ -12,7 +12,7 @@
 - **🎯 Unified Interface** - Same API across all exchanges
 - **⚡ High Performance** - `ValueTask<T>` async patterns, HTTP client pooling
 - **🔒 Type Safe** - Strong typing with comprehensive data models
-- **🌍 Global Coverage** - 178 exchange implementations (8-10 fully functional)
+- **🌍 Global Coverage** - 178 exchange implementations (11 fully functional)
 - **📊 Complete API** - Market data, trading, account management, funding operations
 
 ## 🚀 Quick Start
@@ -41,11 +41,11 @@ var order = await binance.PlaceOrder("BTCUSDT", SideType.Buy, "limit", 0.001m, 5
 
 ## 🏢 Exchange Support
 
-### ✅ Fully Functional (10 exchanges)
-**Binance** | **Bitget** | **Bithumb** | **Kraken** | **Coinone** | **Upbit** | **OKX** | **KuCoin** | **Gate.io** | **Crypto.com**
+### ✅ Fully Functional (11 exchanges)
+**Binance** | **Bitget** | **Bithumb** | **Bitstamp** | **Kraken** | **Coinone** | **Upbit** | **OKX** | **KuCoin** | **Gate.io** | **Crypto.com**
 
 ### 🚧 Priority Development Queue
-**Bitstamp** • **Bitfinex** • **Gemini** • **Poloniex** • **Mexc** • **Deribit** • **Bitmex**
+**Bitfinex** • **Gemini** • **Poloniex** • **Mexc** • **Deribit** • **Bitmex**
 
 ### 📋 Skeleton Ready (168 exchanges)
 All major exchanges have interface implementations ready for development.
@@ -114,7 +114,7 @@ dotnet test               # Run 73 tests
 
 ## 📊 Project Status
 
-- **Current Version**: 1.1.7 (.NET 8.0 & 9.0)
+- **Current Version**: 1.1.8 (.NET 8.0 & 9.0)
 - **Architecture**: Thread-safe, event-driven, REST API focused
 - **Test Coverage**: 73 tests passing
 - **Active Development**: Monthly updates, community-driven priorities

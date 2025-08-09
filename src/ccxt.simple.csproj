@@ -8,7 +8,7 @@
 		<Product>CCXT</Product>
 		<Company>ODINSOFT</Company>
 		<Description>CCXT.SIMPLE ? CryptoCurrency eXchange Trading Library for .NET</Description>
-		<Copyright>Copyright OdinSoft Co., Ltd. 2015~2024</Copyright>
+		<Copyright>Copyright OdinSoft Co., Ltd. 2015~2025</Copyright>
 		<AssemblyTitle>CCXT.SIMPLE</AssemblyTitle>
 		<Authors>SEONGAHN LEE</Authors>
 		<PackageId>CCXT.SIMPLE</PackageId>
@@ -19,16 +19,17 @@
 		<GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
 		<GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<Version>1.1.7</Version>
-		<AssemblyVersion>1.1.7.8</AssemblyVersion>
-		<FileVersion>1.1.7.8</FileVersion>
-		<PackageReleaseNotes>v1.1.7 - Technical Improvements
-• Breaking: Removed netstandard2.1 support (now .NET 8.0 and 9.0 only)
-• Fixed: System.Net.Http.Json dependency replaced with Newtonsoft.Json
-• Fixed: CoinState.json file path issue in Bithumb exchange
-• Improved: All Korean comments translated to English
-• Added: GlobalUsings.cs for common namespace imports
-• Enhanced: Test coverage with all 73 tests passing
+		<Version>1.1.8</Version>
+		<AssemblyVersion>1.1.8.0</AssemblyVersion>
+		<FileVersion>1.1.8.0</FileVersion>
+		<PackageReleaseNotes>v1.1.8 - Bitstamp Exchange Implementation
+• New: Complete Bitstamp exchange implementation with full API support
+  - Market data endpoints (orderbook, trades, candles)
+  - Trading operations (place/cancel orders, order history)
+  - Account management (balance, account info)
+  - Funding operations (deposits, withdrawals)
+• Enhanced: Now supporting 11 fully functional exchanges
+• Documentation: Updated exchange status and implementation guides
 Full changelog: https://github.com/ccxt-net/ccxt.simple/blob/main/docs/CHANGELOG.md</PackageReleaseNotes>
 		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>

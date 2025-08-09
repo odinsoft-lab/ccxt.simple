@@ -14,7 +14,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Language**: C# with modern async/await patterns
 - **Architecture**: Multi-exchange adapter pattern with unified interfaces
 - **Purpose**: Cryptocurrency trading, market data access, and exchange integration
-- **Version**: 1.1.7
+- **Version**: 1.1.8
 
 ## Build and Development Commands
 
@@ -84,7 +84,7 @@ The project follows a **multi-exchange adapter pattern** where each cryptocurren
 **Exchange Implementations**
 - Each exchange has its own folder under `src/Exchanges/{CountryCode}/{ExchangeName}/`
 - Naming convention: `X{ExchangeName}.cs` (e.g., `XBinance.cs`, `XBithumb.cs`)
-- Currently supports: Binance, Bitget, Bithumb, ByBit, Coinbase, Coinone, Crypto, GateIO, Huobi, Korbit, Kraken, Kucoin, OKX (formerly OkEX), Upbit, Bittrex
+- Currently supports: Binance, Bitget, Bithumb, Bitstamp, ByBit, Coinbase, Coinone, Crypto, GateIO, Huobi, Korbit, Kraken, Kucoin, OKX (formerly OkEX), Upbit, Bittrex
 - Exchanges are organized by country/region codes (US, KR, CN, EU, etc.)
 - Most new API methods throw `NotImplementedException` pending full implementation
 
@@ -178,7 +178,7 @@ These samples serve as both integration tests and usage examples.
 - Has `Nullable` disabled
 - All exchange operations are asynchronous using `ValueTask<T>`
 - Thread safety is critical - the library is designed for concurrent access
-- Current version: 1.1.7 (technical improvements and bug fixes)
+- Current version: 1.1.8 (Bitstamp exchange implementation)
 - NuGet package: `CCXT.Simple`
 - No longer supports netstandard2.1 (removed in v1.1.7)
 
