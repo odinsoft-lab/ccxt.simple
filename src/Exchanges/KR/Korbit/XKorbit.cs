@@ -12,6 +12,7 @@ using CCXT.Simple.Data;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System;
+using CCXT.Simple.Extensions;
 
 namespace CCXT.Simple.Exchanges.Korbit
 {
@@ -428,7 +429,7 @@ namespace CCXT.Simple.Exchanges.Korbit
                             _volume *= _last_price;
                             _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
 
-                            var _curr_timestamp = DateTimeXts.NowMilli;
+                            var _curr_timestamp = DateTimeExtensions.NowMilli;
                             if (_curr_timestamp > _next_timestamp)
                             {
                                 _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
@@ -496,7 +497,7 @@ namespace CCXT.Simple.Exchanges.Korbit
                             _volume *= _last_price;
                             _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
 
-                            var _curr_timestamp = DateTimeXts.NowMilli;
+                            var _curr_timestamp = DateTimeExtensions.NowMilli;
                             if (_curr_timestamp > _next_timestamp)
                             {
                                 _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);

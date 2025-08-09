@@ -5,27 +5,42 @@ All notable changes to CCXT.Simple will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.7] - 2025-01-08
+## [1.1.7] - 2025-08-08
 
 ### Changed
 - **Breaking**: Removed netstandard2.1 support - now targets .NET 8.0 and .NET 9.0 only
 - Replaced System.Net.Http.Json dependency with Newtonsoft.Json for better compatibility
 - Translated all Korean comments to English for international developer accessibility
 - Reorganized project structure with GlobalUsings.cs for common namespace imports
+- **Code Organization Improvements**:
+  - Standardized all folder names to lowercase convention (`src/exchanges/`, `src/data/`, `src/models/`, etc.)
+  - Renamed extension classes for consistency:
+    - `DateTimeXts` → `DateTimeExtensions`
+    - `JsonExtensions` → `JsonExtensions`
+    - `StringXts` → `StringExtensions`
+  - Removed WebSocket-related code to maintain REST API focus
+  - Cleaned up build artifacts and user-specific files
 
 ### Fixed
 - Fixed CoinState.json file path issue in Bithumb exchange (now uses assembly-relative path)
 - Fixed build errors related to global using directives in different target frameworks
 - Fixed XCrypto.cs PostAsJsonAsync compatibility issue
+- Fixed namespace inconsistencies in extension classes
 
 ### Added
 - GlobalUsings.cs file for centralized namespace imports
 - Improved test coverage with all 23 tests passing
 
+### Removed
+- WebSocket implementation code from Bitget exchange (maintaining REST API focus)
+- Unused imports and commented-out code
+- Build artifacts (bin/obj folders) from source control
+
 ### Technical Details
 - **Target Frameworks**: .NET 8.0, .NET 9.0
 - **Removed**: netstandard2.1 support
 - **Dependencies**: Replaced System.Net.Http.Json with manual JSON serialization using Newtonsoft.Json
+- **Focus**: REST API only (no WebSocket support)
 
 ## [1.1.6] - 2025-01-08
 
@@ -89,7 +104,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Planned
 - Complete implementation of standardized APIs for all 111 exchanges
-- WebSocket support for real-time data streaming  
 - Advanced order types (OCO, trailing stops)
 - DeFi protocol integrations
 
@@ -256,7 +270,6 @@ All 16 exchanges now support the standardized API:
 
 ### Added
 - Initial support for Bittrex exchange
-- Enhanced WebSocket implementation for Bitget
 
 ### Changed
 - Improved rate limiting logic across all exchanges

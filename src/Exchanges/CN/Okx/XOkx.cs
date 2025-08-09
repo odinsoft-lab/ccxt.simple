@@ -4,6 +4,7 @@ using CCXT.Simple.Models;
 using Newtonsoft.Json;
 using System.Security.Cryptography;
 using System.Text;
+using CCXT.Simple.Extensions;
 
 namespace CCXT.Simple.Exchanges.Okx
 {
@@ -224,7 +225,7 @@ namespace CCXT.Simple.Exchanges.Okx
 
         public void CreateSignature(HttpClient client, string method = "GET", string path = "/api/v5/asset/currencies", string body = "")
         {
-            var _timestamp = DateTimeXts.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss'.'fff'Z'");
+            var _timestamp = DateTimeExtensions.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss'.'fff'Z'");
 
             var _post_data = $"{_timestamp}{method}{path}{body}";
             var _signature = Convert.ToBase64String(Encryptor.ComputeHash(Encoding.UTF8.GetBytes(_post_data)));
@@ -420,7 +421,7 @@ namespace CCXT.Simple.Exchanges.Okx
 
                             _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
 
-                            var _curr_timestamp = DateTimeXts.NowMilli;
+                            var _curr_timestamp = DateTimeExtensions.NowMilli;
                             if (_curr_timestamp > _next_timestamp)
                             {
                                 _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
@@ -508,7 +509,7 @@ namespace CCXT.Simple.Exchanges.Okx
 
                             _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
 
-                            var _curr_timestamp = DateTimeXts.NowMilli;
+                            var _curr_timestamp = DateTimeExtensions.NowMilli;
                             if (_curr_timestamp > _next_timestamp)
                             {
                                 _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);

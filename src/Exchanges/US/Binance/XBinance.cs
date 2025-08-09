@@ -1,4 +1,5 @@
 using CCXT.Simple.Data;
+using CCXT.Simple.Extensions;
 using CCXT.Simple.Models;
 using CCXT.Simple.Services;
 using Newtonsoft.Json;
@@ -93,7 +94,7 @@ namespace CCXT.Simple.Exchanges.Binance
             client.DefaultRequestHeaders.Add("USER-AGENT", mainXchg.UserAgent);
             client.DefaultRequestHeaders.Add("X-MBX-APIKEY", this.ApiKey);
 
-            var _post_data = $"timestamp={DateTimeXts.NowMilli}";
+            var _post_data = $"timestamp={DateTimeExtensions.NowMilli}";
             var _signature = BitConverter.ToString(Encryptor.ComputeHash(Encoding.UTF8.GetBytes(_post_data))).Replace("-", "");
 
             return _post_data + $"&signature={_signature}";
@@ -423,7 +424,7 @@ namespace CCXT.Simple.Exchanges.Binance
 
                             _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
 
-                            var _curr_timestamp = DateTimeXts.NowMilli;
+                            var _curr_timestamp = DateTimeExtensions.NowMilli;
                             if (_curr_timestamp > _next_timestamp)
                             {
                                 _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
@@ -511,7 +512,7 @@ namespace CCXT.Simple.Exchanges.Binance
 
                             _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
 
-                            var _curr_timestamp = DateTimeXts.NowMilli;
+                            var _curr_timestamp = DateTimeExtensions.NowMilli;
                             if (_curr_timestamp > _next_timestamp)
                             {
                                 _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);

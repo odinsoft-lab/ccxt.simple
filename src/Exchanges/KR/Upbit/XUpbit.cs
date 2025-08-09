@@ -17,7 +17,6 @@ namespace CCXT.Simple.Exchanges.Upbit
 		 *
 		 * REST API
 		 *     https://docs.upbit.com/reference
-		 *     https://docs.upbit.com/docs/upbit-quotation-websocket
 		 *     https://upbit.com/service_center/wallet_status
 		 *
 		 * Fees:

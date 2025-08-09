@@ -137,9 +137,9 @@ The `Exchange` class uses several concurrent collections:
 
 ### Exchange-Specific Features
 Some exchanges have unique implementations:
-- **WebSocket Support**: Bitget has extensive WS implementation
 - **GraphQL Support**: Korbit uses GraphQL instead of REST
 - **Multi-Protocol**: Some exchanges support multiple blockchain networks
+- **REST API Focus**: This library uses only REST APIs for reliability and simplicity (no WebSocket)
 
 ## Configuration and Setup
 

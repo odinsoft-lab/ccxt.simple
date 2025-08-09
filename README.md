@@ -26,9 +26,9 @@ A simplified cryptocurrency trading library for .NET that provides unified acces
 
 ### **Advanced Features**
 - **Multi-Currency Support**: KRW, USD, USDT, BTC, and more
-- **WebSocket Support**: Real-time data streaming (Bitget implementation available)
 - **Rate Limiting**: Built-in rate limiting per exchange specifications
 - **Authentication**: Secure API key management with HMAC signatures
+- **REST API Only**: Focused on reliable REST API implementation (no WebSocket)
 
 ## 🏗️ Architecture
 
@@ -199,7 +199,7 @@ if (result.code == "00000")
 | Exchange | Status | Market Data | Trading | Account | Funding | Special Features |
 |----------|--------|-------------|---------|---------|---------|------------------|
 | **Binance** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | Complete API implementation |
-| **Bitget** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | Advanced WS & Trading API |
+| **Bitget** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | Advanced Trading API |
 | **Bithumb** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | KRW pairs, Korean market |
 | **Bittrex** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | USD pairs, US market |
 | **ByBit** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | Derivatives & spot trading |
@@ -331,7 +331,11 @@ exchange.OnKrwPriceEvent += (price) =>
 - **Dependency Cleanup**: Replaced System.Net.Http.Json with Newtonsoft.Json for better compatibility
 - **Documentation**: Translated all Korean comments to English for international developers
 - **Bug Fixes**: Fixed CoinState.json file path issue in Bithumb exchange
-- **Code Organization**: Added GlobalUsings.cs for common namespace imports
+- **Code Organization**: 
+  - Added GlobalUsings.cs for common namespace imports
+  - Standardized folder names to lowercase
+  - Renamed extension classes for consistency (DateTimeExtensions, JsonExtensions, StringExtensions)
+  - Removed unused WebSocket code to maintain REST API focus
 - **Testing**: Unified test project structure with improved test coverage
 - **No Breaking Changes**: Full backward compatibility maintained
 

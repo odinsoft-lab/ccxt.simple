@@ -1,11 +1,9 @@
-﻿using CCXT.Simple.Extensions;
-
-namespace CCXT.Simple.Services
+﻿namespace CCXT.Simple.Extensions
 {
     /// <summary>
     ///
     /// </summary>
-    public class DateTimeXts
+    public static class DateTimeExtensions
     {
         //-----------------------------------------------------------------------------------------------------------------------------
         //

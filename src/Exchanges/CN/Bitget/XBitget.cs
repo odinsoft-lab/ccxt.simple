@@ -1,4 +1,5 @@
 using CCXT.Simple.Data;
+using CCXT.Simple.Extensions;
 using CCXT.Simple.Models;
 using CCXT.Simple.Services;
 using Newtonsoft.Json;
@@ -64,7 +65,7 @@ namespace CCXT.Simple.Exchanges.Bitget
 
         protected (string signBody, string mediaType) CreateRaSignature(HttpClient client, string method, string endpoint, string query, Dictionary<string, string> args)
         {
-            var _timestamp = DateTimeXts.NowMilli;
+            var _timestamp = DateTimeExtensions.NowMilli;
             var _content_type = "application/json";
 
             var _sign_body = args != null ? JsonConvert.SerializeObject(args) : "";
@@ -94,18 +95,6 @@ namespace CCXT.Simple.Exchanges.Bitget
         {
             var _sign = this.CreateRaSignature(client, "POST", endpoint, "", args);
             return new StringContent(_sign.signBody, Encoding.UTF8, _sign.mediaType);
-        }
-
-        protected (string sign, long timestamp) CreateWsSignature(string method, string endpoint)
-        {
-            var _timestamp = DateTimeXts.Now;
-
-            var _sign_data = $"{_timestamp}{method}{endpoint}";
-            var _sign_hash = Encryptor.ComputeHash(Encoding.UTF8.GetBytes(_sign_data));
-
-            var _signature = Convert.ToBase64String(_sign_hash);
-
-            return (_signature, _timestamp);
         }
 
         /// <summary>

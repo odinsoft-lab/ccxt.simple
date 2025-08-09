@@ -202,7 +202,7 @@ namespace CCXT.Simple.Exchanges.Crypto
                 args = new Dictionary<string, string>();
 
             var _post_data = args.ToQueryString2();
-            var _nonce = DateTimeXts.NowMilli;
+            var _nonce = DateTimeExtensions.NowMilli;
 
             var _sign_data = $"{endpoint}{id}{this.ApiKey}{_post_data}{_nonce}";
             var _sign_hash = Encryptor.ComputeHash(Encoding.UTF8.GetBytes(_sign_data));

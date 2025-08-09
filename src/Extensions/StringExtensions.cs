@@ -1,6 +1,6 @@
 ﻿namespace CCXT.Simple.Extensions
 {
-    public static class StringXts
+    public static class StringExtensions
     {
         public static string ToQueryString2(this Dictionary<string, string> args)
         {

@@ -2,8 +2,6 @@ using CCXT.Simple.Exchanges;
 using CCXT.Simple.Exchanges.Bitget.RA.Private;
 using CCXT.Simple.Exchanges.Bitget.RA.Public;
 using CCXT.Simple.Exchanges.Bitget.RA.Trade;
-using CCXT.Simple.Exchanges.Bitget.WS;
-using CCXT.Simple.Services;
 using Microsoft.Extensions.Configuration;
 
 namespace CCXT.Simple.Samples.Samples
@@ -36,7 +34,7 @@ namespace CCXT.Simple.Samples.Samples
 
         public async Task Run()
         {
-            Console.WriteLine("===== Bitget Sample - WebSocket and API Demo =====");
+            Console.WriteLine("===== Bitget Sample - WAPI Demo =====");
             Console.WriteLine();
 
             if (string.IsNullOrEmpty(_apiKey) || string.IsNullOrEmpty(_secretKey))
@@ -51,7 +49,6 @@ namespace CCXT.Simple.Samples.Samples
             while (true)
             {
                 Console.WriteLine("Select operation:");
-                Console.WriteLine("  ws - WebSocket streaming");
                 Console.WriteLine("  pu - Public API demo");
                 Console.WriteLine("  pr - Private API demo (requires API keys)");
                 Console.WriteLine("  tr - Trade API demo (requires API keys)");
@@ -68,9 +65,6 @@ namespace CCXT.Simple.Samples.Samples
                 {
                     switch (command)
                     {
-                        case "ws":
-                            await RunWebSocketDemo(exchange);
-                            break;
                         case "pu":
                             await RunPublicApiDemo(exchange);
                             break;
@@ -92,45 +86,6 @@ namespace CCXT.Simple.Samples.Samples
 
                 Console.WriteLine();
             }
-        }
-
-        private async Task RunWebSocketDemo(Exchange exchange)
-        {
-            Console.WriteLine();
-            Console.WriteLine("=== WebSocket Demo ===");
-            
-            Console.Write("Enter instrument type (SPOT/UMCBL/DMCBL/CMCBL): ");
-            var instType = Console.ReadLine();
-            if (string.IsNullOrEmpty(instType))
-                return;
-
-            Console.Write("Enter channel name (ticker/trade/depth/candle1m): ");
-            var channel = Console.ReadLine();
-            if (string.IsNullOrEmpty(channel))
-                return;
-
-            Console.Write("Enter instrument IDs (comma-separated, e.g., BTCUSDT,ETHUSDT): ");
-            var instId = Console.ReadLine();
-            if (string.IsNullOrEmpty(instId))
-                return;
-
-            var symbols = instId.Split(',');
-            if (symbols.Length < 1)
-                return;
-
-            Console.WriteLine($"Starting WebSocket for {instType} {channel} {instId}...");
-            Console.WriteLine("Press any key to stop streaming...");
-
-            var ws = new WebSocket(exchange, _apiKey, _secretKey, _passPhrase);
-            var wsTask = ws.Start(MainTokenSource.Token, instType, channel, symbols);
-
-            Console.ReadKey();
-            MainTokenSource.Cancel();
-            
-            await wsTask;
-            _mainTokenSource = null;
-            
-            Console.WriteLine("WebSocket stopped.");
         }
 
         private async Task RunPublicApiDemo(Exchange exchange)

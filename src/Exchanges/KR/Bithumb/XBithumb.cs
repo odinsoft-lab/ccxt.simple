@@ -403,7 +403,7 @@ namespace CCXT.Simple.Exchanges.Bithumb
 
                             _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
 
-                            var _curr_timestamp = DateTimeXts.NowMilli;
+                            var _curr_timestamp = DateTimeExtensions.NowMilli;
                             if (_curr_timestamp > _next_timestamp)
                             {
                                 _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
@@ -426,7 +426,7 @@ namespace CCXT.Simple.Exchanges.Bithumb
                             _volume *= mainXchg.fiat_btc_price;
                             _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
 
-                            var _curr_timestamp = DateTimeXts.NowMilli;
+                            var _curr_timestamp = DateTimeExtensions.NowMilli;
                             if (_curr_timestamp > _next_timestamp)
                             {
                                 _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
@@ -482,7 +482,7 @@ namespace CCXT.Simple.Exchanges.Bithumb
         public FormUrlEncodedContent CreateSignature(HttpClient client, string endpoint, Dictionary<string, string> args)
         {
             var _post_data = args.ToQueryString2();
-            var _nonce = DateTimeXts.NowMilli.ToString();
+            var _nonce = DateTimeExtensions.NowMilli.ToString();
 
             var _sign_data = $"{endpoint};{_post_data};{_nonce}";
             var _sign_hash = Encryptor.ComputeHash(Encoding.UTF8.GetBytes(_sign_data));

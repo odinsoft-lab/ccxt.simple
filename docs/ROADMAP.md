@@ -20,6 +20,9 @@
 - ✅ Unified samples project structure (CCXT.Simple.Samples)
 - ✅ .NET 8.0 and .NET 9.0 support (removed netstandard2.1)
 - ✅ English documentation throughout codebase
+- ✅ Code organization improvements (lowercase folders, consistent naming)
+- ✅ REST API focus (removed WebSocket code)
+- ✅ Extension class refactoring (DateTimeExtensions, JsonExtensions, StringExtensions)
 
 ## 🚀 Development Phases
 
@@ -28,14 +31,13 @@
 **Goal**: Complete implementation of top 20 priority exchanges
 
 #### Target Exchanges
-- ~~Kraken~~ ✅ Completed (2025-01)
+- ~~Kraken~~ ✅ Completed (2025-08)
 - **Bitstamp** - European market leader
 - **Bitfinex** - Advanced trading features
 - **Gemini** - US regulated exchange
 - **Poloniex** - Wide altcoin selection
 
 #### Features
-- WebSocket streaming for implemented exchanges
 - Real-time order book and trade streams
 - Standardized error handling across all exchanges
 
@@ -67,7 +69,6 @@
 - DeFi bridge integrations (DEX support)
 - Cross-exchange arbitrage detection
 - Advanced analytics dashboard
-- Unified WebSocket management
 
 #### Exchange Categories
 - **DeFi/DEX**: Vertex, Paradex, Hyperliquid
@@ -95,13 +96,11 @@
 ### August 2025
 - [ ] Start Bitstamp integration
 - [ ] Documentation updates
-- [ ] WebSocket framework design
 - [ ] Community feedback integration
 
 ### September 2025
 - [ ] Complete Bitstamp, Bitfinex
 - [ ] Start Gemini, Poloniex
-- [ ] WebSocket implementation for 5 exchanges
 - [ ] Performance benchmarking
 
 ### October 2025
@@ -125,7 +124,6 @@
 ### January 2026
 - [ ] Q4 targets completion (50+ exchanges)
 - [ ] Cross-exchange arbitrage tools
-- [ ] WebSocket for all major exchanges
 - [ ] Beta testing program launch
 
 ## 🎯 Priority Implementation Queue
@@ -168,7 +166,6 @@ Based on community demand and market importance:
 
 ### Q4 2025
 - 50+ fully implemented exchanges
-- WebSocket support for 30+ exchanges
 - Enterprise customer adoption
 - Community contributor program
 

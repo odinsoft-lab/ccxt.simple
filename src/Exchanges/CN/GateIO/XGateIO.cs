@@ -2,6 +2,7 @@ using CCXT.Simple.Services;
 using CCXT.Simple.Data;
 using CCXT.Simple.Models;
 using Newtonsoft.Json;
+using CCXT.Simple.Extensions;
 
 namespace CCXT.Simple.Exchanges.GateIO
 {
@@ -236,7 +237,7 @@ namespace CCXT.Simple.Exchanges.GateIO
 
                             _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
 
-                            var _curr_timestamp = DateTimeXts.NowMilli;
+                            var _curr_timestamp = DateTimeExtensions.NowMilli;
                             if (_curr_timestamp > _next_timestamp)
                             {
                                 _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);

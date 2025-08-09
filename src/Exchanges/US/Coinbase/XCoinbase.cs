@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using CCXT.Simple.Extensions;
 
 namespace CCXT.Simple.Exchanges.Coinbase
 {
@@ -217,7 +218,7 @@ namespace CCXT.Simple.Exchanges.Coinbase
 
         public void CreateSignature(HttpClient client, string method, string endpoint)
         {
-            var _timestamp = DateTimeXts.Now;
+            var _timestamp = DateTimeExtensions.Now;
 
             var _post_data = $"{_timestamp}{method}{endpoint}";
             var _signature = Convert.ToBase64String(Encryptor.ComputeHash(Encoding.UTF8.GetBytes(_post_data)));
@@ -280,7 +281,7 @@ namespace CCXT.Simple.Exchanges.Coinbase
 
                         _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
 
-                        var _curr_timestamp = DateTimeXts.ConvertToUnixTimeMilli(_jobject.Value<DateTime>("time"));
+                        var _curr_timestamp = DateTimeExtensions.ConvertToUnixTimeMilli(_jobject.Value<DateTime>("time"));
                         if (_curr_timestamp > _next_timestamp)
                         {
                             _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
@@ -547,7 +548,7 @@ namespace CCXT.Simple.Exchanges.Coinbase
                         _result.Add(new TradeData
                         {
                             id = trade["trade_id"].ToString(),
-                            timestamp = DateTimeXts.ConvertToUnixTimeMilli(trade["time"].Value<DateTime>()),
+                            timestamp = DateTimeExtensions.ConvertToUnixTimeMilli(trade["time"].Value<DateTime>()),
                             price = trade["price"].Value<decimal>(),
                             amount = trade["size"].Value<decimal>(),
                             side = trade["side"].ToString() == "buy" ? SideType.Bid : SideType.Ask
@@ -706,7 +707,7 @@ namespace CCXT.Simple.Exchanges.Coinbase
                         price = price,
                         filled = _jobject["filled_size"]?.Value<decimal>() ?? 0,
                         remaining = amount - (_jobject["filled_size"]?.Value<decimal>() ?? 0),
-                        timestamp = DateTimeXts.ConvertToUnixTimeMilli(_jobject["created_at"].Value<DateTime>()),
+                        timestamp = DateTimeExtensions.ConvertToUnixTimeMilli(_jobject["created_at"].Value<DateTime>()),
                         fee = _jobject["fill_fees"]?.Value<decimal>(),
                         feeAsset = "USD"
                     };
@@ -796,7 +797,7 @@ namespace CCXT.Simple.Exchanges.Coinbase
                         price = _jobject["price"]?.Value<decimal>(),
                         filled = _jobject["filled_size"]?.Value<decimal>() ?? 0,
                         remaining = (_jobject["size"]?.Value<decimal>() ?? 0) - (_jobject["filled_size"]?.Value<decimal>() ?? 0),
-                        timestamp = DateTimeXts.ConvertToUnixTimeMilli(_jobject["created_at"].Value<DateTime>()),
+                        timestamp = DateTimeExtensions.ConvertToUnixTimeMilli(_jobject["created_at"].Value<DateTime>()),
                         fee = _jobject["fill_fees"]?.Value<decimal>(),
                         feeAsset = "USD"
                     };
@@ -850,7 +851,7 @@ namespace CCXT.Simple.Exchanges.Coinbase
                             price = order["price"]?.Value<decimal>(),
                             filled = order["filled_size"]?.Value<decimal>() ?? 0,
                             remaining = (order["size"]?.Value<decimal>() ?? 0) - (order["filled_size"]?.Value<decimal>() ?? 0),
-                            timestamp = DateTimeXts.ConvertToUnixTimeMilli(order["created_at"].Value<DateTime>()),
+                            timestamp = DateTimeExtensions.ConvertToUnixTimeMilli(order["created_at"].Value<DateTime>()),
                             fee = order["fill_fees"]?.Value<decimal>(),
                             feeAsset = "USD"
                         });
@@ -905,7 +906,7 @@ namespace CCXT.Simple.Exchanges.Coinbase
                             price = order["executed_value"]?.Value<decimal>() / order["filled_size"]?.Value<decimal>(),
                             filled = order["filled_size"]?.Value<decimal>() ?? 0,
                             remaining = 0,
-                            timestamp = DateTimeXts.ConvertToUnixTimeMilli(order["created_at"].Value<DateTime>()),
+                            timestamp = DateTimeExtensions.ConvertToUnixTimeMilli(order["created_at"].Value<DateTime>()),
                             fee = order["fill_fees"]?.Value<decimal>(),
                             feeAsset = "USD"
                         });
@@ -956,7 +957,7 @@ namespace CCXT.Simple.Exchanges.Coinbase
                             side = fill["side"]?.ToString() == "buy" ? SideType.Bid : SideType.Ask,
                             amount = fill["size"]?.Value<decimal>() ?? 0,
                             price = fill["price"]?.Value<decimal>() ?? 0,
-                            timestamp = DateTimeXts.ConvertToUnixTimeMilli(fill["created_at"].Value<DateTime>()),
+                            timestamp = DateTimeExtensions.ConvertToUnixTimeMilli(fill["created_at"].Value<DateTime>()),
                             fee = fill["fee"]?.Value<decimal>() ?? 0,
                             feeAsset = "USD"
                         });
@@ -1123,7 +1124,7 @@ namespace CCXT.Simple.Exchanges.Coinbase
                             tag = deposit["destination_tag"]?.ToString() ?? "",
                             network = deposit["network"]?.ToString() ?? "",
                             status = deposit["status"]?.ToString() ?? "",
-                            timestamp = DateTimeXts.ConvertToUnixTimeMilli(deposit["created_at"].Value<DateTime>()),
+                            timestamp = DateTimeExtensions.ConvertToUnixTimeMilli(deposit["created_at"].Value<DateTime>()),
                             txid = deposit["crypto_transaction_hash"]?.ToString() ?? ""
                         });
                     }
@@ -1175,7 +1176,7 @@ namespace CCXT.Simple.Exchanges.Coinbase
                             tag = withdrawal["destination_tag"]?.ToString() ?? "",
                             network = withdrawal["network"]?.ToString() ?? "",
                             status = withdrawal["status"]?.ToString() ?? "",
-                            timestamp = DateTimeXts.ConvertToUnixTimeMilli(withdrawal["created_at"].Value<DateTime>()),
+                            timestamp = DateTimeExtensions.ConvertToUnixTimeMilli(withdrawal["created_at"].Value<DateTime>()),
                             fee = withdrawal["fee"]?.Value<decimal>() ?? 0
                         });
                     }

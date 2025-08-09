@@ -14,7 +14,7 @@ Migration from Newtonsoft.Json to System.Text.Json for the entire CCXT.Simple pr
 1. ✅ Created migration PowerShell script (`migrate-to-system-text-json.ps1`)
 2. ✅ Updated project file to include System.Text.Json package reference
 3. ✅ Updated GlobalUsings.cs with System.Text.Json namespaces
-4. ✅ Created JsonExtensions helper class in `src/Extensions/JsonExtensions.cs`
+4. ✅ Created JsonExtensions helper class in `src/extensions/JsonExtensions.cs`
 5. ✅ Modified 124 out of 247 source files with basic replacements:
    - Replaced `using Newtonsoft.Json` → `using System.Text.Json`
    - Replaced `using Newtonsoft.Json.Linq` → `using System.Text.Json.Nodes`
@@ -35,8 +35,8 @@ Migration from Newtonsoft.Json to System.Text.Json for the entire CCXT.Simple pr
 
 ### Files Requiring Manual Review
 The following files contain patterns that need manual attention:
-- `src/Data/DecimalConverter.cs` - Custom JsonConverter implementation
-- `src/Exchanges/Exchange.cs` - JsonSerializerSettings usage
+- `src/data/DecimalConverter.cs` - Custom JsonConverter implementation
+- `src/exchanges/Exchange.cs` - JsonSerializerSettings usage
 - Multiple exchange implementations with complex JSON parsing logic
 
 ### Known Issues to Address
@@ -82,8 +82,6 @@ The PowerShell migration script is saved at: `D:\github.com\lisa3907\ccxt.simple
 
 ---
 
----
-
 ## Version 1.1.7 Updates (Status: Completed)
 
 ### Build System Improvements
@@ -92,10 +90,15 @@ The PowerShell migration script is saved at: `D:\github.com\lisa3907\ccxt.simple
 - ✅ **Added GlobalUsings.cs** - Centralized common namespace imports
 
 ### Code Quality Improvements
-- ✅ **English Documentation** - Translated all Korean comments to English in Extensions folder
+- ✅ **English Documentation** - Translated all Korean comments to English throughout codebase
+- ✅ **Code Organization**:
+  - Standardized all folder names to lowercase (`src/exchanges/`, `src/data/`, etc.)
+  - Renamed extension classes for consistency (DateTimeXts → DateTimeExtensions, etc.)
+  - Removed WebSocket code to maintain REST API focus
 - ✅ **Bug Fixes**:
   - Fixed `CoinState.json` file path issue in Bithumb exchange (now uses assembly location)
   - Fixed build errors related to global using directives
+  - Fixed namespace inconsistencies in extension classes
 
 ### Project Structure
 - ✅ **Target Frameworks**: .NET 8.0, .NET 9.0
@@ -105,10 +108,13 @@ The PowerShell migration script is saved at: `D:\github.com\lisa3907\ccxt.simple
 ### Files Modified
 - `src/ccxt.simple.csproj` - Removed netstandard2.1, updated target frameworks
 - `src/GlobalUsings.cs` - Added for common namespace imports
-- `src/Exchanges/US/Crypto/XCrypto.cs` - Replaced PostAsJsonAsync with manual JSON serialization
-- `src/Exchanges/KR/Bithumb/XBithumb.cs` - Fixed CoinState.json file path
-- `src/Extensions/DateTimeXts.cs` - Translated 23 Korean comments to English
-- `src/Extensions/StringXts.cs` - Translated 2 Korean comments to English
+- `src/exchanges/us/crypto/XCrypto.cs` - Replaced PostAsJsonAsync with manual JSON serialization
+- `src/exchanges/kr/bithumb/XBithumb.cs` - Fixed CoinState.json file path
+- `src/extensions/DateTimeExtensions.cs` - Renamed from DateTimeXts, translated comments
+- `src/extensions/JsonExtensions.cs` - Renamed from JsonXts
+- `src/extensions/StringExtensions.cs` - Renamed from StringXts, translated comments
+- All exchange folders - Renamed to lowercase convention
+- Bitget exchange - Removed WebSocket implementation files
 
 ### Test Results
 ```
@@ -120,4 +126,4 @@ Skipped: 0
 
 ---
 
-*Last Updated: 2025-08-07*
+*Last Updated: 2025-08-09*

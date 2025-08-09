@@ -7,7 +7,6 @@ namespace CCXT.Simple.Exchanges
     {
         Exchange mainXchg { get; set; }
 
-        //ExchangeTitle { get; set; }
         string ExchangeName { get; set; }
         string ExchangeUrl { get; set; }
 

@@ -18,7 +18,6 @@ namespace CCXT.Simple.Exchanges.Huobi
 		 *
 		 * Rate Limit
 		 *     https://huobiapi.github.io/docs/spot/v1/en/#rate-limiting-rule
-		 *     https://huobiapi.github.io/docs/spot/v1/en/#websocket-market-data
 		 *     https://huobiglobal.zendesk.com/hc/en-us/articles/900001168066-Huobi-Global-is-going-to-change-rate-limit-policy-for-part-of-REST-API-endpoints
 		 *
 		 *     Order interface is limited by API Key: no more than 10 times within 1 sec
@@ -359,7 +358,7 @@ namespace CCXT.Simple.Exchanges.Huobi
 
                                 _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
 
-                                var _curr_timestamp = DateTimeXts.NowMilli;
+                                var _curr_timestamp = DateTimeExtensions.NowMilli;
                                 if (_curr_timestamp > _next_timestamp)
                                 {
                                     _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
@@ -444,7 +443,7 @@ namespace CCXT.Simple.Exchanges.Huobi
 
                             _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
 
-                            var _curr_timestamp = DateTimeXts.NowMilli;
+                            var _curr_timestamp = DateTimeExtensions.NowMilli;
                             if (_curr_timestamp > _next_timestamp)
                             {
                                 _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);

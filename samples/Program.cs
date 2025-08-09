@@ -16,7 +16,7 @@ namespace CCXT.Simple.Samples
             Console.WriteLine();
             Console.WriteLine("Available exchanges:");
             Console.WriteLine("1. Bithumb - Order placement sample");
-            Console.WriteLine("2. Bitget  - WebSocket and API sample");
+            Console.WriteLine("2. Bitget  - API sample");
             Console.WriteLine("3. Coinone - Basic sample");
             Console.WriteLine("4. Kraken  - Standard API sample");
             Console.WriteLine();

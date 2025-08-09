@@ -672,9 +672,9 @@ namespace CCXT.Simple.Tests.Exchanges
         // Test class for Coinbase ticker data
         private class CoinbaseTickerData
         {
-            public string type { get; set; }
+            public string type { get; set; } = "";
             public long sequence { get; set; }
-            public string product_id { get; set; }
+            public string product_id { get; set; } = "";
             
             [JsonConverter(typeof(XDecimalNullConverter))]
             public decimal price { get; set; }
@@ -705,9 +705,9 @@ namespace CCXT.Simple.Tests.Exchanges
             
             [JsonConverter(typeof(XDecimalNullConverter))]
             public decimal best_ask_size { get; set; }
-            
-            public string side { get; set; }
-            public string time { get; set; }
+
+            public string side { get; set; } = "";
+            public string time { get; set; } = "";
             public int trade_id { get; set; }
             
             [JsonConverter(typeof(XDecimalNullConverter))]

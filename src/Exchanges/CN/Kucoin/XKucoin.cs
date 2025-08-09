@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using CCXT.Simple.Extensions;
 
 namespace CCXT.Simple.Exchanges.Kucoin
 {
@@ -117,7 +118,7 @@ namespace CCXT.Simple.Exchanges.Kucoin
 
         public void CreateSignature(HttpClient client, string endpoint)
         {
-            var _timestamp = DateTimeXts.NowMilli.ToString();
+            var _timestamp = DateTimeExtensions.NowMilli.ToString();
 
             var _sign_data = _timestamp + "GET" + endpoint;
             var _sign_hash = Convert.ToBase64String(Encryptor.ComputeHash(Encoding.UTF8.GetBytes(_sign_data)));
@@ -405,7 +406,7 @@ namespace CCXT.Simple.Exchanges.Kucoin
 
                             _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
 
-                            var _curr_timestamp = DateTimeXts.NowMilli;
+                            var _curr_timestamp = DateTimeExtensions.NowMilli;
                             if (_curr_timestamp > _next_timestamp)
                             {
                                 _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
@@ -492,7 +493,7 @@ namespace CCXT.Simple.Exchanges.Kucoin
 
                             _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
 
-                            var _curr_timestamp = DateTimeXts.NowMilli;
+                            var _curr_timestamp = DateTimeExtensions.NowMilli;
                             if (_curr_timestamp > _next_timestamp)
                             {
                                 _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
