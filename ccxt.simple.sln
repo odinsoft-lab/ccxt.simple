@@ -28,9 +28,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{5CFF
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C8D5274F-AC00-46C7-1F8D-E88E81087A52}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CCXT.Simple.Tests", "tests\CCXT.Simple.Tests.csproj", "{60A8F8AD-5519-9A10-020F-0890302CF297}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ccxt.test", "tests\ccxt.test.csproj", "{60A8F8AD-5519-9A10-020F-0890302CF297}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CCXT.Simple.Samples", "samples\CCXT.Simple.Samples.csproj", "{788B3CEF-0CD7-0A92-A37F-A283BEA207E7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ccxt.sample", "samples\ccxt.sample.csproj", "{788B3CEF-0CD7-0A92-A37F-A283BEA207E7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
