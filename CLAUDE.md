@@ -66,7 +66,7 @@ The project follows a **multi-exchange adapter pattern** where each cryptocurren
 
 **Exchange Interface (`IExchange`)**
 - Defines the contract all exchange implementations must follow
-- Located at `src/Exchanges/IExchange.cs`
+- Located at `src/core/interfaces/IExchange.cs`
 - Legacy methods: `GetTickers()`, `GetBookTickers()`, `GetMarkets()`, `GetVolumes()`, `GetPrice()`, `VerifySymbols()`, `VerifyStates()`
 - New standardized API methods (v1.1.6+):
   - Market Data: `GetOrderbook()`, `GetCandles()`, `GetTrades()`
@@ -75,7 +75,7 @@ The project follows a **multi-exchange adapter pattern** where each cryptocurren
   - Funding: `GetDepositAddress()`, `Withdraw()`, `GetDepositHistory()`, `GetWithdrawalHistory()`
 
 **Exchange Base Class (`Exchange`)**
-- Central coordination hub located at `src/Exchanges/Exchange.cs`
+- Central coordination hub located at `src/core/Exchange.cs`
 - Manages concurrent collections for tickers, queues, and exchange data
 - Implements event-driven architecture with `MessageEvent`, `UsdPriceEvent`, `KrwPriceEvent`
 - Uses `ConcurrentDictionary` for thread-safe data management
@@ -89,10 +89,13 @@ The project follows a **multi-exchange adapter pattern** where each cryptocurren
 - Most new API methods throw `NotImplementedException` pending full implementation
 
 **Data Models**
-- Core data structures in `src/Data/`
-- `Tickers.cs`: Main container for exchange ticker data
-- `Orderbook.cs`: Order book data representation
-- `WState.cs`: Wallet/coin state information
+- Core data structures in `src/models/`
+- `models/market/Tickers.cs`: Main container for exchange ticker data with compatibility properties
+- `models/market/Orderbook.cs`: Order book data representation
+- `models/market/WState.cs`: Wallet/coin state information
+- `models/account/`: Account and balance models
+- `models/trading/`: Order and trade models
+- `models/funding/`: Deposit and withdrawal models
 - Thread-safe design using concurrent collections
 
 ### Key Dependencies

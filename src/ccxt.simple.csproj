@@ -28,7 +28,7 @@
 • Fixed: CoinState.json file path issue in Bithumb exchange
 • Improved: All Korean comments translated to English
 • Added: GlobalUsings.cs for common namespace imports
-• Enhanced: Test coverage with all 23 tests passing
+• Enhanced: Test coverage with all 73 tests passing
 Full changelog: https://github.com/ccxt-net/ccxt.simple/blob/main/docs/CHANGELOG.md</PackageReleaseNotes>
 		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>

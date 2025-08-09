@@ -2,19 +2,21 @@
 
 ## 📊 Current Status
 
-- **Total Exchanges**: 111
-- **Fully Implemented**: 15 (13.5%)
-- **In Development**: 96 (86.5%)
+- **Total Exchange Files**: 178
+- **Functional Implementations**: ~8-10 (5-6%)
+- **Skeleton Implementations**: ~168 (94%)
+- **NotImplementedException Count**: 2,281 across 107 files
 - **Target Framework**: .NET 8.0, .NET 9.0
 - **Current Version**: 1.1.7
+- **Test Coverage**: 73 tests passing
 
 ## ✅ Completed Features (v1.1.7)
 
-- ✅ Full API implementation for 15 exchanges (including Kraken)
+- ✅ Functional implementation for ~8-10 exchanges (including Kraken, Binance, Bitget)
 - ✅ Standardized trading, account, and funding operations
 - ✅ Comprehensive market data access
 - ✅ HttpClient pooling for improved performance
-- ✅ Skeleton code for 96 additional exchanges from CCXT
+- ✅ Skeleton code for ~168 additional exchanges with NotImplementedException placeholders
 - ✅ Complete Kraken exchange implementation
 - ✅ Unified test project structure (CCXT.Simple.Tests)
 - ✅ Unified samples project structure (CCXT.Simple.Samples)
@@ -77,7 +79,7 @@
 
 ### Phase 4: Enterprise & Optimization (Q2 2026)
 
-**Goal**: Complete all 111 exchange implementations
+**Goal**: Complete all 178 exchange implementations
 
 #### Enterprise Features
 - Multi-account management
@@ -176,7 +178,7 @@ Based on community demand and market importance:
 - 50,000+ NuGet downloads
 
 ### Q2 2026
-- 111 exchanges fully implemented
+- 178 exchanges fully implemented
 - Enterprise features complete
 - Market-leading performance
 - Active community ecosystem
@@ -204,5 +206,74 @@ For roadmap discussions and suggestions:
 
 ---
 
-*This roadmap is updated monthly. Last update: 2025-08-08*
+## 🔧 Technical Tasks & Work in Progress
+
+### System.Text.Json Migration (Status: Postponed)
+
+**Overview**: Migration from Newtonsoft.Json to System.Text.Json for performance improvements.
+
+**Current Status**:
+- **Progress**: ~50% completed, postponed for continuation
+- **Date Started**: 2024-08-07
+- **Migration Script**: Available at project root
+
+**Completed Work**:
+- ✅ Basic migration script created and executed
+- ✅ Updated 124 out of 247 source files with replacements
+- ✅ Created JsonExtensions helper class
+- ✅ Updated GlobalUsings.cs with System.Text.Json namespaces
+
+**Remaining Work**:
+- ⏳ Fix compilation errors from migration
+- ⏳ Handle JsonSerializerSettings references
+- ⏳ Update custom JsonConverter implementations
+- ⏳ Review complex LINQ operations on JsonArray/JsonObject
+
+**Files Requiring Manual Review**:
+- `src/core/converters/DecimalConverter.cs` - Custom JsonConverter
+- `src/core/Exchange.cs` - JsonSerializerSettings usage
+- Multiple exchange implementations with complex JSON parsing
+
+### Technical Debt & Improvements
+
+**High Priority**:
+- Complete all `NotImplementedException` methods (2,281 occurrences)
+- Standardize error messages across exchanges
+- Improve test coverage from current 73 tests to >90% coverage
+- Optimize memory usage for concurrent operations
+
+**Medium Priority**:
+- Performance optimization for 100+ concurrent exchanges
+- Security audits and vulnerability assessments
+- API response time optimization (<100ms average)
+- Documentation overhaul and API reference updates
+
+**Low Priority**:
+- WebSocket implementation consideration (currently REST-only)
+- Advanced caching mechanisms
+- Multi-language documentation support
+
+### Completed Technical Tasks (v1.1.7)
+
+**Build System**:
+- ✅ Removed netstandard2.1 support
+- ✅ Fixed System.Net.Http.Json dependency issues
+- ✅ Added GlobalUsings.cs for centralized imports
+
+**Code Quality**:
+- ✅ Translated all Korean comments to English
+- ✅ Standardized folder structure (lowercase convention)
+- ✅ Renamed extension classes for consistency
+- ✅ Removed WebSocket code to maintain REST focus
+- ✅ Fixed CoinState.json file path issues
+
+**Project Organization**:
+- ✅ Folder reorganization completed
+- ✅ Namespace standardization
+- ✅ Test project unification
+- ✅ Sample project consolidation
+
+---
+
+*This roadmap is updated monthly. Last update: 2025-08-09*
 *Subject to change based on community feedback and market conditions*

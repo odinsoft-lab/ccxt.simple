@@ -1,499 +1,123 @@
 # CCXT.Simple
 
 [![NuGet](https://img.shields.io/nuget/v/CCXT.Simple.svg)](https://www.nuget.org/packages/CCXT.Simple/)
-[![.NET](https://img.shields.io/badge/.NET-9.0-blue.svg)](https://dotnet.microsoft.com/download)
+[![.NET](https://img.shields.io/badge/.NET-8.0%20%7C%209.0-blue.svg)](https://dotnet.microsoft.com/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.txt)
+[![Downloads](https://img.shields.io/nuget/dt/CCXT.Simple.svg)](https://www.nuget.org/packages/CCXT.Simple/)
 
-A simplified cryptocurrency trading library for .NET that provides unified access to multiple cryptocurrency exchange APIs. Built as a simpler alternative to ccxt.net with a focus on ease of use and consistent interfaces across all supported exchanges.
+> 🚀 **Modern .NET cryptocurrency trading library** - Unified API access to 178+ exchange implementations with a focus on simplicity and performance.
 
-## 🚀 Features
+## ✨ Key Features
 
-### **Unified API Interface**
-- **Standardized Methods**: Identical API signatures across all 16 supported exchanges
-- **Type Safety**: Strong typing with comprehensive data models
-- **Async/Await**: Modern C# async patterns with `ValueTask<T>` for optimal performance
-- **Error Handling**: Consistent error reporting and exception handling
+- **🎯 Unified Interface** - Same API across all exchanges
+- **⚡ High Performance** - `ValueTask<T>` async patterns, HTTP client pooling
+- **🔒 Type Safe** - Strong typing with comprehensive data models
+- **🌍 Global Coverage** - 178 exchange implementations (8-10 fully functional)
+- **📊 Complete API** - Market data, trading, account management, funding operations
 
-### **Comprehensive Exchange Support**
-- **111 Total Exchanges**: 15 fully implemented, 96 in development (skeleton code ready)
-- **Implemented Exchanges**: Binance, Bitget, Bithumb, Bittrex, ByBit, Coinbase, Coinone, Crypto.com, Gate.io, Huobi, Korbit, Kraken, KuCoin, OKX, Upbit
-- **In Development**: 96 additional exchanges from CCXT library (see full list below)
-- **Full API Coverage**: Implemented exchanges support complete trading, account, and funding operations (v1.1.6+)
-- **Market Data**: Real-time tickers, order books, trading pairs, volume data
-- **Account Management**: Balance queries, account information, deposit/withdrawal history
-- **Trading Operations**: Order placement, cancellation, order history, trade history
-- **Funding**: Deposit addresses, withdrawals, transaction history
+## 🚀 Quick Start
 
-### **Advanced Features**
-- **Multi-Currency Support**: KRW, USD, USDT, BTC, and more
-- **Rate Limiting**: Built-in rate limiting per exchange specifications
-- **Authentication**: Secure API key management with HMAC signatures
-- **REST API Only**: Focused on reliable REST API implementation (no WebSocket)
+### Installation
+```bash
+dotnet add package CCXT.Simple
+```
 
-## 🏗️ Architecture
+### Basic Usage
+```csharp
+using CCXT.Simple.Exchanges.Binance;
 
-### **Core Components**
+// Initialize exchange
+var exchange = new Exchange("USD");
+var binance = new XBinance(exchange, "api_key", "secret_key");
+
+// Get market data
+var btcPrice = await binance.GetPrice("BTCUSDT");
+var orderbook = await binance.GetOrderbook("BTCUSDT", 10);
+
+// Trading operations
+var balances = await binance.GetBalance();
+var order = await binance.PlaceOrder("BTCUSDT", SideType.Buy, "limit", 0.001m, 50000m);
+```
+
+## 🏢 Exchange Support
+
+### ✅ Fully Functional (10 exchanges)
+**Binance** | **Bitget** | **Bithumb** | **Kraken** | **Coinone** | **Upbit** | **OKX** | **KuCoin** | **Gate.io** | **Crypto.com**
+
+### 🚧 Priority Development Queue
+**Bitstamp** • **Bitfinex** • **Gemini** • **Poloniex** • **Mexc** • **Deribit** • **Bitmex**
+
+### 📋 Skeleton Ready (168 exchanges)
+All major exchanges have interface implementations ready for development.
+
+> 📖 **[View complete exchange list and status →](docs/EXCHANGES.md)**
+
+## 💡 Architecture
+
+Built on a **multi-exchange adapter pattern** with a unified `IExchange` interface:
 
 ```csharp
-// Unified interface for all exchanges
 public interface IExchange
 {
-    // Core market data
-    ValueTask<bool> GetTickers(Tickers tickers);
-    ValueTask<decimal> GetPrice(string symbol);
+    // Market Data
     ValueTask<Orderbook> GetOrderbook(string symbol, int limit = 5);
+    ValueTask<decimal> GetPrice(string symbol);
     
-    // Account management
+    // Trading
+    ValueTask<OrderInfo> PlaceOrder(string symbol, SideType side, string orderType, decimal amount, decimal? price = null);
     ValueTask<Dictionary<string, BalanceInfo>> GetBalance();
-    ValueTask<AccountInfo> GetAccount();
     
-    // Trading operations
-    ValueTask<OrderInfo> PlaceOrder(string symbol, SideType side, string orderType, 
-                                   decimal amount, decimal? price = null);
-    ValueTask<List<OrderInfo>> GetOpenOrders(string symbol = null);
-    
-    // Funding operations
+    // Funding
     ValueTask<DepositAddress> GetDepositAddress(string currency, string network = null);
     ValueTask<WithdrawalInfo> Withdraw(string currency, decimal amount, string address);
 }
 ```
 
-### **Data Models**
-
-```csharp
-// Unified ticker information
-public class Ticker
-{
-    public string symbol { get; set; }
-    public decimal lastPrice { get; set; }
-    public decimal bidPrice { get; set; }
-    public decimal askPrice { get; set; }
-    public decimal volume24h { get; set; }
-    
-    // Compatibility properties
-    public decimal last => lastPrice;
-    public decimal bid => bidPrice;
-    public decimal ask => askPrice;
-}
-
-// Account balance information
-public class BalanceInfo
-{
-    public decimal free { get; set; }
-    public decimal used { get; set; }
-    public decimal total { get; set; }
-}
-
-// Order information
-public class OrderInfo
-{
-    public string id { get; set; }
-    public string symbol { get; set; }
-    public SideType side { get; set; }
-    public decimal amount { get; set; }
-    public decimal? price { get; set; }
-    public string status { get; set; }
-}
-```
-
-## 📦 Installation
-
-### **NuGet Package**
-```bash
-dotnet add package CCXT.Simple
-```
-
-### **Package Manager Console**
-```powershell
-Install-Package CCXT.Simple
-```
-
-### **Clone Repository**
-```bash
-git clone https://github.com/ccxt-net/ccxt.simple.git
-```
-
-## 🚀 Quick Start
-
-### **Basic Market Data**
-
-```csharp
-using CCXT.Simple.Exchanges;
-using CCXT.Simple.Exchanges.Binance;
-
-// Initialize exchange
-var exchange = new Exchange("KRW");
-var binance = new XBinance(exchange);
-
-// Verify available symbols
-await binance.VerifySymbols();
-
-// Get tickers
-var tickers = new Tickers("binance", exchange.GetXInfors("binance").symbols);
-await binance.GetTickers(tickers);
-
-// Get specific price
-var btcPrice = await binance.GetPrice("BTCUSDT");
-Console.WriteLine($"BTC Price: ${btcPrice}");
-
-// Get order book
-var orderbook = await binance.GetOrderbook("BTCUSDT", 10);
-Console.WriteLine($"Best Bid: ${orderbook.bids[0].price}");
-Console.WriteLine($"Best Ask: ${orderbook.asks[0].price}");
-```
-
-### **Account Management & Trading**
-
-```csharp
-// Initialize with API credentials
-var binance = new XBinance(exchange, "your_api_key", "your_secret_key");
-
-// Get account balance
-var balances = await binance.GetBalance();
-foreach (var balance in balances)
-{
-    Console.WriteLine($"{balance.Key}: {balance.Value.free} (Free), {balance.Value.total} (Total)");
-}
-
-// Place a limit order
-var order = await binance.PlaceOrder("BTCUSDT", SideType.Bid, "limit", 0.001m, 50000m);
-Console.WriteLine($"Order placed: {order.id}");
-
-// Get open orders
-var openOrders = await binance.GetOpenOrders("BTCUSDT");
-foreach (var openOrder in openOrders)
-{
-    Console.WriteLine($"Order {openOrder.id}: {openOrder.amount} at ${openOrder.price}");
-}
-
-// Cancel an order
-var cancelled = await binance.CancelOrder("BTCUSDT", order.id);
-Console.WriteLine($"Order cancelled: {cancelled}");
-
-// Get order history
-var history = await binance.GetOrderHistory("BTCUSDT");
-Console.WriteLine($"Total orders in history: {history.Count}");
-```
-
-### **Advanced: Bitget Trading API**
-
-```csharp
-using CCXT.Simple.Exchanges.Bitget.Trade;
-
-// Bitget has specialized trading API
-var tradeApi = new TradeAPI(exchange, "api_key", "secret_key", "pass_phrase");
-
-// Place order with Bitget's native API
-var result = await tradeApi.PlaceOrderAsync("BTCUSDT", "buy", "limit", 
-                                           "normal", 50000m, 0.001m, "client_order_1");
-if (result.code == "00000")
-{
-    Console.WriteLine($"Order successful: {result.data.orderId}");
-}
-```
-
-## 🏢 Supported Exchanges
-
-### ✅ **Fully Implemented Exchanges (15)**
-
-| Exchange | Status | Market Data | Trading | Account | Funding | Special Features |
-|----------|--------|-------------|---------|---------|---------|------------------|
-| **Binance** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | Complete API implementation |
-| **Bitget** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | Advanced Trading API |
-| **Bithumb** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | KRW pairs, Korean market |
-| **Bittrex** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | USD pairs, US market |
-| **ByBit** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | Derivatives & spot trading |
-| **Coinbase** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | USD pairs, regulated exchange |
-| **Coinone** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | KRW pairs, Korean market |
-| **Crypto.com** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | Multi-currency support |
-| **Gate.io** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | Wide altcoin selection |
-| **Huobi** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | Global markets, HTX rebrand |
-| **Korbit** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | KRW pairs, GraphQL API |
-| **Kraken** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | Major US exchange, complete implementation |
-| **KuCoin** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | Extensive altcoin support |
-| **OKX** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | Advanced trading features |
-| **Upbit** | ✅ Active | ✅ Full | ✅ Full | ✅ Full | ✅ Full | KRW pairs, largest Korean exchange |
-
-### 🚧 **In Development - Major Exchanges (19)**
-
-| Exchange | Status | Priority | Target Release | Notes |
-|----------|--------|----------|----------------|-------|
-| **Bitstamp** | 🚧 Dev | High | Q1 2025 | European market leader |
-| **Bitfinex** | 🚧 Dev | High | Q1 2025 | Advanced trading features |
-| **Poloniex** | 🚧 Dev | Medium | Q1 2025 | Wide altcoin selection |
-| **Gemini** | 🚧 Dev | High | Q1 2025 | US regulated exchange |
-| **Mexc** | 🚧 Dev | Medium | Q2 2025 | Growing global exchange |
-| **Deribit** | 🚧 Dev | High | Q2 2025 | Options & futures leader |
-| **Bitmex** | 🚧 Dev | High | Q2 2025 | Derivatives pioneer |
-| **Phemex** | 🚧 Dev | Medium | Q2 2025 | Derivatives trading |
-| **Bitflyer** | 🚧 Dev | Medium | Q2 2025 | Japanese market |
-| **Coincheck** | 🚧 Dev | Medium | Q2 2025 | Japanese exchange |
-| **Zaif** | 🚧 Dev | Low | Q3 2025 | Japanese market |
-| **Luno** | 🚧 Dev | Medium | Q3 2025 | Emerging markets |
-| **Bitvavo** | 🚧 Dev | Medium | Q3 2025 | European exchange |
-| **Btcturk** | 🚧 Dev | Low | Q3 2025 | Turkish market |
-| **Mercado** | 🚧 Dev | Low | Q3 2025 | Brazilian market |
-| **Novadax** | 🚧 Dev | Low | Q3 2025 | Latin American market |
-| **Indodax** | 🚧 Dev | Low | Q3 2025 | Indonesian market |
-| **Woo** | 🚧 Dev | Medium | Q3 2025 | Liquidity network |
-| **Vertex** | 🚧 Dev | Medium | Q4 2025 | DEX with CEX features |
-
-### 📋 **Skeleton Code Ready (77 Exchanges)**
-
-<details>
-<summary>Click to expand full list of exchanges with skeleton implementation</summary>
-
-#### **Binance Ecosystem**
-- BinanceCoinm, BinanceUs, BinanceUsdm
-
-#### **Major International**
-- Alpaca, Apex, Ascendex, Bequant, Bigone, Bingx, Bit2c, Bitbank, Bitbns, Bitmart, Bitopro, Bitrue, Bitso, Bitteam, Bittrade, Blockchaincom, Blofin, Btcalpha, Btcbox, Btcmarkets, Cex
-
-#### **Coinbase Ecosystem**
-- CoinbaseAdvanced, CoinbaseExchange, CoinbaseInternational
-
-#### **Regional Exchanges**
-- Coincatch, Coinex, Coinmate, Coinmetro, Coinsph, Coinspot, Cryptocom, Cryptomus
-
-#### **DeFi & Derivatives**
-- Defx, Delta, Derive, Digifinex, Ellipx, Hyperliquid, Paradex
-
-#### **Established Exchanges**
-- Exmo, Fmfwio, Foxbit, Gate, Hashkey, Hibachi, Hitbtc, Hollaex, Htx, Independentreserve
-
-#### **Kraken Ecosystem**
-- Krakenfutures
-
-#### **KuCoin Ecosystem**
-- Kucoinfutures
-
-#### **Emerging Exchanges**
-- Latoken, Lbank, Modetrade, Myokx, Ndax, Oceanex
-
-#### **OKX Ecosystem**
-- Okcoin, Okx, Okxus
-
-#### **Specialized Exchanges**
-- Onetrading, Oxfun, P2b, Paymium, Probit, Timex, Tokocrypto, Tradeogre
-
-#### **Next Generation**
-- Wavesexchange, Whitebit, Woofipro, Xt, Yobit, Zonda
-
-</details>
-
-**Legend**: 
-- ✅ **Fully implemented** - Complete API integration with all features
-- 🚧 **In Development** - Skeleton code ready, implementation in progress
-- 📋 **Skeleton Ready** - Interface implemented, awaiting full development
-
 ## 🔧 Configuration
 
-### **Exchange Initialization**
-
 ```csharp
-// Basic initialization (public data only)
-var exchange = new Exchange("USD"); // or "KRW", "EUR", etc.
-var binance = new XBinance(exchange);
+// Basic setup
+var exchange = new Exchange("USD");  // or "KRW", "EUR", etc.
+exchange.ApiCallDelaySeconds = 1;    // Rate limiting
+exchange.Volume24hBase = 1000000;    // Volume thresholds
 
-// With API credentials (for private operations)
-var binance = new XBinance(exchange, "api_key", "secret_key", "passphrase");
-
-// Configure volume and rate limiting
-exchange.Volume24hBase = 1000000;    // 24h volume threshold
-exchange.Volume1mBase = 10000;       // 1min volume threshold  
-exchange.ApiCallDelaySeconds = 1;    // Rate limiting delay
+// With events
+exchange.OnMessageEvent += (ex, msg, code) => Console.WriteLine($"[{ex}] {msg}");
+exchange.OnUsdPriceEvent += price => Console.WriteLine($"BTC: ${price}");
 ```
 
-### **Event Handling**
+## 📚 Documentation & Examples
 
-```csharp
-// Subscribe to events
-exchange.OnMessageEvent += (exchange, message, code) => 
-{
-    Console.WriteLine($"[{exchange}] {message} (Code: {code})");
-};
+- **[🗺️ Development Roadmap](docs/ROADMAP.md)** - Future plans, milestones, technical tasks
+- **[🏢 Exchange Status](docs/EXCHANGES.md)** - Complete list of 178 exchanges and implementation status  
+- **[📝 Changelog](docs/CHANGELOG.md)** - Version history and recent updates
+- **[💻 Code Examples](samples/)** - Interactive samples for Bithumb, Bitget, Coinone, Kraken
 
-exchange.OnUsdPriceEvent += (price) => 
-{
-    Console.WriteLine($"BTC/USD Price Update: ${price}");
-};
-
-exchange.OnKrwPriceEvent += (price) => 
-{
-    Console.WriteLine($"BTC/KRW Price Update: ₩{price}");
-};
+### Running Examples
+```bash
+git clone https://github.com/ccxt-net/ccxt.simple.git
+cd ccxt.simple
+dotnet run --project samples/ccxt.sample.csproj
 ```
-
-## 🔄 Migration & Compatibility
-
-### **Version 1.1.7 - Technical Improvements**
-- **Build System Updates**: Removed netstandard2.1 support, focusing on .NET 8.0 and .NET 9.0
-- **Dependency Cleanup**: Replaced System.Net.Http.Json with Newtonsoft.Json for better compatibility
-- **Documentation**: Translated all Korean comments to English for international developers
-- **Bug Fixes**: Fixed CoinState.json file path issue in Bithumb exchange
-- **Code Organization**: 
-  - Added GlobalUsings.cs for common namespace imports
-  - Standardized folder names to lowercase
-  - Renamed extension classes for consistency (DateTimeExtensions, JsonExtensions, StringExtensions)
-  - Removed unused WebSocket code to maintain REST API focus
-- **Testing**: Unified test project structure with improved test coverage
-- **No Breaking Changes**: Full backward compatibility maintained
-
-### **Backward Compatibility**
-```csharp
-// Legacy properties still work
-decimal lastPrice = ticker.last;    // Alias for ticker.lastPrice
-decimal bidPrice = ticker.bid;      // Alias for ticker.bidPrice
-decimal askPrice = ticker.ask;      // Alias for ticker.askPrice
-decimal volume = ticker.baseVolume; // Alias for ticker.volume24h
-```
-
-## 📊 Performance & Best Practices
-
-### **Async/Await Patterns**
-```csharp
-// Efficient batch operations
-var tasks = new[]
-{
-    binance.GetTickers(tickers),
-    binance.GetVolumes(tickers),
-    binance.GetBookTickers(tickers)
-};
-
-await Task.WhenAll(tasks);
-```
-
-### **Rate Limiting**
-```csharp
-// Respect exchange rate limits
-exchange.ApiCallDelaySeconds = 1; // Binance: 1200 requests/minute
-await Task.Delay(TimeSpan.FromSeconds(exchange.ApiCallDelaySeconds));
-```
-
-### **Error Handling**
-```csharp
-try 
-{
-    var result = await exchange.GetTickers(tickers);
-}
-catch (NotImplementedException ex)
-{
-    Console.WriteLine($"Feature not yet implemented: {ex.Message}");
-}
-catch (Exception ex)
-{
-    Console.WriteLine($"Exchange error: {ex.Message}");
-}
-```
-
-## 🛣️ Roadmap
-
-See our detailed [Development Roadmap](docs/ROADMAP.md) for:
-- Quarterly development phases
-- Monthly implementation milestones  
-- Priority exchange queue
-- Community involvement opportunities
-- Success metrics and goals
-
-**Current Focus**: Q3 2025 - Implementing top 20 priority exchanges
 
 ## 🤝 Contributing
 
-We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting pull requests.
+We welcome contributions! **Need a specific exchange implemented?** [Create an issue](https://github.com/ccxt-net/ccxt.simple/issues/new) - exchanges with more community requests get priority.
 
-### 📢 Request Exchange Implementation
-
-**Want a specific exchange implemented sooner?**
-
-If you need a particular exchange from our skeleton implementations (96 exchanges ready), simply [create an issue](https://github.com/ccxt-net/ccxt.simple/issues/new) with the exchange name.
-
-We prioritize implementation based on community demand! Exchanges with more requests will be implemented first.
-
-### 🚀 Request New API Functions
-
-**Need additional API functions beyond our standard interface?**
-
-We're always looking to expand our API coverage! Please [create an issue](https://github.com/ccxt-net/ccxt.simple/issues/new) for:
-
-#### **1. Standard API Functions (All Exchanges)**
-API functions that should be standardized across all exchanges:
-- `GetFundingRate()` - Perpetual contract funding rates
-- `GetLeverageBrackets()` - Margin tier information
-- `GetIndexPrice()` - Index price for derivatives
-- `GetMarkPrice()` - Mark price for futures
-- `GetPositions()` - Open positions for margin/futures
-- `GetSubAccounts()` - Sub-account management
-- `TransferBetweenAccounts()` - Internal transfers
-- `GetTradingFees()` - Current fee structure
-
-#### **2. Exchange-Specific API Functions**
-Unique APIs that certain exchanges offer:
-- `CopyTrade()` - Copy trading API (Bitget, ByBit)
-- `GetStakingProducts()` - Staking opportunities (Binance)
-- `PlaceGridOrder()` - Grid trading (KuCoin, Gate.io)
-- `GetDualInvestment()` - Dual investment products (Binance)
-- `GetOptions()` - Options chain data (Deribit)
-- `GetInsurance()` - Insurance fund data (ByBit)
-- `GetLaunchpad()` - IEO/Launchpad info (multiple exchanges)
-
-When requesting API functions, please specify:
-- Whether it should be standard (all exchanges) or exchange-specific
-- The exact API endpoint from exchange documentation
-- Return data structure you expect
-
-Your feedback helps us identify missing APIs!
-
-### **Development Setup**
+### Development Setup
 ```bash
-# Clone repository
 git clone https://github.com/ccxt-net/ccxt.simple.git
 cd ccxt.simple
-
-# Build solution
-dotnet build
-
-# Run tests
-dotnet test
-
-# Run samples (interactive menu)
-dotnet run --project samples/CCXT.Simple.Samples.csproj
+dotnet build              # Build solution  
+dotnet test               # Run 73 tests
 ```
 
-### **Implementation Guidelines**
-- Follow existing patterns from Binance implementation
-- Use `mainXchg.OnMessageEvent` for error reporting
-- Implement proper rate limiting
-- Add comprehensive error handling
-- Include XML documentation
+## 📊 Project Status
 
-## 📚 Documentation
-
-- **[API Reference](https://github.com/ccxt-net/ccxt.simple/wiki)** - Complete API documentation
-- **[Exchange Guides](https://github.com/ccxt-net/ccxt.simple/wiki/Exchange-Guides)** - Exchange-specific information
-- **[Examples](samples/)** - Sample applications and code examples
-- **[Changelog](CHANGELOG.md)** - Version history and changes
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE.txt) file for details.
-
-## 💖 Support
-
-If CCXT.Simple has made your development easier and you'd like to support continued development:
-
-### **NuGet Package**
-```bash
-dotnet add package CCXT.Simple
-```
-
-### **Cryptocurrency Donations**
-- **Bitcoin**: `15DAoUfaCanpBpTs7VQBK8dRmbQqEnF9WG`
-- **Ethereum**: `0x556E7EdbcCd669a42f00c1Df53D550C00814B0e3`
-
-### **Contact & Support**
-- **Homepage**: https://www.odinsoft.co.kr
-- **Email**: help@odinsoft.co.kr
-- **Issues**: [GitHub Issues](https://github.com/ccxt-net/ccxt.simple/issues)
+- **Current Version**: 1.1.7 (.NET 8.0 & 9.0)
+- **Architecture**: Thread-safe, event-driven, REST API focused
+- **Test Coverage**: 73 tests passing
+- **Active Development**: Monthly updates, community-driven priorities
 
 ## 👥 Team
 
@@ -502,6 +126,15 @@ dotnet add package CCXT.Simple
 - **YUJIN** - Senior Developer & Exchange Integration Specialist ([yoojin@odinsoft.co.kr](mailto:yoojin@odinsoft.co.kr))
 - **SEJIN** - Software Developer & API Implementation ([saejin@odinsoft.co.kr](mailto:saejin@odinsoft.co.kr))
 
+## 📞 Support & Contact
+
+- **🐛 Issues**: [GitHub Issues](https://github.com/ccxt-net/ccxt.simple/issues)
+- **📧 Email**: help@odinsoft.co.kr
+
+## 📄 License
+
+MIT License - see [LICENSE.txt](LICENSE.txt) for details.
+
 ---
 
-**Built with ❤️ by the ODINSOFT Team**
+**Built with ❤️ by the ODINSOFT Team** | [⭐ Star us on GitHub](https://github.com/ccxt-net/ccxt.simple)
