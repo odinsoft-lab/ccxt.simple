@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+		<TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
 		<AssemblyName>CCXT.Simple</AssemblyName>
 		<RootNamespace>CCXT.Simple</RootNamespace>
 		<Nullable>disable</Nullable>
@@ -43,14 +43,15 @@ Full changelog: https://github.com/ccxt-net/ccxt.simple/blob/main/docs/CHANGELOG
 		<NoWarn>CS1998</NoWarn>
 	</PropertyGroup>
 
-
 	<ItemGroup>
-		<None Update="Exchanges\KR\Bithumb\CoinState.json">
+		<None Include="Exchanges\**\*.json" Pack="true"
+				PackagePath="contentFiles\any\any\%(RecursiveDir)%(Filename)%(Extension)">
+			<BuildAction>Content</BuildAction>
+			<PackageCopyToOutput>true</PackageCopyToOutput>
+			<PackageFlatten>false</PackageFlatten>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="Exchanges\KR\Upbit\CoinState.json">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
+		</None>		
+		
 		<Content Include="ccxt.simple.ico" />
 		<None Include="..\docs\ccxt.simple.api.png">
 			<Pack>True</Pack>
