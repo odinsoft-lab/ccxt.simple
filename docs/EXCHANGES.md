@@ -1,44 +1,44 @@
 # CCXT.Simple Exchange Implementation Status
 
-메타 헤더(heuristic v2) 기반 최신 구현 상태를 추적합니다. (계획 상 총 178개 중 현재 메타가 삽입된 110개 파일 대상)
+Tracks the latest implementation status based on heuristic v2 meta headers. (Of the planned 178 exchange files, 110 currently contain a meta header)
 
 Last Updated: 2025-08-13
 
-## 🔄 자동 생성 요약 (scripts/generate-meta-summary.ps1 통합)
+## 🔄 Auto-Generated Summary (merged from scripts/generate-meta-summary.ps1)
 
-다음 수치는 `docs/EXCHANGE_STATUS.generated.md` 내용을 이 문서에 통합한 것입니다. 원본 파일은 자동 생성되며 Git 추적에서 제외될 수 있습니다.
+The following numbers are merged from `docs/EXCHANGE_STATUS.generated.md`. The source file is generated and may be ignored by Git.
 
 - **FULL**: 4 (3.6%)
 - **PARTIAL**: 7 (6.4%)
 - **SKELETON**: 99 (90.0%)
 - **Total (with meta)**: 110
-- **Planned Total**: 178 (잔여 68 파일은 아직 메타/구현 미추적)
+- **Planned Total**: 178 (remaining 68 files not yet tracked with meta)
 
-정의:
-- FULL: 16개 표준 메서드 모두 실 구현(HTTP/파싱 로직) & NotImplementedException 없음
-- PARTIAL: 1개 이상 구현, 미구현/잔여 존재
-- SKELETON: 표준 메서드 실 구현 0 (시그니처/예외/빈 골격)
+Definitions:
+- FULL: All 16 standard methods implemented (real HTTP + parsing) & no NotImplementedException
+- PARTIAL: At least one implemented, at least one still pending
+- SKELETON: Zero standard methods with real implementation (only signatures / exceptions / empty body)
 
 ## ✅ FULL Implementations (4)
 
-| Exchange | 구현 범위 | 비고 | Docs |
-|----------|-----------|------|------|
-| Bitstamp | 16/16 | 시장/거래/입출금 전 영역 | [API](https://www.bitstamp.net/api/) |
-| Coinbase | 16/16 | 계정/거래 안정 | [API](https://docs.cloud.coinbase.com/) |
-| Coinone  | 16/16 | KRW 현물 | [API](https://doc.coinone.co.kr/) |
-| OKX      | 16/16 | 파생/현물 통합 | [API](https://www.okx.com/docs-v5/) |
+| Exchange | Coverage (implemented/total) | Notes | Docs |
+|----------|------------------------------|-------|------|
+| Bitstamp | 16/16 | Market / Trading / Funding complete | [API](https://www.bitstamp.net/api/) |
+| Coinbase | 16/16 | Stable account + trading | [API](https://docs.cloud.coinbase.com/) |
+| Coinone  | 16/16 | KRW spot | [API](https://doc.coinone.co.kr/) |
+| OKX      | 16/16 | Integrated spot + derivatives | [API](https://www.okx.com/docs-v5/) |
 
 ## 🟡 PARTIAL Implementations (7)
 
-| Exchange | Impl | Pending | NotImplEx | 간단 설명 |
-|----------|------|---------|-----------|-----------|
-| Kraken   | 15 | 1 | 7 | GetWithdrawalHistory 1개 미완 (예시: heuristic) |
-| Binance  | 2  | 14 | 14 | 기본 시세/오더북 일부만 |
-| Bithumb  | 1  | 15 | 15 | 기초 메서드 1개 |
-| Huobi    | 1  | 15 | 15 | 기초 메서드 1개 |
-| Korbit   | 1  | 15 | 15 | 기초 메서드 1개 |
-| Kucoin   | 1  | 15 | 15 | 기초 메서드 1개 |
-| Upbit    | 1  | 15 | 16 | 기초 메서드 1개 |
+| Exchange | Impl | Pending | NotImplEx | Summary |
+|----------|------|---------|-----------|---------|
+| Kraken   | 15 | 1 | 7  | One remaining (GetWithdrawalHistory – heuristic example) |
+| Binance  | 2  | 14 | 14 | Only basic price/orderbook subset |
+| Bithumb  | 1  | 15 | 15 | One basic method implemented |
+| Huobi    | 1  | 15 | 15 | One basic method implemented |
+| Korbit   | 1  | 15 | 15 | One basic method implemented |
+| Kucoin   | 1  | 15 | 15 | One basic method implemented |
+| Upbit    | 1  | 15 | 16 | One basic method implemented |
 
 ## 📄 전체 상세 테이블 (자동 생성 병합)
 

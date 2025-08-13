@@ -364,68 +364,68 @@ public async ValueTask<OrderInfo> GetOrder(string orderId, string symbol = null,
 Reference implementations:
 - **Binance**: `src/exchanges/us/binance/XBinance.cs` - Complete feature implementation
 - **Kraken**: `src/exchanges/us/kraken/XKraken.cs` - Complex API with excellent error handling
-- **Bitstamp**: `src/exchanges/gb/bitstamp/XBitstamp.cs` - Partial (Market Data + 일부 표준화). Account/Trading/Funding 변환 로직 진행중
+- **Bitstamp**: `src/exchanges/gb/bitstamp/XBitstamp.cs` - Partial (Market Data + some standardization). Account/Trading/Funding mapping in progress
 - **Bithumb**: `src/exchanges/kr/bithumb/XBithumb.cs` - Korean exchange specific features
 
 ---
 
-## 🧩 구현 상태 메타 표식 규칙 (Implementation Status Metadata)
+## 🧩 Implementation Status Metadata Rules
 
-여러 거래소(X{Exchange}.cs)의 구현/미구현 상태를 자동 집계하기 위한 표준 주석 블록 규칙입니다. 각 파일 상단(`using` 아래 혹은 최상단)에 아래 형식의 블록을 추가하십시오.
+Standardized comment block to automatically aggregate implementation status of each exchange file (X{Exchange}.cs). Place the block near the top of the file (after using directives or at the file start).
 
-### 1. 메타 블록 포맷
+### 1. Meta Block Format
 ```csharp
 // == CCXT-SIMPLE-META-BEGIN ==
 // EXCHANGE: bitstamp
-// IMPLEMENTATION_STATUS: PARTIAL                   // 기본(자동 또는 수동) – 수동 설정 없으면 heuristic 자동 값
-// IMPLEMENTATION_STATUS_MANUAL: FULL               // (선택) 수동 고정 값: 스크립트가 덮어쓰지 않음
-// IMPLEMENTATION_STATUS_AUTO: PARTIAL              // (자동) heuristic 계산 결과(수동 값 존재 시 참고용)
-// PROGRESS_STATUS: WIP                             // DONE | WIP | TODO – 3단계 수작업 진행도
+// IMPLEMENTATION_STATUS: PARTIAL                   // Primary (manual or auto). If no manual override, heuristic result
+// IMPLEMENTATION_STATUS_MANUAL: FULL               // (Optional) Manually locked value; script will not overwrite
+// IMPLEMENTATION_STATUS_AUTO: PARTIAL              // (Auto) Heuristic computed result (reference when manual exists)
+// PROGRESS_STATUS: WIP                             // DONE | WIP | TODO – 3-level human progress indicator
 // CATEGORY: centralized                            // centralized | dex | derivatives | options | payment
-// MARKET_SCOPE: spot                               // 예: spot; spot,futures; spot,options
+// MARKET_SCOPE: spot                               // Examples: spot; spot,futures; spot,options
 // STANDARD_METHODS_IMPLEMENTED: GetOrderbook,GetPrice,GetCandles,GetTrades
 // STANDARD_METHODS_PENDING: GetBalance,GetAccount,PlaceOrder,CancelOrder,GetOrder,GetOpenOrders,GetOrderHistory,GetTradeHistory,GetDepositAddress,Withdraw,GetDepositHistory,GetWithdrawalHistory
-// LEGACY_METHODS_IMPLEMENTED: VerifySymbols        // 없으면 빈 값 또는 -
-// NOT_IMPLEMENTED_EXCEPTIONS: 12                   // 파일 내 NotImplementedException 수(수동 기입)
+// LEGACY_METHODS_IMPLEMENTED: VerifySymbols        // Blank or - if none
+// NOT_IMPLEMENTED_EXCEPTIONS: 12                   // Count of NotImplementedException in file (manual entry)
 // LAST_REVIEWED: 2025-08-13
 // REVIEWER: yourname
-// NOTES: 초기 Market Data 구현; 인증/주문 변환 로직 개선 예정
+// NOTES: Initial Market Data implemented; auth/order mapping improvements pending
 // == CCXT-SIMPLE-META-END ==
 ```
 
-### 2. 상태 정의
-| STATUS | 의미 | 비고 |
-|--------|------|------|
-| FULL | 표준화 IExchange 메서드 모두 동작 (NotImplementedException 0) | heuristic FULL → PROGRESS_STATUS 기본값 DONE |
-| PARTIAL | 일부 표준 메서드 구현, 나머지 대기 | 기본 PROGRESS_STATUS = WIP |
-| SKELETON | 구조만 존재, 표준 메서드 대부분 미구현 | 기본 PROGRESS_STATUS = TODO |
-| LEGACY_ONLY | 레거시(VerifySymbols 등)만 존재, 표준화 미구현 | 현재 스크립트 자동 산출 제외(필요 시 수동) |
-| DEPRECATED | 사용 중단 예정 | 수동 지정 |
+### 2. Status Definitions
+| STATUS | Meaning | Notes |
+|--------|---------|-------|
+| FULL | All standardized IExchange methods implemented (0 NotImplementedException) | Heuristic FULL → default PROGRESS_STATUS DONE |
+| PARTIAL | Some standard methods implemented, others pending | Default PROGRESS_STATUS = WIP |
+| SKELETON | Structure only, most methods unimplemented | Default PROGRESS_STATUS = TODO |
+| LEGACY_ONLY | Only legacy (VerifySymbols etc.) present, no standardization | Manual only (not auto produced) |
+| DEPRECATED | Planned removal | Manual designation |
 
-추가 필드:
-- IMPLEMENTATION_STATUS_MANUAL: 사람이 확정한 상태(예: 테스트 완료 후 FULL 고정). 존재하면 스크립트는 자동 계산을 IMPLEMENTATION_STATUS_AUTO 로만 기록하고 IMPLEMENTATION_STATUS 필드는 수동 값으로 유지.
-- IMPLEMENTATION_STATUS_AUTO: 항상 최신 휴리스틱 산출(참고용).
-- PROGRESS_STATUS: DONE / WIP / TODO 3단계 진행도. 스크립트 실행 시 기존 값이 있으면 유지, 없으면 heuristic 기반 기본값으로 채움. 강제 재계산은 `insert-meta.ps1 -Update -OverrideProgress` 사용.
+Additional fields:
+- IMPLEMENTATION_STATUS_MANUAL: Human-certified status (e.g. locked to FULL after tests). When present the script only updates IMPLEMENTATION_STATUS_AUTO and keeps IMPLEMENTATION_STATUS as the manual value.
+- IMPLEMENTATION_STATUS_AUTO: Latest heuristic output (reference value).
+- PROGRESS_STATUS: DONE / WIP / TODO three-stage progress. Preserved if present; inferred from heuristic if missing. Force recompute with `insert-meta.ps1 -Update -OverrideProgress`.
 
-### 3. 필드 설명
-| 필드 | 필수 | 설명 |
-|------|------|------|
-| IMPLEMENTATION_STATUS | ✅ | 구현 레벨 |
-| STANDARD_METHODS_IMPLEMENTED | ✅ | 구현된 표준 메서드(쉼표, 공백 없음) |
-| STANDARD_METHODS_PENDING | ✅ | 미구현 표준 메서드 목록(없으면 공백) |
-| LAST_REVIEWED | ✅ | 마지막 검토 일자 (YYYY-MM-DD) |
-| EXCHANGE | 권장 | 소문자 거래소 코드 |
-| CATEGORY | 선택 | 유형(centralized/dex/derivatives 등) |
-| MARKET_SCOPE | 선택 | 지원 마켓 범위 |
-| LEGACY_METHODS_IMPLEMENTED | 선택 | 레거시 메서드 구현 목록 |
-| NOT_IMPLEMENTED_EXCEPTIONS | 선택 | 파일 내 NotImplementedException 개수 |
-| REVIEWER | 선택 | 검토자 식별자 |
-| NOTES | 선택 | 특이사항 |
+### 3. Field Description
+| Field | Required | Description |
+|-------|----------|-------------|
+| IMPLEMENTATION_STATUS | ✅ | Effective status (manual if provided, else auto) |
+| STANDARD_METHODS_IMPLEMENTED | ✅ | Implemented standard methods (comma-separated, no spaces) |
+| STANDARD_METHODS_PENDING | ✅ | Remaining standard methods (blank if none) |
+| LAST_REVIEWED | ✅ | Last review date (YYYY-MM-DD) |
+| EXCHANGE | Recommended | Lowercase exchange code |
+| CATEGORY | Optional | Type (centralized/dex/derivatives/etc.) |
+| MARKET_SCOPE | Optional | Supported market scope |
+| LEGACY_METHODS_IMPLEMENTED | Optional | Legacy methods implemented |
+| NOT_IMPLEMENTED_EXCEPTIONS | Optional | Count of NotImplementedException in file |
+| REVIEWER | Optional | Reviewer identifier |
+| NOTES | Optional | Special notes |
 
-규칙:
-1. 각 줄은 `// KEY: VALUE` 형식, 콜론 뒤 한 칸.
-2. 리스트는 `,` 로만 구분(공백 없음) → 단순 파싱.
-3. 시작/끝 구분자는 정확히 `// == CCXT-SIMPLE-META-BEGIN ==` / `// == CCXT-SIMPLE-META-END ==`.
+Rules:
+1. Each line uses `// KEY: VALUE` (exactly one space after colon).
+2. Lists separated only by `,` (no spaces) for easy parsing.
+3. Delimiters must exactly match `// == CCXT-SIMPLE-META-BEGIN ==` and `// == CCXT-SIMPLE-META-END ==`.
 
 ### 4. 예시
 FULL 예시:
@@ -445,7 +445,7 @@ FULL 예시:
 // == CCXT-SIMPLE-META-END ==
 ```
 
-SKELETON 예시:
+SKELETON example:
 ```csharp
 // == CCXT-SIMPLE-META-BEGIN ==
 // EXCHANGE: vertex
@@ -458,7 +458,7 @@ SKELETON 예시:
 // == CCXT-SIMPLE-META-END ==
 ```
 
-PARTIAL → FULL 수동 고정 예시 (Bitstamp):
+Manual PARTIAL → FULL lock example (Bitstamp):
 ```csharp
 // == CCXT-SIMPLE-META-BEGIN ==
 // EXCHANGE: bitstamp
@@ -487,6 +487,77 @@ PARTIAL → FULL 수동 고정 예시 (Bitstamp):
 | SKELETON | 다수 | 16 | 구현 0 | 초기 상태 |
 | LEGACY_ONLY | 다수 | 16 | 레거시만 | 수동 기록 |
 | DEPRECATED | 무관 | 무관 | 유지보수 중단 | 수동 |
+
+### 5.1 FULL(완성) 상태 판정 상세 기준
+다음 모든 항목을 충족하면 `IMPLEMENTATION_STATUS_MANUAL: FULL` 로 고정할 수 있습니다 (휴리스틱 AUTO 값도 FULL 이면 이상적).
+
+#### A. 기술적 구현 충족(필수)
+- 16개 표준 메서드 모두 존재 & 표준 모델 반환 (`STANDARD_METHODS_PENDING` 공란)
+- 파일 내 `NotImplementedException` 0건
+- 각 메서드 정상 경로에서 placeholder(빈 객체, 빈 문자열 등) 남용 없음
+- 오류 발생 시 `mainXchg.OnMessageEvent(...)` 호출 (예외 nuget/network 등 최소 1회 래핑)
+- 사적(private) 엔드포인트(잔고, 주문, 입출금) 사용 시 인증 파라미터/헤더 정확히 적용
+- 타임스탬프 millisecond 단위로 변환
+- 금액/가격 decimal 사용 (float/double 사용 금지)
+- 심볼 변환(내부 ↔ 표준) 양방향 유틸 존재 및 재사용
+
+#### B. 동작 검증(필수)
+- 아래 최소 수동 호출 검증 (실거래 키 혹은 샌드박스) 로그/스크린샷 확보:
+    - 시세계열: GetOrderbook, GetTrades (1개 심볼 이상)
+    - 계정계열: GetBalance (주요 통화 1개 이상 balance > 0 or 0 명시)
+    - 주문계열: PlaceOrder → GetOrder → CancelOrder 흐름 1회 (테스트 가능한 시장)
+    - 입출금 지원 시: GetDepositAddress 또는 Withdraw 중 1개 (미지원이면 NOTES 에 "No funding API" 명시)
+- 예외/에러 케이스 1건 이상(잘못된 심볼 등) 처리 확인
+- (선택) tests/ 폴더 내 기본 통합 테스트 1개 이상 추가 가능하면 통과
+
+#### C. 안정성 & 품질(권장)
+- 반복 호출 시 (≥3회) 레이트리밋/429/비정상 응답 graceful backoff (Thread.Sleep, Retry 등) 또는 TODO 주석 + NOTES 기록
+- Null 가능 필드 defensively handling (?. 연산자, 기본값)
+- JSON 파싱 실패 시 try/catch 후 기본 모델 반환
+
+#### D. 메타 업데이트(필수)
+- 메타 블록 필드 세트:
+    - `IMPLEMENTATION_STATUS_MANUAL: FULL`
+    - `IMPLEMENTATION_STATUS: FULL` (수동 고정 후 스크립트가 동일하게 유지)
+    - `IMPLEMENTATION_STATUS_AUTO: FULL` (다를 경우 아래 Regression 절차 수행)
+    - `PROGRESS_STATUS: DONE`
+    - `LAST_REVIEWED: YYYY-MM-DD` (오늘 날짜)
+    - `REVIEWER: your-id`
+    - `NOT_IMPLEMENTED_EXCEPTIONS: 0`
+    - `NOTES:` 주요 특이사항 (예: "No futures endpoints" / "Sandbox verified")
+
+#### E. Regression(자동 vs 수동 괴리) 처리
+`IMPLEMENTATION_STATUS_MANUAL=FULL` 이지만 스크립트 재실행 후 `IMPLEMENTATION_STATUS_AUTO` 가 PARTIAL/SKELETON 으로 떨어진 경우:
+1. 변경된 소스 diff 확인 (표준 메서드 삭제/예외 추가/시그니처 변경 여부)
+2. 휴리스틱 오탐이면: `NOTES` 에 "AUTO heuristic false negative (원인)" 기입 후 유지
+3. 실제 기능 퇴보이면: MANUAL 을 PARTIAL 로 낮추고 CHANGELOG 에 기록
+
+#### F. 빠른 자동 점검 스니펫
+표준 메서드 수(16) & NotImplementedException 0 검증:
+```powershell
+Get-ChildItem -Recurse src/exchanges -Filter X{Exchange}.cs | ForEach-Object {
+    $code = Get-Content $_.FullName -Raw
+    $mCount = ([regex]::Matches($code, 'public\s+ValueTask<')).Count
+    $ni = ([regex]::Matches($code, 'NotImplementedException')).Count
+    [PSCustomObject]@{ File=$_.Name; Methods=$mCount; NotImpl=$ni }
+}
+```
+주) 표준 메서드가 추가/변경되면 16 값은 달라질 수 있으니 GUIDE 최상단 모델 목록과 동기화.
+
+#### G. FULL 전환 체크리스트 (요약)
+| 항목 | 완료 여부 |
+|------|-----------|
+| 16개 표준 메서드 구현 및 반환모델 표준화 | |
+| NotImplementedException 0 | |
+| 주문 Place→Get→Cancel 실측 | |
+| 계정/잔고 호출 성공 | |
+| 오더북/체결 데이터 수신 | |
+| 필요시 입출금 1회 검증 또는 미지원 명시 | |
+| 에러 처리/OnMessageEvent 호출 | |
+| 메타 블록 FULL + 날짜/리뷰어 기입 | |
+| AUTO=FULL 또는 괴리 사유 NOTES 기록 | |
+
+위 표 모두 ✅ 후 PR / CHANGELOG 에 "Exchange {name}: PARTIAL → FULL" 기록 권장.
 
 ### 6. PowerShell 집계 예시
 상태 분포:

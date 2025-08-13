@@ -34,7 +34,7 @@
 
 #### Target Exchanges
 - Kraken ✅ Completed (2025-01)
-- Bitstamp - In Progress (Partial: Market Data 구현됨)
+- Bitstamp - In Progress (Partial: Market Data implemented)
 - **Bitfinex** - Advanced trading features
 - **Gemini** - US regulated exchange
 - **Poloniex** - Wide altcoin selection
@@ -96,9 +96,9 @@
 ## 📅 Monthly Milestones
 
 ### August 2025
-- [x] Start Bitstamp integration (Partial 구현: Market Data, 캔들, 체결)
-- [x] Documentation corrections (Functional vs Partial 재분류)
-- [ ] Bitstamp 계정/주문/입출금 표준화 매핑 추가
+- [x] Start Bitstamp integration (Partial: Market Data, candles, trades implemented)
+- [x] Documentation corrections (Reclassified Functional vs Partial)
+- [ ] Bitstamp account / order / funding normalization mapping
 
 ### September 2025
 - [ ] Complete Bitstamp, Bitfinex

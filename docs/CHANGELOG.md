@@ -8,10 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.8] - 2025-08-10
 
 ### Added
-- **Bitstamp Exchange (Partial)**: 1차 구현 (시장 데이터 + 표준화 API 일부)
-  - 구현됨: 주문호가(GetOrderbook), 시세(GetPrice), 캔들(GetCandles), 체결(GetTrades)
-  - 부분 구현/미구현: 레거시 메서드(VerifyStates, GetTickers 등), 잔고/주문/입출금 일부 항목 변환 로직 보완 필요
-  - 인증 요청 일부 엔드포인트 경로 중복 가능성 (`ExchangeUrl`에 `/api/v2` 포함 + 엔드포인트에 `/v2/` 접두 사용) — 다음 릴리스에서 수정 예정
+- **Bitstamp Exchange (Partial)**: Initial implementation (Market data + subset of standardized API)
+  - Implemented: Orderbook(GetOrderbook), Price(GetPrice), Candles(GetCandles), Trades(GetTrades)
+  - Partial / Missing: Legacy methods (VerifyStates, GetTickers, etc.), balance/order/funding mapping improvements required
+  - Potential duplicate path composition for authenticated endpoints (`ExchangeUrl` contains `/api/v2` while endpoint adds `/v2/`) — to be fixed next release
   - 위치: `src/exchanges/gb/bitstamp/`
 
 ### Changed
@@ -19,8 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Functional exchange count 재검토 (Bitstamp 제외 여전히 10개 유지)
 
 ### Notes
-- 문서 기존 서술 중 Bitstamp "Full implementation" 문구는 실제 코드상 다수 `NotImplementedException` 및 레거시 미구현으로 사실과 달라 정정
-- Bittrex 역시 표준화 거래/입출금 API 미구현 상태로 "Functional" 분류 대상에서 제외 유지
+- Previous documentation describing Bitstamp as "Full implementation" was inaccurate (multiple `NotImplementedException` + missing legacy parts) and has been corrected
+- Bittrex remains excluded from "Functional" classification (standardized trading/funding APIs not implemented)
 
 ## [Documentation Update] - 2025-08-09
 
@@ -30,27 +30,27 @@ Based on comprehensive source code analysis, this update corrects inaccurate inf
 
 #### **Corrected Implementation Statistics (Revalidated 2025-08-13)**
 - **Total Exchange Files**: 178
-- **Functional Implementations (실사용 가능)**: 10 (Binance, Bitget, Bithumb, Kraken, Coinone, Upbit, OKX, KuCoin, Gate.io, Crypto.com)
-- **Partial / In Progress**: Bitstamp (시장데이터 + 표준 일부), Bittrex (레거시 시세 일부)
-- **Skeleton Implementations**: ~168 (대부분 표준화 메서드 `NotImplementedException`)
-- **NotImplementedException Count**: 2,281 (기존 수치 유지)
+- **Functional Implementations (usable)**: 10 (Binance, Bitget, Bithumb, Kraken, Coinone, Upbit, OKX, KuCoin, Gate.io, Crypto.com)
+- **Partial / In Progress**: Bitstamp (market data + some standard methods), Bittrex (some legacy price endpoints)
+- **Skeleton Implementations**: ~168 (most standard methods throw `NotImplementedException`)
+- **NotImplementedException Count**: 2,281 (unchanged)
 - **Test Coverage**: 73 tests passing
 
-#### **Actual Functional Exchange Status (완료 10)**
+#### **Actual Functional Exchange Status (10)**
 1. **Binance** - Market 데이터 & 기본 주문
-2. **Bitget** - 확장된 트레이딩 API (전용 내부 구조)
-3. **Bithumb** - 한국 원화 마켓 지원
-4. **Kraken** - 표준화 API 충실 구현
-5. **Coinone** - 한국 마켓 구현
-6. **Upbit** - 한국 최대 거래소 지원
-7. **OKX** - 글로벌 파생상품/현물 핵심 기능
-8. **KuCoin** - 알트코인 중심
-9. **Gate.io** - 다수 페어 지원
-10. **Crypto.com** - 다중 통화/카드 생태계
+2. **Bitget** - Extended trading API (custom internal structure)
+3. **Bithumb** - KRW market support
+4. **Kraken** - Robust standardized API implementation
+5. **Coinone** - KR market support
+6. **Upbit** - Major KR exchange support
+7. **OKX** - Global derivatives + spot core features
+8. **KuCoin** - Altcoin focused
+9. **Gate.io** - Wide pair coverage
+10. **Crypto.com** - Multi-currency / card ecosystem
 
-#### **Partial / In Progress (부분 구현)**
-- **Bitstamp**: 표준화 시장 데이터 구현 / 계정·주문·입출금 변환 로직 및 레거시 시세 수집 미완
-- **Bittrex**: 레거시 VerifySymbols/States/Tickers/Volumes 일부 구현, 표준화 계정·주문·입출금 미구현
+#### **Partial / In Progress**
+- **Bitstamp**: Standardized market data implemented / account, order, funding mappings and legacy price collection incomplete
+- **Bittrex**: Some legacy VerifySymbols/States/Tickers/Volumes implemented; standardized account/order/funding missing
 
 #### **File Structure Corrections**
 Updated documentation to reflect actual project structure:

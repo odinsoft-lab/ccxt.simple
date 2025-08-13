@@ -5,9 +5,9 @@ namespace CCXT.Simple.Exchanges.Bithumb
 {
     public class PlaceOrders : ApiResult
     {
-        /// <summary>
-        /// 결과 상태 코드 (정상 : 0000, 정상이외 코드는 에러 코드 참조)
-        /// </summary>
+    /// <summary>
+    /// Result status code (success: 0000, otherwise see error code reference)
+    /// </summary>
         [JsonProperty(PropertyName = "status")]
         public override int statusCode
         {
@@ -24,9 +24,9 @@ namespace CCXT.Simple.Exchanges.Bithumb
             }
         }
 
-        /// <summary>
-        /// 주문번호
-        /// </summary>
+    /// <summary>
+    /// Order identifier
+    /// </summary>
         [JsonProperty(PropertyName = "order_id")]
         public string orderId
         {
