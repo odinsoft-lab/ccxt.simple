@@ -54,7 +54,7 @@ var order = await binance.PlaceOrder("BTCUSDT", SideType.Buy, "limit", 0.001m, 5
 Remaining adapters are generated skeletons awaiting implementation.
 
 > 📖 **[View complete exchange list and status →](docs/EXCHANGES.md)**
-> 🧮 **Auto Generated Status Summary**: Run `pwsh scripts/generate-meta-summary.ps1 -Print` for current heuristic classification (FULL / PARTIAL / SKELETON, plus stub counts). The file `docs/EXCHANGE_STATUS.generated.md` is generated (do not edit manually).
+
 
 ## 💡 Architecture
 
@@ -118,7 +118,7 @@ dotnet test               # Run 73 tests
 
 ## 📊 Project Status
 
-- **Current Version**: 1.1.8 (.NET 8.0 & 9.0)
+- **Current Version**: 1.1.9 (.NET 8.0 & 9.0 & 10.0)
 - **Architecture**: Thread-safe, event-driven, REST API focused
 - **Test Coverage**: 73 tests passing
 - **Active Development**: Monthly updates, community-driven priorities

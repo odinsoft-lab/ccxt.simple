@@ -10,11 +10,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **CCXT.Simple** is a cryptocurrency exchange trading library for .NET that provides a simplified interface for accessing cryptocurrency exchange APIs. It's designed as a simpler alternative to the more complex ccxt.net library.
 
-- **Target Frameworks**: .NET 8.0, .NET 9.0
+- **Target Frameworks**: .NET 8.0, .NET 9.0, NET 10.0
 - **Language**: C# with modern async/await patterns
 - **Architecture**: Multi-exchange adapter pattern with unified interfaces
 - **Purpose**: Cryptocurrency trading, market data access, and exchange integration
-- **Version**: 1.1.8
+- **Version**: 1.1.9
 
 ## Build and Development Commands
 
