@@ -3,6 +3,9 @@ using Newtonsoft.Json;
 
 namespace CCXT.Simple.Exchanges.Bithumb
 {
+    /// <summary>
+    /// Represents a response to a place order request. Inherits ApiResult to standardize success handling.
+    /// </summary>
     public class PlaceOrders : ApiResult
     {
     /// <summary>

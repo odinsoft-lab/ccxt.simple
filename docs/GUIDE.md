@@ -378,18 +378,10 @@ Standardized comment block to automatically aggregate implementation status of e
 // == CCXT-SIMPLE-META-BEGIN ==
 // EXCHANGE: bitstamp
 // IMPLEMENTATION_STATUS: PARTIAL                   // Primary (manual or auto). If no manual override, heuristic result
-// IMPLEMENTATION_STATUS_MANUAL: FULL               // (Optional) Manually locked value; script will not overwrite
-// IMPLEMENTATION_STATUS_AUTO: PARTIAL              // (Auto) Heuristic computed result (reference when manual exists)
 // PROGRESS_STATUS: WIP                             // DONE | WIP | TODO – 3-level human progress indicator
-// CATEGORY: centralized                            // centralized | dex | derivatives | options | payment
 // MARKET_SCOPE: spot                               // Examples: spot; spot,futures; spot,options
-// STANDARD_METHODS_IMPLEMENTED: GetOrderbook,GetPrice,GetCandles,GetTrades
-// STANDARD_METHODS_PENDING: GetBalance,GetAccount,PlaceOrder,CancelOrder,GetOrder,GetOpenOrders,GetOrderHistory,GetTradeHistory,GetDepositAddress,Withdraw,GetDepositHistory,GetWithdrawalHistory
-// LEGACY_METHODS_IMPLEMENTED: VerifySymbols        // Blank or - if none
 // NOT_IMPLEMENTED_EXCEPTIONS: 12                   // Count of NotImplementedException in file (manual entry)
 // LAST_REVIEWED: 2025-08-13
-// REVIEWER: yourname
-// NOTES: Initial Market Data implemented; auth/order mapping improvements pending
 // == CCXT-SIMPLE-META-END ==
 ```
 
@@ -426,57 +418,6 @@ Rules:
 1. Each line uses `// KEY: VALUE` (exactly one space after colon).
 2. Lists separated only by `,` (no spaces) for easy parsing.
 3. Delimiters must exactly match `// == CCXT-SIMPLE-META-BEGIN ==` and `// == CCXT-SIMPLE-META-END ==`.
-
-### 4. Examples
-FULL example:
-```csharp
-// == CCXT-SIMPLE-META-BEGIN ==
-// EXCHANGE: kraken
-// IMPLEMENTATION_STATUS: FULL
-// CATEGORY: centralized
-// MARKET_SCOPE: spot
-// STANDARD_METHODS_IMPLEMENTED: GetOrderbook,GetPrice,GetCandles,GetTrades,GetBalance,GetAccount,PlaceOrder,CancelOrder,GetOrder,GetOpenOrders,GetOrderHistory,GetTradeHistory,GetDepositAddress,Withdraw,GetDepositHistory,GetWithdrawalHistory
-// STANDARD_METHODS_PENDING: 
-// LEGACY_METHODS_IMPLEMENTED: VerifySymbols,VerifyStates
-// NOT_IMPLEMENTED_EXCEPTIONS: 0
-// LAST_REVIEWED: 2025-08-13
-// REVIEWER: dev1
-// NOTES: All standard methods validated
-// == CCXT-SIMPLE-META-END ==
-```
-
-SKELETON example:
-```csharp
-// == CCXT-SIMPLE-META-BEGIN ==
-// EXCHANGE: vertex
-// IMPLEMENTATION_STATUS: SKELETON
-// STANDARD_METHODS_IMPLEMENTED: 
-// STANDARD_METHODS_PENDING: GetOrderbook,GetPrice,GetCandles,GetTrades,GetBalance,GetAccount,PlaceOrder,CancelOrder,GetOrder,GetOpenOrders,GetOrderHistory,GetTradeHistory,GetDepositAddress,Withdraw,GetDepositHistory,GetWithdrawalHistory
-// NOT_IMPLEMENTED_EXCEPTIONS: 16
-// LAST_REVIEWED: 2025-08-13
-// NOTES: Derivatives structure planned, standardization not started
-// == CCXT-SIMPLE-META-END ==
-```
-
-Manual PARTIAL → FULL lock example (Bitstamp):
-```csharp
-// == CCXT-SIMPLE-META-BEGIN ==
-// EXCHANGE: bitstamp
-// IMPLEMENTATION_STATUS_MANUAL: FULL
-// IMPLEMENTATION_STATUS: FULL
-// IMPLEMENTATION_STATUS_AUTO: PARTIAL
-// CATEGORY: centralized
-// MARKET_SCOPE: spot
-// STANDARD_METHODS_IMPLEMENTED: GetOrderbook,GetPrice,GetCandles,GetTrades,PlaceOrder,CancelOrder,GetOrder,GetOpenOrders,GetOrderHistory,GetTradeHistory,GetBalance,GetAccount,GetDepositAddress,Withdraw,GetDepositHistory,GetWithdrawalHistory
-// STANDARD_METHODS_PENDING: 
-// LEGACY_METHODS_IMPLEMENTED: VerifySymbols
-// NOT_IMPLEMENTED_EXCEPTIONS: 0
-// LAST_REVIEWED: 2025-08-13
-// REVIEWER: dev2
-// PROGRESS_STATUS: DONE
-// NOTES: Legacy GetTickers/Volumes irrelevant (standard complete) → manually locked FULL
-// == CCXT-SIMPLE-META-END ==
-```
 
 ### 5. Quality Criteria (auto/manual combined validation guide)
 | Status (source) | Allowed NotImplementedException | STANDARD_METHODS_PENDING | Condition | Notes |

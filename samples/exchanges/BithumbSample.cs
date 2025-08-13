@@ -18,136 +18,199 @@ namespace CCXT.Simple.Samples.Samples
             _secretKey = _configuration["BithumbApi:SecretKey"] ?? "";
         }
 
-        public Task Run()
+        public async Task Run()
         {
-            Console.WriteLine("===== Bithumb Sample - Concurrent Order Placement =====");
+            Console.WriteLine("===== Bithumb Sample - Full API Demonstration =====");
             Console.WriteLine();
 
             if (string.IsNullOrEmpty(_apiKey) || string.IsNullOrEmpty(_secretKey))
             {
-                Console.WriteLine("Warning: API keys not configured. Running in demo mode.");
+                Console.WriteLine("Warning: API keys not configured. Running in demo mode with market data only.");
                 Console.WriteLine("To run with real API, configure BithumbApi:ApiKey and BithumbApi:SecretKey in appsettings.json");
                 Console.WriteLine();
             }
 
-            // Configuration from appsettings.json
-            var totalTime = _configuration.GetValue<int>("SampleSettings:TotalTime", 60);   // 60 seconds
-            var breakTime = _configuration.GetValue<int>("SampleSettings:BreakTime", 100);  // 0.1 seconds
-            var frequency = _configuration.GetValue<int>("SampleSettings:Frequency", 30);    // 30 times
-
-            Console.Write("Enter base currency (e.g., BTC): ");
-            var baseAsset = Console.ReadLine() ?? "BTC";
-            
-            Console.Write("Enter quote currency (e.g., KRW): ");
-            var quoteAsset = Console.ReadLine() ?? "KRW";
-            
-            Console.Write("Enter price: ");
-            var priceStr = Console.ReadLine();
-            var price = decimal.TryParse(priceStr, out var p) ? p : 100000000m;
-            
-            Console.Write("Enter quantity: ");
-            var quantityStr = Console.ReadLine();
-            var quantity = decimal.TryParse(quantityStr, out var q) ? q : 0.001m;
-
-            Console.WriteLine();
-            Console.WriteLine($"Configuration:");
-            Console.WriteLine($"  Symbol: {baseAsset}/{quoteAsset}");
-            Console.WriteLine($"  Price: {price:N0}");
-            Console.WriteLine($"  Quantity: {quantity}");
-            Console.WriteLine($"  Total Time: {totalTime} seconds");
-            Console.WriteLine($"  Frequency: {frequency} orders");
-            Console.WriteLine();
-
             var exchange = new Exchange();
-            var tasks = new List<Task>();
-            var cancelToken = new CancellationTokenSource();
+            var bithumb = new XBithumb(exchange, _apiKey, _secretKey);
 
-            // Bid (Buy) Worker
-            var bidWorker = Task.Run(async () =>
+            Console.WriteLine("Select sample to run:");
+            Console.WriteLine("1. Market Data (Public API)");
+            Console.WriteLine("2. Account Information (Private API)");
+            Console.WriteLine("3. Trading Demo (Private API)");
+            Console.WriteLine("4. Full Test (All APIs)");
+            Console.Write("Enter choice (1-4): ");
+            var choice = Console.ReadLine() ?? "1";
+            Console.WriteLine();
+
+            var symbol = "BTC_KRW";  // Default symbol for testing
+
+            switch (choice)
             {
-                var bidBithumb = new XBithumb(exchange, _apiKey, _secretKey);
-
-                for (var i = 1; i <= frequency; i++)
-                {
-                    if (cancelToken.IsCancellationRequested)
-                        break;
-
-                    try
+                case "1":
+                    await TestMarketData(bithumb, symbol);
+                    break;
+                case "2":
+                    await TestAccountInfo(bithumb);
+                    break;
+                case "3":
+                    await TestTrading(bithumb, symbol);
+                    break;
+                case "4":
+                    await TestMarketData(bithumb, symbol);
+                    if (!string.IsNullOrEmpty(_apiKey))
                     {
-                        if (!string.IsNullOrEmpty(_apiKey))
-                        {
-                            var bidResult = await bidBithumb.CreateLimitOrderAsync(baseAsset, quoteAsset, quantity, price, SideType.Bid);
-                            if (!bidResult.success)
-                                Console.WriteLine($"#{i}, side: bid, {bidResult.message}");
-                            else
-                                Console.WriteLine($"#{i}, side: bid, symbol: '{baseAsset}/{quoteAsset}', qty:{quantity}, price:{price}, order-id:{bidResult.orderId}");
-                        }
-                        else
-                        {
-                            // Demo mode
-                            Console.WriteLine($"#{i}, side: bid, symbol: '{baseAsset}/{quoteAsset}', qty:{quantity}, price:{price} [DEMO]");
-                        }
+                        await TestAccountInfo(bithumb);
+                        await TestTrading(bithumb, symbol);
                     }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error: {ex.Message}");
-                    }
-                    finally
-                    {
-                        await Task.Delay(breakTime);
-                    }
-                }
-            }, cancelToken.Token);
-
-            tasks.Add(bidWorker);
-
-            // Ask (Sell) Worker
-            var askWorker = Task.Run(async () =>
-            {
-                var askBithumb = new XBithumb(exchange, _apiKey, _secretKey);
-                
-                for (var i = 1; i <= frequency; i++)
-                {
-                    if (cancelToken.IsCancellationRequested)
-                        break;
-
-                    try
-                    {
-                        if (!string.IsNullOrEmpty(_apiKey))
-                        {
-                            var askResult = await askBithumb.CreateLimitOrderAsync(baseAsset, quoteAsset, quantity, price, SideType.Ask);
-                            if (!askResult.success)
-                                Console.WriteLine($"#{i}, side: ask, {askResult.message}");
-                            else
-                                Console.WriteLine($"#{i}, side: ask, symbol: '{baseAsset}/{quoteAsset}', qty:{quantity}, price:{price}, order-id:{askResult.orderId}");
-                        }
-                        else
-                        {
-                            // Demo mode
-                            Console.WriteLine($"#{i}, side: ask, symbol: '{baseAsset}/{quoteAsset}', qty:{quantity}, price:{price} [DEMO]");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error: {ex.Message}");
-                    }
-                    finally
-                    {
-                        await Task.Delay(breakTime);
-                    }
-                }
-            }, cancelToken.Token);
-
-            tasks.Add(askWorker);
-
-            // Wait for completion or timeout
-            Task.WaitAll(tasks.ToArray(), totalTime * 1000, cancelToken.Token);
-            cancelToken.Cancel();
+                    break;
+                default:
+                    Console.WriteLine("Invalid choice.");
+                    break;
+            }
 
             Console.WriteLine();
             Console.WriteLine("Bithumb sample completed.");
-            
-            return Task.CompletedTask;
+        }
+
+        private async Task TestMarketData(XBithumb bithumb, string symbol)
+        {
+            Console.WriteLine("=== Testing Market Data APIs ===");
+
+            try
+            {
+                // Test GetPrice
+                Console.WriteLine("\n1. GetPrice:");
+                var price = await bithumb.GetPrice(symbol);
+                Console.WriteLine($"   Current price of {symbol}: {price:N0} KRW");
+
+                // Test GetOrderbook
+                Console.WriteLine("\n2. GetOrderbook:");
+                var orderbook = await bithumb.GetOrderbook(symbol, 5);
+                Console.WriteLine($"   Top ask: {orderbook.asks.FirstOrDefault()?.price:N0} KRW");
+                Console.WriteLine($"   Top bid: {orderbook.bids.FirstOrDefault()?.price:N0} KRW");
+                Console.WriteLine($"   Spread: {(orderbook.asks.FirstOrDefault()?.price - orderbook.bids.FirstOrDefault()?.price):N0} KRW");
+
+                // Test GetTrades
+                Console.WriteLine("\n3. GetTrades:");
+                var trades = await bithumb.GetTrades(symbol, 5);
+                Console.WriteLine($"   Recent trades: {trades.Count}");
+                if (trades.Any())
+                {
+                    var lastTrade = trades.First();
+                    Console.WriteLine($"   Last trade: {lastTrade.side} {lastTrade.amount} @ {lastTrade.price:N0}");
+                }
+
+                // Test GetCandles
+                Console.WriteLine("\n4. GetCandles:");
+                var candles = await bithumb.GetCandles(symbol, "1h", null, 5);
+                Console.WriteLine($"   Candles retrieved: {candles.Count}");
+                if (candles.Any())
+                {
+                    var lastCandle = candles.Last();
+                    Console.WriteLine($"   Last candle: O:{lastCandle[1]:N0} H:{lastCandle[2]:N0} L:{lastCandle[3]:N0} C:{lastCandle[4]:N0}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"   Error: {ex.Message}");
+            }
+        }
+
+        private async Task TestAccountInfo(XBithumb bithumb)
+        {
+            Console.WriteLine("\n=== Testing Account APIs ===");
+
+            if (string.IsNullOrEmpty(_apiKey))
+            {
+                Console.WriteLine("   Skipped: API keys not configured");
+                return;
+            }
+
+            try
+            {
+                // Test GetBalance
+                Console.WriteLine("\n1. GetBalance:");
+                var balances = await bithumb.GetBalance();
+                Console.WriteLine($"   Balances found: {balances.Count}");
+                foreach (var balance in balances.Take(5))
+                {
+                    if (balance.Value.total > 0)
+                    {
+                        Console.WriteLine($"   {balance.Key}: Total={balance.Value.total}, Free={balance.Value.free}, Used={balance.Value.used}");
+                    }
+                }
+
+                // Test GetAccount
+                Console.WriteLine("\n2. GetAccount:");
+                var account = await bithumb.GetAccount();
+                Console.WriteLine($"   Account ID: {account.id}");
+                Console.WriteLine($"   Can Trade: {account.canTrade}");
+                Console.WriteLine($"   Can Withdraw: {account.canWithdraw}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"   Error: {ex.Message}");
+            }
+        }
+
+        private async Task TestTrading(XBithumb bithumb, string symbol)
+        {
+            Console.WriteLine("\n=== Testing Trading APIs (Demo) ===");
+
+            if (string.IsNullOrEmpty(_apiKey))
+            {
+                Console.WriteLine("   Skipped: API keys not configured");
+                return;
+            }
+
+            try
+            {
+                // Get current price for reference
+                var currentPrice = await bithumb.GetPrice(symbol);
+                var testPrice = currentPrice * 0.5m; // 50% of current price to avoid accidental execution
+                var testAmount = 0.001m;
+
+                Console.WriteLine($"\n   Using test price: {testPrice:N0} KRW (50% of current)");
+                Console.WriteLine($"   Using test amount: {testAmount} BTC");
+
+                // Test PlaceOrder
+                Console.WriteLine("\n1. PlaceOrder (Buy):");
+                var order = await bithumb.PlaceOrder(symbol, SideType.Bid, "limit", testAmount, testPrice);
+                Console.WriteLine($"   Order placed: {order.id}");
+
+                if (!string.IsNullOrEmpty(order.id))
+                {
+                    // Test GetOrder
+                    Console.WriteLine("\n2. GetOrder:");
+                    var orderInfo = await bithumb.GetOrder(order.id, symbol);
+                    Console.WriteLine($"   Status: {orderInfo.status}");
+                    Console.WriteLine($"   Filled: {orderInfo.filled}/{orderInfo.amount}");
+
+                    // Test GetOpenOrders
+                    Console.WriteLine("\n3. GetOpenOrders:");
+                    var openOrders = await bithumb.GetOpenOrders(symbol);
+                    Console.WriteLine($"   Open orders: {openOrders.Count}");
+
+                    // Test CancelOrder
+                    Console.WriteLine("\n4. CancelOrder:");
+                    var canceled = await bithumb.CancelOrder(order.id, symbol);
+                    Console.WriteLine($"   Order canceled: {canceled}");
+                }
+
+                // Test GetOrderHistory
+                Console.WriteLine("\n5. GetOrderHistory:");
+                var orderHistory = await bithumb.GetOrderHistory(symbol, 5);
+                Console.WriteLine($"   Historical orders: {orderHistory.Count}");
+
+                // Test GetTradeHistory
+                Console.WriteLine("\n6. GetTradeHistory:");
+                var tradeHistory = await bithumb.GetTradeHistory(symbol, 5);
+                Console.WriteLine($"   Historical trades: {tradeHistory.Count}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"   Error: {ex.Message}");
+            }
         }
     }
 }

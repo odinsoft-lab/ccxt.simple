@@ -5,6 +5,53 @@ All notable changes to CCXT.Simple will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Bithumb Exchange (Full Implementation)**: Complete implementation of all 16 standard API methods
+  - Market Data: GetOrderbook, GetPrice, GetCandles, GetTrades - all fully functional
+  - Account Management: GetBalance, GetAccount - complete with balance tracking
+  - Trading Operations: PlaceOrder, CancelOrder, GetOrder, GetOpenOrders, GetOrderHistory, GetTradeHistory - full trading support
+  - Funding Operations: GetDepositAddress, Withdraw, GetDepositHistory, GetWithdrawalHistory - complete funding management
+  - Location: `src/exchanges/kr/bithumb/`
+  - API Version: Bithumb API v2.1.0 with JWT authentication (2025-08-13)
+  - Sample Updated: New comprehensive sample demonstrating all API categories
+
+- **Kraken Exchange (Full Implementation)**: Complete implementation of all 16 standard API methods
+  - Market Data: GetOrderbook, GetPrice, GetCandles, GetTrades - all fully functional
+  - Account Management: GetBalance, GetAccount - complete with balance tracking
+  - Trading Operations: PlaceOrder, CancelOrder, GetOrder, GetOpenOrders, GetOrderHistory, GetTradeHistory - full trading support
+  - Funding Operations: GetDepositAddress, Withdraw, GetDepositHistory, GetWithdrawalHistory - complete funding management
+  - Legacy Methods: All legacy methods implemented (VerifySymbols, VerifyStates, GetTickers, GetVolumes, GetMarkets, GetBookTickers)
+  - Location: `src/exchanges/us/kraken/`
+  - API Version: Kraken REST API v0 (2025-08-13)
+
+- **Binance Exchange (Full Implementation)**: Complete implementation of all 16 standard API methods
+  - Market Data: GetOrderbook, GetPrice, GetCandles, GetTrades - all fully functional
+  - Account Management: GetBalance, GetAccount - complete with balance tracking
+  - Trading Operations: PlaceOrder, CancelOrder, GetOrder, GetOpenOrders, GetOrderHistory, GetTradeHistory - full trading support
+  - Funding Operations: GetDepositAddress, Withdraw, GetDepositHistory, GetWithdrawalHistory - complete funding management
+  - Legacy Methods: All legacy methods already implemented (VerifySymbols, VerifyStates, GetTickers, GetVolumes, GetMarkets, GetBookTickers)
+  - Location: `src/exchanges/us/binance/`
+  - API Version: Binance REST API v3 (2025-08-13)
+
+- **Upbit Exchange (Full Implementation)**: Complete implementation of all 16 standard API methods
+  - Market Data: GetOrderbook, GetPrice, GetCandles, GetTrades - all fully functional
+  - Account Management: GetBalance, GetAccount - complete with balance tracking
+  - Trading Operations: PlaceOrder, CancelOrder, GetOrder, GetOpenOrders, GetOrderHistory, GetTradeHistory - full trading support
+  - Funding Operations: GetDepositAddress, Withdraw, GetDepositHistory, GetWithdrawalHistory - complete funding management
+  - Legacy Methods: All legacy methods already implemented (VerifySymbols, VerifyStates, GetTickers, GetVolumes, GetMarkets, GetBookTickers)
+  - Location: `src/exchanges/kr/upbit/`
+  - API Version: Upbit REST API v1 with JWT authentication (2025-08-13)
+
+### Changed  
+- Bithumb status: PARTIAL -> FULL (all 16 standard methods implemented)
+- Kraken status: PARTIAL -> FULL (all 16 standard methods + legacy methods implemented)
+- Binance status: PARTIAL -> FULL (all 16 standard methods implemented)
+- Upbit status: PARTIAL -> FULL (all 16 standard methods implemented)
+- Total fully functional exchanges: 4 -> 8
+- Updated sample application with comprehensive API demonstrations
+
 ## [1.1.8] - 2025-08-10
 
 ### Added

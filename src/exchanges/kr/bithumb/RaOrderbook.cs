@@ -26,27 +26,28 @@
 
     public class RaOrderbookItem
     {
-        /// <summary>
-        /// 
-        /// </summary>
+    /// <summary>
+    /// Price level for the order book entry.
+    /// </summary>
         public decimal price
         {
             get;
             set;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
+    /// <summary>
+    /// Quantity available at the price level.
+    /// </summary>
         public decimal quantity
         {
             get;
             set;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
+    /// <summary>
+    /// Total number of individual orders aggregated at this level if provided by upstream source.
+    /// Some Bithumb endpoints may not populate this; retained for structural consistency.
+    /// </summary>
         public int total
         {
             get;
