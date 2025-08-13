@@ -558,6 +558,91 @@ foreach (var f in files) {
 
 ---
 
+## 📦 NuGet Package Management
+
+### Package Build Process
+
+#### 1. Pre-Release Checklist
+✅ Update version in `src/ccxt.simple.csproj`  
+✅ Update README.md with current exchange counts  
+✅ Update CHANGELOG.md with release notes  
+✅ Update EXCHANGES.md with latest status  
+✅ Build and test the solution  
+✅ Verify all tests pass  
+
+#### 2. Version Update
+Edit `src/ccxt.simple.csproj`:
+```xml
+<Version>1.1.9</Version>
+<AssemblyVersion>1.1.9.0</AssemblyVersion>
+<FileVersion>1.1.9.0</FileVersion>
+<PackageReleaseNotes>...</PackageReleaseNotes>
+```
+
+#### 3. Build Package
+```bash
+# Build the release package
+dotnet pack src/ccxt.simple.csproj --configuration Release
+
+# Package location
+src/bin/Release/CCXT.SIMPLE.{version}.nupkg
+```
+
+#### 4. Upload to NuGet.org
+
+##### Option A: Using dotnet CLI
+```bash
+dotnet nuget push src\bin\Release\CCXT.SIMPLE.{version}.nupkg \
+  --api-key YOUR_API_KEY \
+  --source https://api.nuget.org/v3/index.json
+```
+
+##### Option B: Using NuGet.org Web Interface
+1. Go to https://www.nuget.org/packages/manage/upload
+2. Sign in with your NuGet account
+3. Browse and select the `.nupkg` file
+4. Review package details
+5. Click "Submit"
+
+#### 5. Post-Upload Tasks
+- Create GitHub Release with tag `v{version}`
+- Attach release notes from CHANGELOG.md
+- Announce on project channels
+- Update project website if applicable
+
+### Release Notes Template
+
+```markdown
+## v{version} - {Title}
+
+### Added
+- Exchange implementations with details
+- New features and capabilities
+
+### Changed  
+- Status updates (PARTIAL -> FULL)
+- Performance improvements
+- Bug fixes
+
+### Technical Improvements
+- Authentication enhancements
+- Error handling improvements
+- Performance optimizations
+
+### Statistics
+- Total Fully Functional: X
+- Total Partial: Y
+- Total Skeleton: Z
+```
+
+### Important Notes
+- Version numbers are immutable once published
+- Package will be available globally within 15-30 minutes
+- Always test package locally before upload
+- Keep API keys secure and never commit them
+
+---
+
 ## 📞 Support
 
 For questions or support regarding exchange implementations:
@@ -567,4 +652,4 @@ For questions or support regarding exchange implementations:
 
 ---
 
-*Last Updated: 2025-08-09*
+*Last Updated: 2025-08-14*

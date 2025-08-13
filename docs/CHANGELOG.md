@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.9] - 2025-08-14
+
 ### Added
 - **Bithumb Exchange (Full Implementation)**: Complete implementation of all 16 standard API methods
   - Market Data: GetOrderbook, GetPrice, GetCandles, GetTrades - all fully functional
@@ -14,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Trading Operations: PlaceOrder, CancelOrder, GetOrder, GetOpenOrders, GetOrderHistory, GetTradeHistory - full trading support
   - Funding Operations: GetDepositAddress, Withdraw, GetDepositHistory, GetWithdrawalHistory - complete funding management
   - Location: `src/exchanges/kr/bithumb/`
-  - API Version: Bithumb API v2.1.0 with JWT authentication (2025-08-13)
+  - API Version: Bithumb API v2.1.0 with JWT authentication (2025-08-14)
   - Sample Updated: New comprehensive sample demonstrating all API categories
 
 - **Kraken Exchange (Full Implementation)**: Complete implementation of all 16 standard API methods
@@ -24,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Funding Operations: GetDepositAddress, Withdraw, GetDepositHistory, GetWithdrawalHistory - complete funding management
   - Legacy Methods: All legacy methods implemented (VerifySymbols, VerifyStates, GetTickers, GetVolumes, GetMarkets, GetBookTickers)
   - Location: `src/exchanges/us/kraken/`
-  - API Version: Kraken REST API v0 (2025-08-13)
+  - API Version: Kraken REST API v0 (2025-08-14)
 
 - **Binance Exchange (Full Implementation)**: Complete implementation of all 16 standard API methods
   - Market Data: GetOrderbook, GetPrice, GetCandles, GetTrades - all fully functional
@@ -33,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Funding Operations: GetDepositAddress, Withdraw, GetDepositHistory, GetWithdrawalHistory - complete funding management
   - Legacy Methods: All legacy methods already implemented (VerifySymbols, VerifyStates, GetTickers, GetVolumes, GetMarkets, GetBookTickers)
   - Location: `src/exchanges/us/binance/`
-  - API Version: Binance REST API v3 (2025-08-13)
+  - API Version: Binance REST API v3 (2025-08-14)
 
 - **Upbit Exchange (Full Implementation)**: Complete implementation of all 16 standard API methods
   - Market Data: GetOrderbook, GetPrice, GetCandles, GetTrades - all fully functional
@@ -42,15 +44,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Funding Operations: GetDepositAddress, Withdraw, GetDepositHistory, GetWithdrawalHistory - complete funding management
   - Legacy Methods: All legacy methods already implemented (VerifySymbols, VerifyStates, GetTickers, GetVolumes, GetMarkets, GetBookTickers)
   - Location: `src/exchanges/kr/upbit/`
-  - API Version: Upbit REST API v1 with JWT authentication (2025-08-13)
+  - API Version: Upbit REST API v1 with JWT authentication (2025-08-14)
 
 ### Changed  
 - Bithumb status: PARTIAL -> FULL (all 16 standard methods implemented)
 - Kraken status: PARTIAL -> FULL (all 16 standard methods + legacy methods implemented)
 - Binance status: PARTIAL -> FULL (all 16 standard methods implemented)
 - Upbit status: PARTIAL -> FULL (all 16 standard methods implemented)
-- Total fully functional exchanges: 4 -> 8
+- Total fully functional exchanges: 4 -> 8 (100% increase)
 - Updated sample application with comprehensive API demonstrations
+
+### Technical Improvements
+- Enhanced JWT authentication support for Korean exchanges (Bithumb, Upbit)
+- Improved symbol format conversion across different exchange standards
+- Standardized error handling and reporting across all new implementations
+- Optimized HTTP client pooling for better performance
 
 ## [1.1.8] - 2025-08-10
 
@@ -444,7 +452,10 @@ All 16 exchanges now support the standardized API:
 
 ---
 
-[Unreleased]: https://github.com/ccxt-net/ccxt.simple/compare/v1.1.6...HEAD
+[Unreleased]: https://github.com/ccxt-net/ccxt.simple/compare/v1.1.9...HEAD
+[1.1.9]: https://github.com/ccxt-net/ccxt.simple/compare/v1.1.8...v1.1.9
+[1.1.8]: https://github.com/ccxt-net/ccxt.simple/compare/v1.1.7...v1.1.8
+[1.1.7]: https://github.com/ccxt-net/ccxt.simple/compare/v1.1.6...v1.1.7
 [1.1.6]: https://github.com/ccxt-net/ccxt.simple/compare/v1.1.5...v1.1.6
 [1.1.5]: https://github.com/ccxt-net/ccxt.simple/compare/v1.1.4...v1.1.5
 [1.1.4]: https://github.com/ccxt-net/ccxt.simple/compare/v1.1.0...v1.1.4

@@ -2,7 +2,7 @@
 
 Tracks the latest implementation status based on heuristic v2 meta headers. (Total tracked exchange files with meta headers: 110)
 
-Last Updated: 2025-08-13
+Last Updated: 2025-08-14
 
 ## 🔄 Auto-Generated Summary (merged from scripts/generate-meta-summary.ps1)
 
@@ -39,7 +39,6 @@ Definitions:
 | Huobi    | 1  | 15 | 15 | One basic method implemented |
 | Korbit   | 1  | 15 | 15 | One basic method implemented |
 | Kucoin   | 1  | 15 | 15 | One basic method implemented |
-| Upbit    | 16 | 0  | 16 | FULL - All 16 standard methods implemented |
 
 ## 📄 Full Detailed Table (auto-generated merge)
 

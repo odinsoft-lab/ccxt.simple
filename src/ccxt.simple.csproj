@@ -19,16 +19,21 @@
 		<GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
 		<GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<Version>1.1.8</Version>
-		<AssemblyVersion>1.1.8.0</AssemblyVersion>
-		<FileVersion>1.1.8.0</FileVersion>
-		<PackageReleaseNotes>v1.1.8 - Bitstamp Exchange Implementation
-• New: Complete Bitstamp exchange implementation with full API support
-  - Market data endpoints (orderbook, trades, candles)
+		<Version>1.1.9</Version>
+		<AssemblyVersion>1.1.9.0</AssemblyVersion>
+		<FileVersion>1.1.9.0</FileVersion>
+		<PackageReleaseNotes>v1.1.9 - Major Exchange Implementations (Bithumb, Kraken, Binance, Upbit)
+• New: Complete implementation of 4 major exchanges with all 16 standard API methods
+  - Bithumb (KR): Full JWT authentication, v2.1.0 API support
+  - Kraken (US): Complete implementation with legacy methods support
+  - Binance (Global): World's largest exchange - full spot trading support
+  - Upbit (KR): Complete JWT authentication implementation
+• Features: All exchanges now support:
+  - Market data (orderbook, trades, candles, price)
   - Trading operations (place/cancel orders, order history)
   - Account management (balance, account info)
-  - Funding operations (deposits, withdrawals)
-• Enhanced: Now supporting 11 fully functional exchanges
+  - Funding operations (deposits, withdrawals, history)
+• Enhanced: Now supporting 8 fully functional exchanges (up from 4)
 • Documentation: Updated exchange status and implementation guides
 Full changelog: https://github.com/ccxt-net/ccxt.simple/blob/main/docs/CHANGELOG.md</PackageReleaseNotes>
 		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>

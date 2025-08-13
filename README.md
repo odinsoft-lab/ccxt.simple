@@ -5,14 +5,14 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.txt)
 [![Downloads](https://img.shields.io/nuget/dt/CCXT.Simple.svg)](https://www.nuget.org/packages/CCXT.Simple/)
 
-> 🚀 **Modern .NET cryptocurrency trading library** - Unified API access to 110 exchange adapters (5 FULL, 6 PARTIAL, 99 SKELETON) with a focus on simplicity and performance.
+> 🚀 **Modern .NET cryptocurrency trading library** - Unified API access to 110 exchange adapters (8 FULL, 3 PARTIAL, 99 SKELETON) with a focus on simplicity and performance.
 
 ## ✨ Key Features
 
 - **🎯 Unified Interface** - Same API across all exchanges
 - **⚡ High Performance** - `ValueTask<T>` async patterns, HTTP client pooling
 - **🔒 Type Safe** - Strong typing with comprehensive data models
-- **🌍 Global Coverage** - 110 exchange adapters (5 fully validated, 6 in progress)
+- **🌍 Global Coverage** - 110 exchange adapters (8 fully validated, 3 in progress)
 - **📊 Complete API** - Market data, trading, account management, funding operations
 
 ## 🚀 Quick Start
@@ -41,11 +41,11 @@ var order = await binance.PlaceOrder("BTCUSDT", SideType.Buy, "limit", 0.001m, 5
 
 ## 🏢 Exchange Support
 
-### ✅ Fully Functional (5 exchanges)
-**OKX** | **Bitstamp** | **Bithumb** | **Coinone** | **Coinbase**
+### ✅ Fully Functional (8 exchanges)
+**OKX** | **Bitstamp** | **Coinbase** | **Coinone** | **Bithumb** | **Kraken** | **Binance** | **Upbit**
 
-### 🌓 Partial / In Progress (6)
-**Huobi** | **KuCoin** | **Korbit** | **Upbit** | **Binance** | **Kraken**
+### 🌓 Partial / In Progress (3)
+**Huobi** | **KuCoin** | **Korbit**
 
 ### 🚧 Priority Development Queue
 **Bitfinex** • **Gemini** • **Poloniex** • **Mexc** • **Deribit** • **Bitmex**
