@@ -7,7 +7,7 @@
 - **Skeleton Implementations**: ~168 (94%)
 - **NotImplementedException Count**: 2,281 across 107 files
 - **Target Framework**: .NET 8.0, .NET 9.0
-- **Current Version**: 1.1.7
+- **Current Version**: 1.1.8
 - **Test Coverage**: 73 tests passing
 
 ## ✅ Completed Features (v1.1.7)
@@ -33,8 +33,8 @@
 **Goal**: Complete implementation of top 20 priority exchanges
 
 #### Target Exchanges
-- ~~Kraken~~ ✅ Completed (2025-08)
-- **Bitstamp** - European market leader
+- Kraken ✅ Completed (2025-01)
+- Bitstamp - In Progress (Partial: Market Data 구현됨)
 - **Bitfinex** - Advanced trading features
 - **Gemini** - US regulated exchange
 - **Poloniex** - Wide altcoin selection
@@ -96,9 +96,9 @@
 ## 📅 Monthly Milestones
 
 ### August 2025
-- [ ] Start Bitstamp integration
-- [ ] Documentation updates
-- [ ] Community feedback integration
+- [x] Start Bitstamp integration (Partial 구현: Market Data, 캔들, 체결)
+- [x] Documentation corrections (Functional vs Partial 재분류)
+- [ ] Bitstamp 계정/주문/입출금 표준화 매핑 추가
 
 ### September 2025
 - [ ] Complete Bitstamp, Bitfinex
@@ -132,16 +132,16 @@
 
 Based on community demand and market importance:
 
-1. **Bitstamp** - European leader, long history
-2. **Bitfinex** - Advanced features, high liquidity
-3. **Gemini** - US regulated, institutional
-4. **Deribit** - Options leader, derivatives
-5. **Poloniex** - Wide altcoin selection
-6. **Mexc** - Growing global exchange
-7. **Bitmex** - Derivatives pioneer
-8. **Phemex** - Modern derivatives platform
-9. **Bitflyer** - Japanese market leader
-10. **Coincheck** - Major Japanese exchange
+1. **Bitfinex** - Advanced features, high liquidity
+2. **Gemini** - US regulated, institutional
+3. **Poloniex** - Wide altcoin selection
+4. **Mexc** - Growing global exchange
+5. **Deribit** - Options leader, derivatives
+6. **Bitmex** - Derivatives pioneer
+7. **Phemex** - Modern derivatives platform
+8. **Bitflyer** - Japanese market leader
+9. **Coincheck** - Major Japanese exchange
+10. **Bitstamp** - Remaining: Account/Trading/Funding normalization
 
 ## 🔄 Continuous Improvements
 

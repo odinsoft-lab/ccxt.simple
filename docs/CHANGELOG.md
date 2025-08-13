@@ -8,16 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.8] - 2025-08-10
 
 ### Added
-- **Bitstamp Exchange**: Full implementation with complete API support
-  - Market data endpoints (orderbook, trades, candles)
-  - Trading operations (place/cancel orders, order history)
-  - Account management (balance, account info)
-  - Funding operations (deposits, withdrawals)
-  - Located in `src/exchanges/gb/bitstamp/`
+- **Bitstamp Exchange (Partial)**: 1차 구현 (시장 데이터 + 표준화 API 일부)
+  - 구현됨: 주문호가(GetOrderbook), 시세(GetPrice), 캔들(GetCandles), 체결(GetTrades)
+  - 부분 구현/미구현: 레거시 메서드(VerifyStates, GetTickers 등), 잔고/주문/입출금 일부 항목 변환 로직 보완 필요
+  - 인증 요청 일부 엔드포인트 경로 중복 가능성 (`ExchangeUrl`에 `/api/v2` 포함 + 엔드포인트에 `/v2/` 접두 사용) — 다음 릴리스에서 수정 예정
+  - 위치: `src/exchanges/gb/bitstamp/`
 
 ### Changed
-- Updated functional exchange count from 10 to 11
-- Bitstamp moved from "Priority Development Queue" to "Fully Functional"
+- Bitstamp 상태: "Fully Functional" -> "Partial Implementation (In Progress)"
+- Functional exchange count 재검토 (Bitstamp 제외 여전히 10개 유지)
+
+### Notes
+- 문서 기존 서술 중 Bitstamp "Full implementation" 문구는 실제 코드상 다수 `NotImplementedException` 및 레거시 미구현으로 사실과 달라 정정
+- Bittrex 역시 표준화 거래/입출금 API 미구현 상태로 "Functional" 분류 대상에서 제외 유지
 
 ## [Documentation Update] - 2025-08-09
 
@@ -25,25 +28,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Based on comprehensive source code analysis, this update corrects inaccurate information in project documentation and provides the true implementation status.
 
-#### **Corrected Implementation Statistics**
-- **Total Exchange Files**: 178 (previously incorrectly stated as 111)
-- **Functional Implementations**: ~8-10 exchanges (5-6%) - significantly fewer than previously claimed
-- **Skeleton Implementations**: ~168 exchanges (94%) with NotImplementedException placeholders
-- **NotImplementedException Count**: 2,281 occurrences across 107 files
-- **Test Coverage**: 73 tests passing (not 23 as previously stated)
+#### **Corrected Implementation Statistics (Revalidated 2025-08-13)**
+- **Total Exchange Files**: 178
+- **Functional Implementations (실사용 가능)**: 10 (Binance, Bitget, Bithumb, Kraken, Coinone, Upbit, OKX, KuCoin, Gate.io, Crypto.com)
+- **Partial / In Progress**: Bitstamp (시장데이터 + 표준 일부), Bittrex (레거시 시세 일부)
+- **Skeleton Implementations**: ~168 (대부분 표준화 메서드 `NotImplementedException`)
+- **NotImplementedException Count**: 2,281 (기존 수치 유지)
+- **Test Coverage**: 73 tests passing
 
-#### **Actual Functional Exchange Status**
-Exchanges with working implementations (minimal NotImplementedException):
-1. **Binance** - Complete market data and basic trading
-2. **Bitget** - Advanced implementation with specialized trading APIs
-3. **Bithumb** - Full Korean market implementation
-4. **Kraken** - Recent complete implementation  
-5. **Coinone** - Korean market implementation
-6. **Upbit** - Korean market leader implementation
-7. **OKX** - Major global exchange implementation
-8. **KuCoin** - Altcoin focused implementation
-9. **Gate.io** - Wide selection implementation
-10. **Crypto.com** - Multi-currency implementation
+#### **Actual Functional Exchange Status (완료 10)**
+1. **Binance** - Market 데이터 & 기본 주문
+2. **Bitget** - 확장된 트레이딩 API (전용 내부 구조)
+3. **Bithumb** - 한국 원화 마켓 지원
+4. **Kraken** - 표준화 API 충실 구현
+5. **Coinone** - 한국 마켓 구현
+6. **Upbit** - 한국 최대 거래소 지원
+7. **OKX** - 글로벌 파생상품/현물 핵심 기능
+8. **KuCoin** - 알트코인 중심
+9. **Gate.io** - 다수 페어 지원
+10. **Crypto.com** - 다중 통화/카드 생태계
+
+#### **Partial / In Progress (부분 구현)**
+- **Bitstamp**: 표준화 시장 데이터 구현 / 계정·주문·입출금 변환 로직 및 레거시 시세 수집 미완
+- **Bittrex**: 레거시 VerifySymbols/States/Tickers/Volumes 일부 구현, 표준화 계정·주문·입출금 미구현
 
 #### **File Structure Corrections**
 Updated documentation to reflect actual project structure:
@@ -66,11 +73,10 @@ Exchange implementations organized by country/region (ISO 3166-1 alpha-2 codes):
 - **JP**: 6 Japanese exchanges  
 - **Other regions**: 28 countries/regions total
 
-#### **Priority Implementation Queue**
-Based on market volume and community demand:
-1. **Tier 1 (High Priority)**: Bitstamp, Bitfinex, Gemini, Poloniex, Mexc
-2. **Tier 2 (Medium Priority)**: Bitflyer, Coincheck, Deribit, Bitmex, Phemex
-3. **Tier 3 (Regional/Specialized)**: Regional exchanges and DeFi platforms
+#### **Priority Implementation Queue (Revised)**
+1. **Tier 1 (High Priority)**: Bitfinex, Gemini, Poloniex, Mexc, Deribit
+2. **Tier 2 (Medium)**: Bitmex, Phemex, Bitflyer, Coincheck
+3. **Tier 3 (Regional/Specialized)**: (유지) Regional + DeFi (Vertex, Hyperliquid 등)
 
 #### **Development Recommendations**
 - Focus on completing Tier 1 exchanges first (skeleton code ready)
@@ -79,7 +85,7 @@ Based on market volume and community demand:
 - Maintain backward compatibility with existing aliases and properties
 
 ### 🗂️ Documentation Updates
-- **EXCHANGES.md**: Corrected exchange counts and implementation status
+- **EXCHANGES.md**: Functional/Partial 재분류 (Bitstamp -> Partial)
 - **README.md**: Updated feature descriptions and exchange statistics
 - **CLAUDE.md**: Fixed file paths and project structure information
 - **Package Notes**: Corrected test count in NuGet package description

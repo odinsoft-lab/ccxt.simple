@@ -364,8 +364,185 @@ public async ValueTask<OrderInfo> GetOrder(string orderId, string symbol = null,
 Reference implementations:
 - **Binance**: `src/exchanges/us/binance/XBinance.cs` - Complete feature implementation
 - **Kraken**: `src/exchanges/us/kraken/XKraken.cs` - Complex API with excellent error handling
-- **Bitstamp**: `src/exchanges/gb/bitstamp/XBitstamp.cs` - Clean implementation pattern
+- **Bitstamp**: `src/exchanges/gb/bitstamp/XBitstamp.cs` - Partial (Market Data + 일부 표준화). Account/Trading/Funding 변환 로직 진행중
 - **Bithumb**: `src/exchanges/kr/bithumb/XBithumb.cs` - Korean exchange specific features
+
+---
+
+## 🧩 구현 상태 메타 표식 규칙 (Implementation Status Metadata)
+
+여러 거래소(X{Exchange}.cs)의 구현/미구현 상태를 자동 집계하기 위한 표준 주석 블록 규칙입니다. 각 파일 상단(`using` 아래 혹은 최상단)에 아래 형식의 블록을 추가하십시오.
+
+### 1. 메타 블록 포맷
+```csharp
+// == CCXT-SIMPLE-META-BEGIN ==
+// EXCHANGE: bitstamp
+// IMPLEMENTATION_STATUS: PARTIAL                   // 기본(자동 또는 수동) – 수동 설정 없으면 heuristic 자동 값
+// IMPLEMENTATION_STATUS_MANUAL: FULL               // (선택) 수동 고정 값: 스크립트가 덮어쓰지 않음
+// IMPLEMENTATION_STATUS_AUTO: PARTIAL              // (자동) heuristic 계산 결과(수동 값 존재 시 참고용)
+// PROGRESS_STATUS: WIP                             // DONE | WIP | TODO – 3단계 수작업 진행도
+// CATEGORY: centralized                            // centralized | dex | derivatives | options | payment
+// MARKET_SCOPE: spot                               // 예: spot; spot,futures; spot,options
+// STANDARD_METHODS_IMPLEMENTED: GetOrderbook,GetPrice,GetCandles,GetTrades
+// STANDARD_METHODS_PENDING: GetBalance,GetAccount,PlaceOrder,CancelOrder,GetOrder,GetOpenOrders,GetOrderHistory,GetTradeHistory,GetDepositAddress,Withdraw,GetDepositHistory,GetWithdrawalHistory
+// LEGACY_METHODS_IMPLEMENTED: VerifySymbols        // 없으면 빈 값 또는 -
+// NOT_IMPLEMENTED_EXCEPTIONS: 12                   // 파일 내 NotImplementedException 수(수동 기입)
+// LAST_REVIEWED: 2025-08-13
+// REVIEWER: yourname
+// NOTES: 초기 Market Data 구현; 인증/주문 변환 로직 개선 예정
+// == CCXT-SIMPLE-META-END ==
+```
+
+### 2. 상태 정의
+| STATUS | 의미 | 비고 |
+|--------|------|------|
+| FULL | 표준화 IExchange 메서드 모두 동작 (NotImplementedException 0) | heuristic FULL → PROGRESS_STATUS 기본값 DONE |
+| PARTIAL | 일부 표준 메서드 구현, 나머지 대기 | 기본 PROGRESS_STATUS = WIP |
+| SKELETON | 구조만 존재, 표준 메서드 대부분 미구현 | 기본 PROGRESS_STATUS = TODO |
+| LEGACY_ONLY | 레거시(VerifySymbols 등)만 존재, 표준화 미구현 | 현재 스크립트 자동 산출 제외(필요 시 수동) |
+| DEPRECATED | 사용 중단 예정 | 수동 지정 |
+
+추가 필드:
+- IMPLEMENTATION_STATUS_MANUAL: 사람이 확정한 상태(예: 테스트 완료 후 FULL 고정). 존재하면 스크립트는 자동 계산을 IMPLEMENTATION_STATUS_AUTO 로만 기록하고 IMPLEMENTATION_STATUS 필드는 수동 값으로 유지.
+- IMPLEMENTATION_STATUS_AUTO: 항상 최신 휴리스틱 산출(참고용).
+- PROGRESS_STATUS: DONE / WIP / TODO 3단계 진행도. 스크립트 실행 시 기존 값이 있으면 유지, 없으면 heuristic 기반 기본값으로 채움. 강제 재계산은 `insert-meta.ps1 -Update -OverrideProgress` 사용.
+
+### 3. 필드 설명
+| 필드 | 필수 | 설명 |
+|------|------|------|
+| IMPLEMENTATION_STATUS | ✅ | 구현 레벨 |
+| STANDARD_METHODS_IMPLEMENTED | ✅ | 구현된 표준 메서드(쉼표, 공백 없음) |
+| STANDARD_METHODS_PENDING | ✅ | 미구현 표준 메서드 목록(없으면 공백) |
+| LAST_REVIEWED | ✅ | 마지막 검토 일자 (YYYY-MM-DD) |
+| EXCHANGE | 권장 | 소문자 거래소 코드 |
+| CATEGORY | 선택 | 유형(centralized/dex/derivatives 등) |
+| MARKET_SCOPE | 선택 | 지원 마켓 범위 |
+| LEGACY_METHODS_IMPLEMENTED | 선택 | 레거시 메서드 구현 목록 |
+| NOT_IMPLEMENTED_EXCEPTIONS | 선택 | 파일 내 NotImplementedException 개수 |
+| REVIEWER | 선택 | 검토자 식별자 |
+| NOTES | 선택 | 특이사항 |
+
+규칙:
+1. 각 줄은 `// KEY: VALUE` 형식, 콜론 뒤 한 칸.
+2. 리스트는 `,` 로만 구분(공백 없음) → 단순 파싱.
+3. 시작/끝 구분자는 정확히 `// == CCXT-SIMPLE-META-BEGIN ==` / `// == CCXT-SIMPLE-META-END ==`.
+
+### 4. 예시
+FULL 예시:
+```csharp
+// == CCXT-SIMPLE-META-BEGIN ==
+// EXCHANGE: kraken
+// IMPLEMENTATION_STATUS: FULL
+// CATEGORY: centralized
+// MARKET_SCOPE: spot
+// STANDARD_METHODS_IMPLEMENTED: GetOrderbook,GetPrice,GetCandles,GetTrades,GetBalance,GetAccount,PlaceOrder,CancelOrder,GetOrder,GetOpenOrders,GetOrderHistory,GetTradeHistory,GetDepositAddress,Withdraw,GetDepositHistory,GetWithdrawalHistory
+// STANDARD_METHODS_PENDING: 
+// LEGACY_METHODS_IMPLEMENTED: VerifySymbols,VerifyStates
+// NOT_IMPLEMENTED_EXCEPTIONS: 0
+// LAST_REVIEWED: 2025-08-13
+// REVIEWER: dev1
+// NOTES: 모든 표준 메서드 검증 완료
+// == CCXT-SIMPLE-META-END ==
+```
+
+SKELETON 예시:
+```csharp
+// == CCXT-SIMPLE-META-BEGIN ==
+// EXCHANGE: vertex
+// IMPLEMENTATION_STATUS: SKELETON
+// STANDARD_METHODS_IMPLEMENTED: 
+// STANDARD_METHODS_PENDING: GetOrderbook,GetPrice,GetCandles,GetTrades,GetBalance,GetAccount,PlaceOrder,CancelOrder,GetOrder,GetOpenOrders,GetOrderHistory,GetTradeHistory,GetDepositAddress,Withdraw,GetDepositHistory,GetWithdrawalHistory
+// NOT_IMPLEMENTED_EXCEPTIONS: 16
+// LAST_REVIEWED: 2025-08-13
+// NOTES: 파생상품 구조 계획, 아직 표준화 미착수
+// == CCXT-SIMPLE-META-END ==
+```
+
+PARTIAL → FULL 수동 고정 예시 (Bitstamp):
+```csharp
+// == CCXT-SIMPLE-META-BEGIN ==
+// EXCHANGE: bitstamp
+// IMPLEMENTATION_STATUS_MANUAL: FULL
+// IMPLEMENTATION_STATUS: FULL
+// IMPLEMENTATION_STATUS_AUTO: PARTIAL
+// CATEGORY: centralized
+// MARKET_SCOPE: spot
+// STANDARD_METHODS_IMPLEMENTED: GetOrderbook,GetPrice,GetCandles,GetTrades,PlaceOrder,CancelOrder,GetOrder,GetOpenOrders,GetOrderHistory,GetTradeHistory,GetBalance,GetAccount,GetDepositAddress,Withdraw,GetDepositHistory,GetWithdrawalHistory
+// STANDARD_METHODS_PENDING: 
+// LEGACY_METHODS_IMPLEMENTED: VerifySymbols
+// NOT_IMPLEMENTED_EXCEPTIONS: 0
+// LAST_REVIEWED: 2025-08-13
+// REVIEWER: dev2
+// PROGRESS_STATUS: DONE
+// NOTES: 레거시 GetTickers/Volumes 무관(표준 완료) → 수동 FULL 고정
+// == CCXT-SIMPLE-META-END ==
+```
+
+### 5. 품질 기준 (자동/수동 병행 검증 가이드)
+| 상태(source) | NotImplementedException 허용 | STANDARD_METHODS_PENDING | 조건 | 비고 |
+|--------------|------------------------------|---------------------------|------|------|
+| FULL (AUTO) | 0 | 빈 값 | 16/16 구현 | 휴리스틱 산출 |
+| FULL (MANUAL) | 0 권장 | 빈 값 권장 | 테스트 검증 후 고정 | AUTO 와 다르면 비교 필요 |
+| PARTIAL | ≥0 | ≥1 | 구현≥1 & 미구현 존재 | 진행 중 |
+| SKELETON | 다수 | 16 | 구현 0 | 초기 상태 |
+| LEGACY_ONLY | 다수 | 16 | 레거시만 | 수동 기록 |
+| DEPRECATED | 무관 | 무관 | 유지보수 중단 | 수동 |
+
+### 6. PowerShell 집계 예시
+상태 분포:
+```powershell
+Get-ChildItem -Recurse src/exchanges -Filter X*.cs |
+  Select-String -Pattern '^// IMPLEMENTATION_STATUS:' |
+  ForEach-Object { ($_.Line -split ':')[1].Trim() } |
+  Group-Object | Select Name,Count
+```
+
+미구현 표준 메서드 개수:
+```powershell
+Get-ChildItem -Recurse src/exchanges -Filter X*.cs |
+    Select-String -Pattern '^// STANDARD_METHODS_PENDING:' |
+    ForEach-Object {
+        if ($_.Line -match '^// STANDARD_METHODS_PENDING:\s*(.*)$') {
+            $val = $matches[1].Trim()
+            if ($val) { $val.Split(',').Count } else { 0 }
+        }
+    } | Group-Object | Sort-Object Name
+```
+
+각 파일 NotImplementedException 실측:
+```powershell
+Get-ChildItem -Recurse src/exchanges -Filter X*.cs |
+    % { [PSCustomObject]@{ File=$_.Name; Count=(Select-String -Path $_.FullName -Pattern 'NotImplementedException').Count } } |
+    Sort Count -Descending
+```
+
+### 7. C# 간단 파서 스니펫
+```csharp
+var files = Directory.GetFiles("src/exchanges", "X*.cs", SearchOption.AllDirectories);
+var stats = new Dictionary<string,int>();
+foreach (var f in files) {
+        var lines = File.ReadAllLines(f);
+        var inside = false;
+        foreach (var line in lines) {
+                if (line.Contains("CCXT-SIMPLE-META-BEGIN")) inside = true;
+                else if (line.Contains("CCXT-SIMPLE-META-END")) break;
+                else if (inside && line.StartsWith("// IMPLEMENTATION_STATUS:")) {
+                        var val = line.Split(':')[2].Trim();
+                        stats[val] = stats.TryGetValue(val, out var c) ? c+1 : 1;
+                        break;
+                }
+        }
+}
+```
+
+### 8. 적용 순서 제안 (수동 진행도 포함)
+1. 메타 블록 삽입 (스크립트 자동 or 수동 초기화)
+2. 휴리스틱 결과 확인 (IMPLEMENTATION_STATUS_AUTO)
+3. 실제 테스트/검증 후 필요 시 IMPLEMENTATION_STATUS_MANUAL + PROGRESS_STATUS 조정
+4. 향후 구현 진행 시 PROGRESS_STATUS만 단계적으로(TODO→WIP→DONE) 변경, AUTO 값 변동 추적
+5. 완전 구현 확정 시 MANUAL=FULL 고정, AUTO 값이 추후 PARTIAL로 떨어지면 회귀(regression) 신호
+6. 집계 스크립트 재생성 후 EXCHANGES.md 통합
+7. PR 에 CHANGELOG 적용 (상태 전환 로그)
 
 ---
 

@@ -41,8 +41,11 @@ var order = await binance.PlaceOrder("BTCUSDT", SideType.Buy, "limit", 0.001m, 5
 
 ## 🏢 Exchange Support
 
-### ✅ Fully Functional (11 exchanges)
-**Binance** | **Bitget** | **Bithumb** | **Bitstamp** | **Kraken** | **Coinone** | **Upbit** | **OKX** | **KuCoin** | **Gate.io** | **Crypto.com**
+### ✅ Fully Functional (10 exchanges)
+**Binance** | **Bitget** | **Bithumb** | **Kraken** | **Coinone** | **Upbit** | **OKX** | **KuCoin** | **Gate.io** | **Crypto.com**
+
+### 🌓 Partial / In Progress
+**Bitstamp** (시장 데이터 + 표준 일부, 주문/입출금/잔고 로직 개선 예정) | **Bittrex** (레거시 시세/상태, 표준화 미구현)
 
 ### 🚧 Priority Development Queue
 **Bitfinex** • **Gemini** • **Poloniex** • **Mexc** • **Deribit** • **Bitmex**
@@ -51,6 +54,7 @@ var order = await binance.PlaceOrder("BTCUSDT", SideType.Buy, "limit", 0.001m, 5
 All major exchanges have interface implementations ready for development.
 
 > 📖 **[View complete exchange list and status →](docs/EXCHANGES.md)**
+> 🧮 **Auto Generated Status Summary**: Run `pwsh scripts/generate-meta-summary.ps1 -Print` for current heuristic classification (FULL / PARTIAL / SKELETON, plus stub counts). The file `docs/EXCHANGE_STATUS.generated.md` is generated (do not edit manually).
 
 ## 💡 Architecture
 
