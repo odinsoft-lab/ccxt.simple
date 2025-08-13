@@ -427,8 +427,8 @@ Rules:
 2. Lists separated only by `,` (no spaces) for easy parsing.
 3. Delimiters must exactly match `// == CCXT-SIMPLE-META-BEGIN ==` and `// == CCXT-SIMPLE-META-END ==`.
 
-### 4. 예시
-FULL 예시:
+### 4. Examples
+FULL example:
 ```csharp
 // == CCXT-SIMPLE-META-BEGIN ==
 // EXCHANGE: kraken
@@ -441,7 +441,7 @@ FULL 예시:
 // NOT_IMPLEMENTED_EXCEPTIONS: 0
 // LAST_REVIEWED: 2025-08-13
 // REVIEWER: dev1
-// NOTES: 모든 표준 메서드 검증 완료
+// NOTES: All standard methods validated
 // == CCXT-SIMPLE-META-END ==
 ```
 
@@ -454,7 +454,7 @@ SKELETON example:
 // STANDARD_METHODS_PENDING: GetOrderbook,GetPrice,GetCandles,GetTrades,GetBalance,GetAccount,PlaceOrder,CancelOrder,GetOrder,GetOpenOrders,GetOrderHistory,GetTradeHistory,GetDepositAddress,Withdraw,GetDepositHistory,GetWithdrawalHistory
 // NOT_IMPLEMENTED_EXCEPTIONS: 16
 // LAST_REVIEWED: 2025-08-13
-// NOTES: 파생상품 구조 계획, 아직 표준화 미착수
+// NOTES: Derivatives structure planned, standardization not started
 // == CCXT-SIMPLE-META-END ==
 ```
 
@@ -474,66 +474,66 @@ Manual PARTIAL → FULL lock example (Bitstamp):
 // LAST_REVIEWED: 2025-08-13
 // REVIEWER: dev2
 // PROGRESS_STATUS: DONE
-// NOTES: 레거시 GetTickers/Volumes 무관(표준 완료) → 수동 FULL 고정
+// NOTES: Legacy GetTickers/Volumes irrelevant (standard complete) → manually locked FULL
 // == CCXT-SIMPLE-META-END ==
 ```
 
-### 5. 품질 기준 (자동/수동 병행 검증 가이드)
-| 상태(source) | NotImplementedException 허용 | STANDARD_METHODS_PENDING | 조건 | 비고 |
+### 5. Quality Criteria (auto/manual combined validation guide)
+| Status (source) | Allowed NotImplementedException | STANDARD_METHODS_PENDING | Condition | Notes |
 |--------------|------------------------------|---------------------------|------|------|
-| FULL (AUTO) | 0 | 빈 값 | 16/16 구현 | 휴리스틱 산출 |
-| FULL (MANUAL) | 0 권장 | 빈 값 권장 | 테스트 검증 후 고정 | AUTO 와 다르면 비교 필요 |
-| PARTIAL | ≥0 | ≥1 | 구현≥1 & 미구현 존재 | 진행 중 |
-| SKELETON | 다수 | 16 | 구현 0 | 초기 상태 |
-| LEGACY_ONLY | 다수 | 16 | 레거시만 | 수동 기록 |
-| DEPRECATED | 무관 | 무관 | 유지보수 중단 | 수동 |
+| FULL (AUTO) | 0 | empty | 16/16 implemented | Heuristic result |
+| FULL (MANUAL) | 0 preferred | empty preferred | Locked after test validation | Compare if AUTO differs |
+| PARTIAL | ≥0 | ≥1 | ≥1 implemented & ≥1 pending | In progress |
+| SKELETON | many | 16 | 0 implemented | Initial state |
+| LEGACY_ONLY | many | 16 | Only legacy present | Manual record |
+| DEPRECATED | any | any | To be removed | Manual |
 
-### 5.1 FULL(완성) 상태 판정 상세 기준
-다음 모든 항목을 충족하면 `IMPLEMENTATION_STATUS_MANUAL: FULL` 로 고정할 수 있습니다 (휴리스틱 AUTO 값도 FULL 이면 이상적).
+### 5.1 FULL Completion Detailed Criteria
+Lock `IMPLEMENTATION_STATUS_MANUAL: FULL` only when ALL items below are satisfied (ideally heuristic AUTO is also FULL).
 
-#### A. 기술적 구현 충족(필수)
-- 16개 표준 메서드 모두 존재 & 표준 모델 반환 (`STANDARD_METHODS_PENDING` 공란)
-- 파일 내 `NotImplementedException` 0건
-- 각 메서드 정상 경로에서 placeholder(빈 객체, 빈 문자열 등) 남용 없음
-- 오류 발생 시 `mainXchg.OnMessageEvent(...)` 호출 (예외 nuget/network 등 최소 1회 래핑)
-- 사적(private) 엔드포인트(잔고, 주문, 입출금) 사용 시 인증 파라미터/헤더 정확히 적용
-- 타임스탬프 millisecond 단위로 변환
-- 금액/가격 decimal 사용 (float/double 사용 금지)
-- 심볼 변환(내부 ↔ 표준) 양방향 유틸 존재 및 재사용
+#### A. Technical Implementation (required)
+- All 16 standard methods present & return standardized models (`STANDARD_METHODS_PENDING` empty)
+- Zero `NotImplementedException` occurrences in file
+- No overuse of placeholders (empty objects/strings) on normal success paths
+- On error paths call `mainXchg.OnMessageEvent(...)` at least once (wrap network/nuget exceptions)
+- Private endpoints (balance, orders, funding) apply auth parameters/headers correctly
+- Timestamps normalized to millisecond precision
+- Monetary amounts/prices use decimal (never float/double)
+- Bidirectional symbol mapping utilities exist and are reused
 
-#### B. 동작 검증(필수)
-- 아래 최소 수동 호출 검증 (실거래 키 혹은 샌드박스) 로그/스크린샷 확보:
-    - 시세계열: GetOrderbook, GetTrades (1개 심볼 이상)
-    - 계정계열: GetBalance (주요 통화 1개 이상 balance > 0 or 0 명시)
-    - 주문계열: PlaceOrder → GetOrder → CancelOrder 흐름 1회 (테스트 가능한 시장)
-    - 입출금 지원 시: GetDepositAddress 또는 Withdraw 중 1개 (미지원이면 NOTES 에 "No funding API" 명시)
-- 예외/에러 케이스 1건 이상(잘못된 심볼 등) 처리 확인
-- (선택) tests/ 폴더 내 기본 통합 테스트 1개 이상 추가 가능하면 통과
+#### B. Runtime Verification (required)
+- Capture logs/screenshots for minimum manual invocations (live keys or sandbox):
+    - Market data: GetOrderbook, GetTrades (≥1 symbol)
+    - Account: GetBalance (≥1 major currency; show balance > 0 or explicit 0)
+    - Orders: PlaceOrder → GetOrder → CancelOrder flow once (on a testable market)
+    - Funding (if supported): one of GetDepositAddress or Withdraw (if unsupported add NOTES: "No funding API")
+- At least one handled exception/error case (e.g., invalid symbol)
+- (Optional) Add ≥1 basic integration test in tests/ that passes
 
-#### C. 안정성 & 품질(권장)
-- 반복 호출 시 (≥3회) 레이트리밋/429/비정상 응답 graceful backoff (Thread.Sleep, Retry 등) 또는 TODO 주석 + NOTES 기록
-- Null 가능 필드 defensively handling (?. 연산자, 기본값)
-- JSON 파싱 실패 시 try/catch 후 기본 모델 반환
+#### C. Stability & Quality (recommended)
+- On repeated calls (≥3) gracefully back off on rate limit / 429 / abnormal responses (Thread.Sleep, retry etc.) OR leave TODO + record in NOTES
+- Defensive handling for nullable fields (null checks / ?. / defaults)
+- On JSON parse failure wrap in try/catch and return a safe default model
 
-#### D. 메타 업데이트(필수)
-- 메타 블록 필드 세트:
+#### D. Meta Update (required)
+- Meta block field set:
     - `IMPLEMENTATION_STATUS_MANUAL: FULL`
-    - `IMPLEMENTATION_STATUS: FULL` (수동 고정 후 스크립트가 동일하게 유지)
-    - `IMPLEMENTATION_STATUS_AUTO: FULL` (다를 경우 아래 Regression 절차 수행)
+    - `IMPLEMENTATION_STATUS: FULL` (after manual lock script keeps identical)
+    - `IMPLEMENTATION_STATUS_AUTO: FULL` (if different follow Regression steps below)
     - `PROGRESS_STATUS: DONE`
-    - `LAST_REVIEWED: YYYY-MM-DD` (오늘 날짜)
+    - `LAST_REVIEWED: YYYY-MM-DD` (today)
     - `REVIEWER: your-id`
     - `NOT_IMPLEMENTED_EXCEPTIONS: 0`
-    - `NOTES:` 주요 특이사항 (예: "No futures endpoints" / "Sandbox verified")
+    - `NOTES:` key notes (e.g., "No futures endpoints" / "Sandbox verified")
 
-#### E. Regression(자동 vs 수동 괴리) 처리
-`IMPLEMENTATION_STATUS_MANUAL=FULL` 이지만 스크립트 재실행 후 `IMPLEMENTATION_STATUS_AUTO` 가 PARTIAL/SKELETON 으로 떨어진 경우:
-1. 변경된 소스 diff 확인 (표준 메서드 삭제/예외 추가/시그니처 변경 여부)
-2. 휴리스틱 오탐이면: `NOTES` 에 "AUTO heuristic false negative (원인)" 기입 후 유지
-3. 실제 기능 퇴보이면: MANUAL 을 PARTIAL 로 낮추고 CHANGELOG 에 기록
+#### E. Regression (auto vs manual divergence) handling
+If `IMPLEMENTATION_STATUS_MANUAL=FULL` but after rerun `IMPLEMENTATION_STATUS_AUTO` drops to PARTIAL/SKELETON:
+1. Inspect changed source diff (removed standard method / added exceptions / signature changes)
+2. If heuristic false negative: add note `AUTO heuristic false negative (reason)` and keep FULL
+3. If real regression: downgrade MANUAL to PARTIAL and record in CHANGELOG
 
-#### F. 빠른 자동 점검 스니펫
-표준 메서드 수(16) & NotImplementedException 0 검증:
+#### F. Quick automated verification snippet
+Validate standard method count (16) & zero NotImplementedException:
 ```powershell
 Get-ChildItem -Recurse src/exchanges -Filter X{Exchange}.cs | ForEach-Object {
     $code = Get-Content $_.FullName -Raw
@@ -542,25 +542,25 @@ Get-ChildItem -Recurse src/exchanges -Filter X{Exchange}.cs | ForEach-Object {
     [PSCustomObject]@{ File=$_.Name; Methods=$mCount; NotImpl=$ni }
 }
 ```
-주) 표준 메서드가 추가/변경되면 16 값은 달라질 수 있으니 GUIDE 최상단 모델 목록과 동기화.
+Note: If standard methods are added/changed the number 16 will change; keep in sync with the model list near the top of this GUIDE.
 
-#### G. FULL 전환 체크리스트 (요약)
-| 항목 | 완료 여부 |
-|------|-----------|
-| 16개 표준 메서드 구현 및 반환모델 표준화 | |
-| NotImplementedException 0 | |
-| 주문 Place→Get→Cancel 실측 | |
-| 계정/잔고 호출 성공 | |
-| 오더북/체결 데이터 수신 | |
-| 필요시 입출금 1회 검증 또는 미지원 명시 | |
-| 에러 처리/OnMessageEvent 호출 | |
-| 메타 블록 FULL + 날짜/리뷰어 기입 | |
-| AUTO=FULL 또는 괴리 사유 NOTES 기록 | |
+#### G. FULL transition checklist (summary)
+| Item | Done |
+|------|------|
+| 16 standard methods implemented & return standardized models | |
+| NotImplementedException count == 0 | |
+| Order flow Place→Get→Cancel verified | |
+| Account / balance call successful | |
+| Orderbook / trades data retrieved | |
+| Funding (if applicable) one call verified OR noted unsupported | |
+| Error handling / OnMessageEvent invocation present | |
+| Meta block FULL + date / reviewer filled | |
+| AUTO=FULL or divergence reason noted in NOTES | |
 
-위 표 모두 ✅ 후 PR / CHANGELOG 에 "Exchange {name}: PARTIAL → FULL" 기록 권장.
+After all rows are ✅, add to PR / CHANGELOG: "Exchange {name}: PARTIAL → FULL".
 
-### 6. PowerShell 집계 예시
-상태 분포:
+### 6. PowerShell aggregation examples
+Status distribution:
 ```powershell
 Get-ChildItem -Recurse src/exchanges -Filter X*.cs |
   Select-String -Pattern '^// IMPLEMENTATION_STATUS:' |
@@ -568,7 +568,7 @@ Get-ChildItem -Recurse src/exchanges -Filter X*.cs |
   Group-Object | Select Name,Count
 ```
 
-미구현 표준 메서드 개수:
+Count of pending standard methods:
 ```powershell
 Get-ChildItem -Recurse src/exchanges -Filter X*.cs |
     Select-String -Pattern '^// STANDARD_METHODS_PENDING:' |
@@ -580,14 +580,14 @@ Get-ChildItem -Recurse src/exchanges -Filter X*.cs |
     } | Group-Object | Sort-Object Name
 ```
 
-각 파일 NotImplementedException 실측:
+Per-file NotImplementedException counts:
 ```powershell
 Get-ChildItem -Recurse src/exchanges -Filter X*.cs |
     % { [PSCustomObject]@{ File=$_.Name; Count=(Select-String -Path $_.FullName -Pattern 'NotImplementedException').Count } } |
     Sort Count -Descending
 ```
 
-### 7. C# 간단 파서 스니펫
+### 7. C# lightweight parser snippet
 ```csharp
 var files = Directory.GetFiles("src/exchanges", "X*.cs", SearchOption.AllDirectories);
 var stats = new Dictionary<string,int>();
@@ -606,14 +606,14 @@ foreach (var f in files) {
 }
 ```
 
-### 8. 적용 순서 제안 (수동 진행도 포함)
-1. 메타 블록 삽입 (스크립트 자동 or 수동 초기화)
-2. 휴리스틱 결과 확인 (IMPLEMENTATION_STATUS_AUTO)
-3. 실제 테스트/검증 후 필요 시 IMPLEMENTATION_STATUS_MANUAL + PROGRESS_STATUS 조정
-4. 향후 구현 진행 시 PROGRESS_STATUS만 단계적으로(TODO→WIP→DONE) 변경, AUTO 값 변동 추적
-5. 완전 구현 확정 시 MANUAL=FULL 고정, AUTO 값이 추후 PARTIAL로 떨어지면 회귀(regression) 신호
-6. 집계 스크립트 재생성 후 EXCHANGES.md 통합
-7. PR 에 CHANGELOG 적용 (상태 전환 로그)
+### 8. Suggested application sequence (with manual progress)
+1. Insert meta block (script automation or manual init)
+2. Review heuristic output (IMPLEMENTATION_STATUS_AUTO)
+3. After real testing/verification adjust IMPLEMENTATION_STATUS_MANUAL + PROGRESS_STATUS if needed
+4. During ongoing work change only PROGRESS_STATUS stepwise (TODO→WIP→DONE) and observe AUTO changes
+5. When fully implemented lock MANUAL=FULL; if later AUTO drops to PARTIAL treat as regression signal
+6. Regenerate aggregation script output and merge into EXCHANGES.md
+7. Update CHANGELOG in PR (status transition log)
 
 ---
 

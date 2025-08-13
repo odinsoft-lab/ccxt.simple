@@ -12,11 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Implemented: Orderbook(GetOrderbook), Price(GetPrice), Candles(GetCandles), Trades(GetTrades)
   - Partial / Missing: Legacy methods (VerifyStates, GetTickers, etc.), balance/order/funding mapping improvements required
   - Potential duplicate path composition for authenticated endpoints (`ExchangeUrl` contains `/api/v2` while endpoint adds `/v2/`) — to be fixed next release
-  - 위치: `src/exchanges/gb/bitstamp/`
+  - Location: `src/exchanges/gb/bitstamp/`
 
 ### Changed
-- Bitstamp 상태: "Fully Functional" -> "Partial Implementation (In Progress)"
-- Functional exchange count 재검토 (Bitstamp 제외 여전히 10개 유지)
+- Bitstamp status: "Fully Functional" -> "Partial Implementation (In Progress)"
+- Functional exchange count reviewed (remains 10 excluding Bitstamp)
 
 ### Notes
 - Previous documentation describing Bitstamp as "Full implementation" was inaccurate (multiple `NotImplementedException` + missing legacy parts) and has been corrected
@@ -37,7 +37,7 @@ Based on comprehensive source code analysis, this update corrects inaccurate inf
 - **Test Coverage**: 73 tests passing
 
 #### **Actual Functional Exchange Status (10)**
-1. **Binance** - Market 데이터 & 기본 주문
+1. **Binance** - Market data & basic order
 2. **Bitget** - Extended trading API (custom internal structure)
 3. **Bithumb** - KRW market support
 4. **Kraken** - Robust standardized API implementation
@@ -76,7 +76,7 @@ Exchange implementations organized by country/region (ISO 3166-1 alpha-2 codes):
 #### **Priority Implementation Queue (Revised)**
 1. **Tier 1 (High Priority)**: Bitfinex, Gemini, Poloniex, Mexc, Deribit
 2. **Tier 2 (Medium)**: Bitmex, Phemex, Bitflyer, Coincheck
-3. **Tier 3 (Regional/Specialized)**: (유지) Regional + DeFi (Vertex, Hyperliquid 등)
+3. **Tier 3 (Regional/Specialized)**: (unchanged) Regional + DeFi (Vertex, Hyperliquid etc.)
 
 #### **Development Recommendations**
 - Focus on completing Tier 1 exchanges first (skeleton code ready)
@@ -85,7 +85,7 @@ Exchange implementations organized by country/region (ISO 3166-1 alpha-2 codes):
 - Maintain backward compatibility with existing aliases and properties
 
 ### 🗂️ Documentation Updates
-- **EXCHANGES.md**: Functional/Partial 재분류 (Bitstamp -> Partial)
+- **EXCHANGES.md**: Functional/Partial reclassification (Bitstamp -> Partial)
 - **README.md**: Updated feature descriptions and exchange statistics
 - **CLAUDE.md**: Fixed file paths and project structure information
 - **Package Notes**: Corrected test count in NuGet package description

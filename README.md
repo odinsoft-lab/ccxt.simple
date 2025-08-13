@@ -5,14 +5,14 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.txt)
 [![Downloads](https://img.shields.io/nuget/dt/CCXT.Simple.svg)](https://www.nuget.org/packages/CCXT.Simple/)
 
-> 🚀 **Modern .NET cryptocurrency trading library** - Unified API access to 178+ exchange implementations with a focus on simplicity and performance.
+> 🚀 **Modern .NET cryptocurrency trading library** - Unified API access to 110 exchange adapters (4 FULL, 7 PARTIAL, 99 SKELETON) with a focus on simplicity and performance.
 
 ## ✨ Key Features
 
 - **🎯 Unified Interface** - Same API across all exchanges
 - **⚡ High Performance** - `ValueTask<T>` async patterns, HTTP client pooling
 - **🔒 Type Safe** - Strong typing with comprehensive data models
-- **🌍 Global Coverage** - 178 exchange implementations (11 fully functional)
+- **🌍 Global Coverage** - 110 exchange adapters (4 fully validated, 7 in progress)
 - **📊 Complete API** - Market data, trading, account management, funding operations
 
 ## 🚀 Quick Start
@@ -41,17 +41,17 @@ var order = await binance.PlaceOrder("BTCUSDT", SideType.Buy, "limit", 0.001m, 5
 
 ## 🏢 Exchange Support
 
-### ✅ Fully Functional (10 exchanges)
-**Binance** | **Bitget** | **Bithumb** | **Kraken** | **Coinone** | **Upbit** | **OKX** | **KuCoin** | **Gate.io** | **Crypto.com**
+### ✅ Fully Functional (4 exchanges)
+**OKX** | **Bitstamp** | **Coinone** | **Coinbase**
 
-### 🌓 Partial / In Progress
-**Bitstamp** (시장 데이터 + 표준 일부, 주문/입출금/잔고 로직 개선 예정) | **Bittrex** (레거시 시세/상태, 표준화 미구현)
+### 🌓 Partial / In Progress (7)
+**Huobi** | **KuCoin** | **Bithumb** | **Korbit** | **Upbit** | **Binance** | **Kraken**
 
 ### 🚧 Priority Development Queue
 **Bitfinex** • **Gemini** • **Poloniex** • **Mexc** • **Deribit** • **Bitmex**
 
-### 📋 Skeleton Ready (168 exchanges)
-All major exchanges have interface implementations ready for development.
+### 📋 Skeleton Ready (99 exchanges)
+Remaining adapters are generated skeletons awaiting implementation.
 
 > 📖 **[View complete exchange list and status →](docs/EXCHANGES.md)**
 > 🧮 **Auto Generated Status Summary**: Run `pwsh scripts/generate-meta-summary.ps1 -Print` for current heuristic classification (FULL / PARTIAL / SKELETON, plus stub counts). The file `docs/EXCHANGE_STATUS.generated.md` is generated (do not edit manually).
@@ -93,7 +93,7 @@ exchange.OnUsdPriceEvent += price => Console.WriteLine($"BTC: ${price}");
 ## 📚 Documentation & Examples
 
 - **[🗺️ Development Roadmap](docs/ROADMAP.md)** - Future plans, milestones, technical tasks
-- **[🏢 Exchange Status](docs/EXCHANGES.md)** - Complete list of 178 exchanges and implementation status  
+- **[🏢 Exchange Status](docs/EXCHANGES.md)** - Complete list of 110 exchanges and implementation status  
 - **[📝 Changelog](docs/CHANGELOG.md)** - Version history and recent updates
 - **[💻 Code Examples](samples/)** - Interactive samples for Bithumb, Bitget, Coinone, Kraken
 

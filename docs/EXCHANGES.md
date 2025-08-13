@@ -40,9 +40,9 @@ Definitions:
 | Kucoin   | 1  | 15 | 15 | One basic method implemented |
 | Upbit    | 1  | 15 | 16 | One basic method implemented |
 
-## 📄 전체 상세 테이블 (자동 생성 병합)
+## 📄 Full Detailed Table (auto-generated merge)
 
-> 아래 표는 `EXCHANGE_STATUS.generated.md`의 내용을 그대로 포함합니다 (수동 편집 금지 권장).
+> The table below is an exact inclusion of `EXCHANGE_STATUS.generated.md` (manual edits discouraged).
 
 | Exchange | Status | Impl | Pending | Stub | Legacy | NotImplEx | LastReviewed | Reviewer | Notes |
 |----------|--------|------|---------|------|--------|-----------|--------------|----------|-------|
@@ -159,7 +159,7 @@ Definitions:
 
 ---
 
-아래 기존 섹션은 계획/우선순위 및 구조 안내용으로 유지되며, 상단 자동 생성 표와 모순될 경우 상단 표를 신뢰하세요.
+The legacy planning/priority section below is kept for context; if anything conflicts with the auto-generated table above, trust the table above.
 
 ## 🚧 Priority Development Queue
 
@@ -186,7 +186,7 @@ High-priority exchanges for full API implementation (most have skeleton code rea
 | **Vertex** | 🟡 Medium | DeFi | Hybrid DEX | Q2 2026 | Skeleton Ready |
 | **Zaif** | 🟢 Low | Japan | Regional | Q1 2026 | Skeleton Ready |
 
-## 📋 Skeleton Implementations (계획/설명)
+## 📋 Skeleton Implementations (Planning / Reference)
 
 | **BinanceUs** | Spot | https://api.binance.us | US Regulated |
 | **BinanceUsdm** | Futures | https://fapi.binance.com | USD-M Futures |
@@ -210,7 +210,7 @@ High-priority exchanges for full API implementation (most have skeleton code rea
 | **Bittrade** | Japan | https://api.bittrade.co.jp | Japanese |
 | **Blockchaincom** | Global | https://api.blockchain.com | Wallet Provider |
 | **Blofin** | Global | https://api.blofin.com | New |
-<!-- (구식 Functional 표 제거됨: 상단 FULL/PARTIAL 섹션 대체) -->
+<!-- (Deprecated Functional table removed: replaced by top FULL/PARTIAL section) -->
 | **Btcmarkets** | Australia | https://api.btcmarkets.net | Australian |
 | **Cex** | UK | https://cex.io | Established |
 
