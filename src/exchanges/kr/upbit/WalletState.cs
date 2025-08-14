@@ -41,7 +41,13 @@
             set;
         }
 
-        public string message
+        public string net_type
+        {
+            get;
+            set;
+        }
+
+        public string network_name
         {
             get;
             set;

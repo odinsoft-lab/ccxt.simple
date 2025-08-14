@@ -88,7 +88,7 @@ namespace CCXT.Simple.Exchanges.Kraken
 
         private long GetNonce()
         {
-            return DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            return TimeExtensions.UnixTime;
         }
 
         // Legacy Methods
@@ -388,7 +388,7 @@ namespace CCXT.Simple.Exchanges.Kraken
                                 _volume *= ticker.lastPrice;
                                 ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
 
-                                var _curr_timestamp = DateTimeExtensions.NowMilli;
+                                var _curr_timestamp = TimeExtensions.NowMilli;
                                 if (_curr_timestamp > _next_timestamp)
                                 {
                                     ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
@@ -873,7 +873,7 @@ namespace CCXT.Simple.Exchanges.Kraken
                         _result.price = price ?? 0;
                         _result.amount = amount;
                         _result.status = "open";
-                        _result.timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                        _result.timestamp = TimeExtensions.UnixTime;
                     }
                 }
             }
@@ -1325,7 +1325,7 @@ namespace CCXT.Simple.Exchanges.Kraken
                     _result.tag = tag;
                     _result.network = network;
                     _result.status = "pending";
-                    _result.timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                    _result.timestamp = TimeExtensions.UnixTime;
                 }
             }
             catch (Exception ex)

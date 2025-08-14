@@ -279,7 +279,7 @@ namespace CCXT.Simple.Exchanges.Bittrex
 
                             _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
 
-                            var _curr_timestamp = DateTimeExtensions.ConvertToUnixTimeMilli(_jitem.Value<DateTime>("updatedAt"));
+                            var _curr_timestamp = TimeExtensions.ConvertToUnixTimeMilli(_jitem.Value<DateTime>("updatedAt"));
                             if (_curr_timestamp > _next_timestamp)
                             {
                                 _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);

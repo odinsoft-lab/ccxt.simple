@@ -364,7 +364,7 @@ public async ValueTask<Orderbook> GetOrderbook(string symbol, int limit = 100)
         symbol = symbol,
         bids = ParseOrders(data["bids"]),
         asks = ParseOrders(data["asks"]),
-        timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+        timestamp = TimeExtensions.UnixTime
     };
     
     return orderbook;

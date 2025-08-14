@@ -218,7 +218,7 @@ public async ValueTask<OrderInfo> PlaceOrder(string symbol, SideType side, strin
         status = MapExchangeStatus(exchangeOrder.Status),
         amount = amount,
         price = price,
-        timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+        timestamp = TimeExtensions.UnixTime
     };
 }
 ```

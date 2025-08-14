@@ -470,7 +470,7 @@ namespace CCXT.Simple.Exchanges.Bithumb
 
                             _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
 
-                            var _curr_timestamp = DateTimeExtensions.NowMilli;
+                            var _curr_timestamp = TimeExtensions.NowMilli;
                             if (_curr_timestamp > _next_timestamp)
                             {
                                 _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
@@ -493,7 +493,7 @@ namespace CCXT.Simple.Exchanges.Bithumb
                             _volume *= mainXchg.fiat_btc_price;
                             _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
 
-                            var _curr_timestamp = DateTimeExtensions.NowMilli;
+                            var _curr_timestamp = TimeExtensions.NowMilli;
                             if (_curr_timestamp > _next_timestamp)
                             {
                                 _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
@@ -694,7 +694,7 @@ namespace CCXT.Simple.Exchanges.Bithumb
                 if (_jarray != null && _jarray.Count > 0)
                 {
                     var _data = _jarray[0];
-                    _result.timestamp = _data["timestamp"]?.Value<long>() ?? DateTimeExtensions.NowMilli;
+                    _result.timestamp = _data["timestamp"]?.Value<long>() ?? TimeExtensions.NowMilli;
 
                     var _units = _data["orderbook_units"];
                     if (_units != null)
@@ -767,7 +767,7 @@ namespace CCXT.Simple.Exchanges.Bithumb
                     foreach (var candle in _jarray)
                     {
                         // v2.1.0 returns: candle_date_time_utc, opening_price, high_price, low_price, trade_price, candle_acc_trade_volume
-                        var _timestamp = DateTimeExtensions.ConvertToUnixTimeMilli(DateTime.Parse(candle["candle_date_time_utc"]?.Value<string>() ?? DateTime.UtcNow.ToString()));
+                        var _timestamp = TimeExtensions.ConvertToUnixTimeMilli(DateTime.Parse(candle["candle_date_time_utc"]?.Value<string>() ?? DateTime.UtcNow.ToString()));
                         _result.Add(new decimal[]
                         {
                             _timestamp,
@@ -1046,7 +1046,7 @@ namespace CCXT.Simple.Exchanges.Bithumb
                         _result.price = price ?? 0;
                         _result.amount = amount;
                         _result.status = "open";
-                        _result.timestamp = DateTimeExtensions.NowMilli;
+                        _result.timestamp = TimeExtensions.NowMilli;
                     }
                 }
             }
@@ -1317,7 +1317,7 @@ namespace CCXT.Simple.Exchanges.Bithumb
                                         amount = order["units"]?.Value<decimal>() ?? 0,
                                         filled = order["units"]?.Value<decimal>() ?? 0,
                                         status = "closed",
-                                        timestamp = DateTimeExtensions.ConvertToUnixTimeMilli(DateTime.Parse(order["transfer_date"]?.Value<string>() ?? DateTime.UtcNow.ToString()))
+                                        timestamp = TimeExtensions.ConvertToUnixTimeMilli(DateTime.Parse(order["transfer_date"]?.Value<string>() ?? DateTime.UtcNow.ToString()))
                                     });
                                 }
                             }
@@ -1397,7 +1397,7 @@ namespace CCXT.Simple.Exchanges.Bithumb
                                         amount = trade["units"]?.Value<decimal>() ?? 0,
                                         fee = trade["fee"]?.Value<decimal>() ?? 0,
                                         feeAsset = trade["fee_currency"]?.Value<string>() ?? "",
-                                        timestamp = DateTimeExtensions.ConvertToUnixTimeMilli(DateTime.Parse(trade["transfer_date"]?.Value<string>() ?? DateTime.UtcNow.ToString()))
+                                        timestamp = TimeExtensions.ConvertToUnixTimeMilli(DateTime.Parse(trade["transfer_date"]?.Value<string>() ?? DateTime.UtcNow.ToString()))
                                     });
                                 }
                             }
@@ -1498,14 +1498,14 @@ namespace CCXT.Simple.Exchanges.Bithumb
 
                     if (_jobject["status"].Value<string>() == "0000")
                     {
-                        _result.id = DateTimeExtensions.NowMilli.ToString(); // Bithumb doesn't return withdrawal ID
+                        _result.id = TimeExtensions.NowMilli.ToString(); // Bithumb doesn't return withdrawal ID
                         _result.currency = currency;
                         _result.amount = amount;
                         _result.address = address;
                         _result.tag = tag;
                         _result.network = network;
                         _result.status = "pending";
-                        _result.timestamp = DateTimeExtensions.NowMilli;
+                        _result.timestamp = TimeExtensions.NowMilli;
                     }
                 }
             }
@@ -1570,7 +1570,7 @@ namespace CCXT.Simple.Exchanges.Bithumb
                                     address = deposit["address"]?.Value<string>() ?? "",
                                     txid = deposit["txid"]?.Value<string>() ?? "",
                                     status = "completed", // Bithumb only shows completed deposits
-                                    timestamp = DateTimeExtensions.ConvertToUnixTimeMilli(DateTime.Parse(deposit["transfer_date"]?.Value<string>() ?? DateTime.UtcNow.ToString()))
+                                    timestamp = TimeExtensions.ConvertToUnixTimeMilli(DateTime.Parse(deposit["transfer_date"]?.Value<string>() ?? DateTime.UtcNow.ToString()))
                                 });
                             }
                         }
@@ -1639,7 +1639,7 @@ namespace CCXT.Simple.Exchanges.Bithumb
                                     address = withdrawal["address"]?.Value<string>() ?? "",
                                     // WithdrawalInfo doesn't have txid property
                                     status = "completed", // Bithumb only shows completed withdrawals
-                                    timestamp = DateTimeExtensions.ConvertToUnixTimeMilli(DateTime.Parse(withdrawal["transfer_date"]?.Value<string>() ?? DateTime.UtcNow.ToString()))
+                                    timestamp = TimeExtensions.ConvertToUnixTimeMilli(DateTime.Parse(withdrawal["transfer_date"]?.Value<string>() ?? DateTime.UtcNow.ToString()))
                                 });
                             }
                         }

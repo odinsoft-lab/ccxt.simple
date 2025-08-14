@@ -80,7 +80,7 @@ namespace CCXT.Simple.Exchanges.Bitget
 
         protected (string signBody, string mediaType) CreateRaSignature(HttpClient client, string method, string endpoint, string query, Dictionary<string, string> args)
         {
-            var _timestamp = DateTimeExtensions.NowMilli;
+            var _timestamp = TimeExtensions.NowMilli;
             var _content_type = "application/json";
 
             var _sign_body = args != null ? JsonConvert.SerializeObject(args) : "";

@@ -111,7 +111,7 @@ namespace CCXT.Simple.Exchanges.Binance
             client.DefaultRequestHeaders.Add("USER-AGENT", mainXchg.UserAgent);
             client.DefaultRequestHeaders.Add("X-MBX-APIKEY", this.ApiKey);
 
-            var _post_data = $"timestamp={DateTimeExtensions.NowMilli}";
+            var _post_data = $"timestamp={TimeExtensions.NowMilli}";
             var _signature = BitConverter.ToString(Encryptor.ComputeHash(Encoding.UTF8.GetBytes(_post_data))).Replace("-", "");
 
             return _post_data + $"&signature={_signature}";
@@ -441,7 +441,7 @@ namespace CCXT.Simple.Exchanges.Binance
 
                             _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
 
-                            var _curr_timestamp = DateTimeExtensions.NowMilli;
+                            var _curr_timestamp = TimeExtensions.NowMilli;
                             if (_curr_timestamp > _next_timestamp)
                             {
                                 _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
@@ -529,7 +529,7 @@ namespace CCXT.Simple.Exchanges.Binance
 
                             _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
 
-                            var _curr_timestamp = DateTimeExtensions.NowMilli;
+                            var _curr_timestamp = TimeExtensions.NowMilli;
                             if (_curr_timestamp > _next_timestamp)
                             {
                                 _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
@@ -815,7 +815,7 @@ namespace CCXT.Simple.Exchanges.Binance
                 if (!string.IsNullOrEmpty(clientOrderId))
                     _params += $"&newClientOrderId={clientOrderId}";
                 
-                _params += $"&timestamp={DateTimeExtensions.NowMilli}";
+                _params += $"&timestamp={TimeExtensions.NowMilli}";
                 
                 var _signature = BitConverter.ToString(Encryptor.ComputeHash(Encoding.UTF8.GetBytes(_params))).Replace("-", "");
                 _params += $"&signature={_signature}";
@@ -862,7 +862,7 @@ namespace CCXT.Simple.Exchanges.Binance
                 else if (!string.IsNullOrEmpty(clientOrderId))
                     _params += $"&origClientOrderId={clientOrderId}";
                 
-                _params += $"&timestamp={DateTimeExtensions.NowMilli}";
+                _params += $"&timestamp={TimeExtensions.NowMilli}";
                 
                 var _signature = BitConverter.ToString(Encryptor.ComputeHash(Encoding.UTF8.GetBytes(_params))).Replace("-", "");
                 _params += $"&signature={_signature}";
@@ -901,7 +901,7 @@ namespace CCXT.Simple.Exchanges.Binance
                 else if (!string.IsNullOrEmpty(clientOrderId))
                     _params += $"&origClientOrderId={clientOrderId}";
                 
-                _params += $"&timestamp={DateTimeExtensions.NowMilli}";
+                _params += $"&timestamp={TimeExtensions.NowMilli}";
                 
                 var _signature = BitConverter.ToString(Encryptor.ComputeHash(Encoding.UTF8.GetBytes(_params))).Replace("-", "");
                 _params += $"&signature={_signature}";
@@ -939,7 +939,7 @@ namespace CCXT.Simple.Exchanges.Binance
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 
-                var _params = $"timestamp={DateTimeExtensions.NowMilli}";
+                var _params = $"timestamp={TimeExtensions.NowMilli}";
                 
                 if (!string.IsNullOrEmpty(symbol))
                 {
@@ -989,7 +989,7 @@ namespace CCXT.Simple.Exchanges.Binance
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 
-                var _params = $"limit={limit}&timestamp={DateTimeExtensions.NowMilli}";
+                var _params = $"limit={limit}&timestamp={TimeExtensions.NowMilli}";
                 
                 if (!string.IsNullOrEmpty(symbol))
                 {
@@ -1039,7 +1039,7 @@ namespace CCXT.Simple.Exchanges.Binance
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 
-                var _params = $"limit={limit}&timestamp={DateTimeExtensions.NowMilli}";
+                var _params = $"limit={limit}&timestamp={TimeExtensions.NowMilli}";
                 
                 if (!string.IsNullOrEmpty(symbol))
                 {
@@ -1088,7 +1088,7 @@ namespace CCXT.Simple.Exchanges.Binance
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 
-                var _params = $"coin={currency}&timestamp={DateTimeExtensions.NowMilli}";
+                var _params = $"coin={currency}&timestamp={TimeExtensions.NowMilli}";
                 
                 if (!string.IsNullOrEmpty(network))
                     _params += $"&network={network}";
@@ -1123,7 +1123,7 @@ namespace CCXT.Simple.Exchanges.Binance
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 
-                var _params = $"coin={currency}&amount={amount}&address={address}&timestamp={DateTimeExtensions.NowMilli}";
+                var _params = $"coin={currency}&amount={amount}&address={address}&timestamp={TimeExtensions.NowMilli}";
                 
                 if (!string.IsNullOrEmpty(tag))
                     _params += $"&addressTag={tag}";
@@ -1148,7 +1148,7 @@ namespace CCXT.Simple.Exchanges.Binance
                 _result.tag = tag;
                 _result.network = network;
                 _result.status = "pending";
-                _result.timestamp = DateTimeExtensions.NowMilli;
+                _result.timestamp = TimeExtensions.NowMilli;
             }
             catch (Exception ex)
             {
@@ -1166,7 +1166,7 @@ namespace CCXT.Simple.Exchanges.Binance
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 
-                var _params = $"timestamp={DateTimeExtensions.NowMilli}";
+                var _params = $"timestamp={TimeExtensions.NowMilli}";
                 
                 if (!string.IsNullOrEmpty(currency))
                     _params = $"coin={currency}&" + _params;
@@ -1225,7 +1225,7 @@ namespace CCXT.Simple.Exchanges.Binance
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 
-                var _params = $"timestamp={DateTimeExtensions.NowMilli}";
+                var _params = $"timestamp={TimeExtensions.NowMilli}";
                 
                 if (!string.IsNullOrEmpty(currency))
                     _params = $"coin={currency}&" + _params;

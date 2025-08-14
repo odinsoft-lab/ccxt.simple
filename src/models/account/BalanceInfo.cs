@@ -19,5 +19,10 @@ namespace CCXT.Simple.Models.Account
         /// Total balance (free + used)
         /// </summary>
         public decimal total { get; set; }
+        
+        /// <summary>
+        /// Average Buy Price
+        /// </summary>
+        public decimal average { get; set; }
     }
 }

@@ -146,7 +146,7 @@ namespace CCXT.Simple.Exchanges.Bybit
         public void CreateSignature(HttpClient client, Dictionary<string, string> args = null)
         {
             var _post_data = args.ToQueryString2();
-            var _nonce = DateTimeExtensions.NowMilli;
+            var _nonce = TimeExtensions.NowMilli;
             var _recv_window = 5000;
 
             var _sign_data = $"{_nonce}{this.ApiKey}{_recv_window}{_post_data}";
@@ -299,7 +299,7 @@ namespace CCXT.Simple.Exchanges.Bybit
                                 _volume *= tickers.exchgRate;
                                 _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
 
-                                var _curr_timestamp = DateTimeExtensions.NowMilli;
+                                var _curr_timestamp = TimeExtensions.NowMilli;
                                 if (_curr_timestamp > _next_timestamp)
                                 {
                                     _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);

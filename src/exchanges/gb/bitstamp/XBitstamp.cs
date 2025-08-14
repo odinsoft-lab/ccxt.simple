@@ -72,7 +72,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
         // Bitstamp authentication helper
         private (string signature, string nonce) CreateBitstampAuth(string endpoint, Dictionary<string, string> parameters = null)
         {
-            var _nonce = DateTimeExtensions.NowMilli.ToString();
+            var _nonce = TimeExtensions.NowMilli.ToString();
             var _message = _nonce + this.ApiKey;
             
             if (parameters != null)
@@ -783,7 +783,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
                         tag = tag,
                         network = network ?? "",
                         status = "pending", // Bitstamp withdrawals typically start as pending
-                        timestamp = DateTimeExtensions.NowMilli
+                        timestamp = TimeExtensions.NowMilli
                     };
                 }
                 

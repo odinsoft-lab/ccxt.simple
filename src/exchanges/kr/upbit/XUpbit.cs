@@ -20,6 +20,7 @@ using CCXT.Simple.Models.Funding;
 using CCXT.Simple.Models.Market;
 using CCXT.Simple.Models.Trading;
 using CCXT.Simple.Core.Utilities;
+using CCXT.Simple.Core.Extensions;
 
 namespace CCXT.Simple.Exchanges.Upbit
 {
@@ -568,7 +569,7 @@ namespace CCXT.Simple.Exchanges.Upbit
                 if (_jarray != null && _jarray.Count > 0)
                 {
                     var orderbook = _jarray[0];
-                    
+
                     _result.asks.AddRange(
                         orderbook.orderbook_units
                             .Take(limit)
@@ -610,16 +611,16 @@ namespace CCXT.Simple.Exchanges.Upbit
             {
                 // Convert timeframe to Upbit format
                 var upbitTimeframe = ConvertTimeframe(timeframe);
-                
+
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _url = $"/v1/candles/{upbitTimeframe}?market={symbol}&count={limit}";
-                
+
                 if (since.HasValue)
                 {
                     var toTime = DateTimeOffset.FromUnixTimeMilliseconds(since.Value).ToString("yyyy-MM-dd HH:mm:ss");
                     _url += $"&to={toTime}";
                 }
-                
+
                 var _response = await _client.GetAsync(_url);
                 var _jstring = await _response.Content.ReadAsStringAsync();
                 var _jarray = Newtonsoft.Json.Linq.JArray.Parse(_jstring);
@@ -702,11 +703,11 @@ namespace CCXT.Simple.Exchanges.Upbit
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                var _nonce = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var _nonce = TimeExtensions.UnixTime;
                 var _token = CreateToken(_nonce);
-                
+
                 _client.DefaultRequestHeaders.Add("Authorization", _token);
-                
+
                 var _response = await _client.GetAsync("/v1/accounts");
                 var _jstring = await _response.Content.ReadAsStringAsync();
                 var _jarray = Newtonsoft.Json.Linq.JArray.Parse(_jstring);
@@ -715,16 +716,18 @@ namespace CCXT.Simple.Exchanges.Upbit
                 {
                     var currency = balance.Value<string>("currency");
                     var free = balance.Value<decimal>("balance");
-                    var locked = balance.Value<decimal>("locked");
-                    var total = free + locked;
-                    
+                    var used = balance.Value<decimal>("locked");
+                    var average = balance.Value<decimal>("avg_buy_price");
+                    var total = free + used;
+
                     if (total > 0)
                     {
                         _result[currency] = new BalanceInfo
                         {
                             free = free,
-                            used = locked,
-                            total = total
+                            used = used,
+                            total = total,
+                            average = average
                         };
                     }
                 }
@@ -744,11 +747,11 @@ namespace CCXT.Simple.Exchanges.Upbit
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                var _nonce = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var _nonce = TimeExtensions.UnixTime;
                 var _token = CreateToken(_nonce);
-                
+
                 _client.DefaultRequestHeaders.Add("Authorization", _token);
-                
+
                 var _response = await _client.GetAsync("/v1/accounts");
                 var _jstring = await _response.Content.ReadAsStringAsync();
                 var _jarray = Newtonsoft.Json.Linq.JArray.Parse(_jstring);
@@ -766,7 +769,7 @@ namespace CCXT.Simple.Exchanges.Upbit
                     var free = balance.Value<decimal>("balance");
                     var locked = balance.Value<decimal>("locked");
                     var total = free + locked;
-                    
+
                     if (total > 0)
                     {
                         _result.balances[currency] = new BalanceInfo
@@ -794,7 +797,7 @@ namespace CCXT.Simple.Exchanges.Upbit
             {
                 var upbitSide = side == SideType.Bid ? "bid" : "ask";
                 var upbitOrderType = orderType.ToLower() == "market" ? "price" : "limit";
-                
+
                 var _params = new Dictionary<string, string>
                 {
                     { "market", symbol },
@@ -820,8 +823,8 @@ namespace CCXT.Simple.Exchanges.Upbit
                     _params.Add("identifier", clientOrderId);
 
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                var _nonce = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                
+                var _nonce = TimeExtensions.UnixTime;
+
                 // Create JWT with query parameters
                 var queryString = string.Join("&", _params.Select(p => $"{p.Key}={p.Value}"));
                 var _payload = new JwtPayload
@@ -836,9 +839,9 @@ namespace CCXT.Simple.Exchanges.Upbit
                 var _header = new JwtHeader(_credentials);
                 var _security_token = new JwtSecurityToken(_header, _payload);
                 var _jwt_token = new JwtSecurityTokenHandler().WriteToken(_security_token);
-                
+
                 _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _jwt_token);
-                
+
                 var content = new FormUrlEncodedContent(_params);
                 var _response = await _client.PostAsync("/v1/orders", content);
                 var _jstring = await _response.Content.ReadAsStringAsync();
@@ -869,15 +872,15 @@ namespace CCXT.Simple.Exchanges.Upbit
             try
             {
                 var _params = new Dictionary<string, string>();
-                
+
                 if (!string.IsNullOrEmpty(orderId))
                     _params.Add("uuid", orderId);
                 else if (!string.IsNullOrEmpty(clientOrderId))
                     _params.Add("identifier", clientOrderId);
-                
+
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                var _nonce = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                
+                var _nonce = TimeExtensions.UnixTime;
+
                 // Create JWT with query parameters
                 var queryString = string.Join("&", _params.Select(p => $"{p.Key}={p.Value}"));
                 var _payload = new JwtPayload
@@ -892,11 +895,11 @@ namespace CCXT.Simple.Exchanges.Upbit
                 var _header = new JwtHeader(_credentials);
                 var _security_token = new JwtSecurityToken(_header, _payload);
                 var _jwt_token = new JwtSecurityTokenHandler().WriteToken(_security_token);
-                
+
                 _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _jwt_token);
-                
+
                 var _response = await _client.DeleteAsync($"/v1/order?{queryString}");
-                
+
                 if (_response.IsSuccessStatusCode)
                 {
                     _result = true;
@@ -917,15 +920,15 @@ namespace CCXT.Simple.Exchanges.Upbit
             try
             {
                 var _params = new Dictionary<string, string>();
-                
+
                 if (!string.IsNullOrEmpty(orderId))
                     _params.Add("uuid", orderId);
                 else if (!string.IsNullOrEmpty(clientOrderId))
                     _params.Add("identifier", clientOrderId);
-                
+
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                var _nonce = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                
+                var _nonce = TimeExtensions.UnixTime;
+
                 // Create JWT with query parameters
                 var queryString = string.Join("&", _params.Select(p => $"{p.Key}={p.Value}"));
                 var _payload = new JwtPayload
@@ -940,9 +943,9 @@ namespace CCXT.Simple.Exchanges.Upbit
                 var _header = new JwtHeader(_credentials);
                 var _security_token = new JwtSecurityToken(_header, _payload);
                 var _jwt_token = new JwtSecurityTokenHandler().WriteToken(_security_token);
-                
+
                 _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _jwt_token);
-                
+
                 var _response = await _client.GetAsync($"/v1/order?{queryString}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
                 var _jdata = Newtonsoft.Json.Linq.JObject.Parse(_jstring);
@@ -976,13 +979,13 @@ namespace CCXT.Simple.Exchanges.Upbit
                 {
                     { "state", "wait" }
                 };
-                
+
                 if (!string.IsNullOrEmpty(symbol))
                     _params.Add("market", symbol);
-                
+
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                var _nonce = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                
+                var _nonce = TimeExtensions.UnixTime;
+
                 // Create JWT with query parameters
                 var queryString = string.Join("&", _params.Select(p => $"{p.Key}={p.Value}"));
                 var _payload = new JwtPayload
@@ -997,9 +1000,9 @@ namespace CCXT.Simple.Exchanges.Upbit
                 var _header = new JwtHeader(_credentials);
                 var _security_token = new JwtSecurityToken(_header, _payload);
                 var _jwt_token = new JwtSecurityTokenHandler().WriteToken(_security_token);
-                
+
                 _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _jwt_token);
-                
+
                 var _response = await _client.GetAsync($"/v1/orders?{queryString}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
                 var _jarray = Newtonsoft.Json.Linq.JArray.Parse(_jstring);
@@ -1040,13 +1043,13 @@ namespace CCXT.Simple.Exchanges.Upbit
                     { "state", "done" },
                     { "limit", limit.ToString() }
                 };
-                
+
                 if (!string.IsNullOrEmpty(symbol))
                     _params.Add("market", symbol);
-                
+
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                var _nonce = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                
+                var _nonce = TimeExtensions.UnixTime;
+
                 // Create JWT with query parameters
                 var queryString = string.Join("&", _params.Select(p => $"{p.Key}={p.Value}"));
                 var _payload = new JwtPayload
@@ -1061,9 +1064,9 @@ namespace CCXT.Simple.Exchanges.Upbit
                 var _header = new JwtHeader(_credentials);
                 var _security_token = new JwtSecurityToken(_header, _payload);
                 var _jwt_token = new JwtSecurityTokenHandler().WriteToken(_security_token);
-                
+
                 _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _jwt_token);
-                
+
                 var _response = await _client.GetAsync($"/v1/orders?{queryString}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
                 var _jarray = Newtonsoft.Json.Linq.JArray.Parse(_jstring);
@@ -1102,19 +1105,19 @@ namespace CCXT.Simple.Exchanges.Upbit
                 // First get order UUIDs to fetch trades
                 var orders = await GetOrderHistory(symbol, limit);
                 var uuids = orders.Select(o => o.id).ToList();
-                
+
                 if (uuids.Count == 0)
                     return _result;
-                
+
                 var _params = new Dictionary<string, string>();
                 for (int i = 0; i < uuids.Count; i++)
                 {
                     _params.Add($"uuids[{i}]", uuids[i]);
                 }
-                
+
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                var _nonce = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                
+                var _nonce = TimeExtensions.UnixTime;
+
                 // Create JWT with query parameters
                 var queryString = string.Join("&", _params.Select(p => $"{p.Key}={p.Value}"));
                 var _payload = new JwtPayload
@@ -1129,9 +1132,9 @@ namespace CCXT.Simple.Exchanges.Upbit
                 var _header = new JwtHeader(_credentials);
                 var _security_token = new JwtSecurityToken(_header, _payload);
                 var _jwt_token = new JwtSecurityTokenHandler().WriteToken(_security_token);
-                
+
                 _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _jwt_token);
-                
+
                 var _response = await _client.GetAsync($"/v1/orders?{queryString}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
                 var _jarray = Newtonsoft.Json.Linq.JArray.Parse(_jstring);
@@ -1177,13 +1180,13 @@ namespace CCXT.Simple.Exchanges.Upbit
                 {
                     { "currency", currency }
                 };
-                
+
                 if (!string.IsNullOrEmpty(network))
                     _params.Add("net_type", network);
-                
+
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                var _nonce = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                
+                var _nonce = TimeExtensions.UnixTime;
+
                 // Create JWT with query parameters
                 var queryString = string.Join("&", _params.Select(p => $"{p.Key}={p.Value}"));
                 var _payload = new JwtPayload
@@ -1198,9 +1201,9 @@ namespace CCXT.Simple.Exchanges.Upbit
                 var _header = new JwtHeader(_credentials);
                 var _security_token = new JwtSecurityToken(_header, _payload);
                 var _jwt_token = new JwtSecurityTokenHandler().WriteToken(_security_token);
-                
+
                 _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _jwt_token);
-                
+
                 var content = new FormUrlEncodedContent(_params);
                 var _response = await _client.PostAsync("/v1/deposits/generate_coin_address", content);
                 var _jstring = await _response.Content.ReadAsStringAsync();
@@ -1232,16 +1235,16 @@ namespace CCXT.Simple.Exchanges.Upbit
                     { "address", address },
                     { "transaction_type", "default" }
                 };
-                
+
                 if (!string.IsNullOrEmpty(tag))
                     _params.Add("secondary_address", tag);
-                
+
                 if (!string.IsNullOrEmpty(network))
                     _params.Add("net_type", network);
-                
+
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                var _nonce = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                
+                var _nonce = TimeExtensions.UnixTime;
+
                 // Create JWT with query parameters
                 var queryString = string.Join("&", _params.Select(p => $"{p.Key}={p.Value}"));
                 var _payload = new JwtPayload
@@ -1256,9 +1259,9 @@ namespace CCXT.Simple.Exchanges.Upbit
                 var _header = new JwtHeader(_credentials);
                 var _security_token = new JwtSecurityToken(_header, _payload);
                 var _jwt_token = new JwtSecurityTokenHandler().WriteToken(_security_token);
-                
+
                 _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _jwt_token);
-                
+
                 var content = new FormUrlEncodedContent(_params);
                 var _response = await _client.PostAsync("/v1/withdraws/coin", content);
                 var _jstring = await _response.Content.ReadAsStringAsync();
@@ -1293,13 +1296,13 @@ namespace CCXT.Simple.Exchanges.Upbit
                     { "limit", limit.ToString() },
                     { "order_by", "desc" }
                 };
-                
+
                 if (!string.IsNullOrEmpty(currency))
                     _params.Add("currency", currency);
-                
+
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                var _nonce = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                
+                var _nonce = TimeExtensions.UnixTime;
+
                 // Create JWT with query parameters
                 var queryString = string.Join("&", _params.Select(p => $"{p.Key}={p.Value}"));
                 var _payload = new JwtPayload
@@ -1314,9 +1317,9 @@ namespace CCXT.Simple.Exchanges.Upbit
                 var _header = new JwtHeader(_credentials);
                 var _security_token = new JwtSecurityToken(_header, _payload);
                 var _jwt_token = new JwtSecurityTokenHandler().WriteToken(_security_token);
-                
+
                 _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _jwt_token);
-                
+
                 var _response = await _client.GetAsync($"/v1/deposits?{queryString}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
                 var _jarray = Newtonsoft.Json.Linq.JArray.Parse(_jstring);
@@ -1355,13 +1358,13 @@ namespace CCXT.Simple.Exchanges.Upbit
                     { "limit", limit.ToString() },
                     { "order_by", "desc" }
                 };
-                
+
                 if (!string.IsNullOrEmpty(currency))
                     _params.Add("currency", currency);
-                
+
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                var _nonce = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                
+                var _nonce = TimeExtensions.UnixTime;
+
                 // Create JWT with query parameters
                 var queryString = string.Join("&", _params.Select(p => $"{p.Key}={p.Value}"));
                 var _payload = new JwtPayload
@@ -1376,9 +1379,9 @@ namespace CCXT.Simple.Exchanges.Upbit
                 var _header = new JwtHeader(_credentials);
                 var _security_token = new JwtSecurityToken(_header, _payload);
                 var _jwt_token = new JwtSecurityTokenHandler().WriteToken(_security_token);
-                
+
                 _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _jwt_token);
-                
+
                 var _response = await _client.GetAsync($"/v1/withdraws?{queryString}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
                 var _jarray = Newtonsoft.Json.Linq.JArray.Parse(_jstring);
@@ -1408,8 +1411,3 @@ namespace CCXT.Simple.Exchanges.Upbit
         }
     }
 }
-
-
-
-
-

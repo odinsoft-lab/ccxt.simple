@@ -116,7 +116,7 @@ Updated documentation to reflect actual project structure:
   - `market/` - Market data models with compatibility properties
   - `trading/` - Order and trade models
 - **Services**: `src/core/services/` - HTTP client pooling, utilities
-- **Extensions**: `src/core/extensions/` - DateTimeExtensions, JsonExtensions, StringExtensions
+- **Extensions**: `src/core/extensions/` - TimeExtensions, JsonExtensions, StringExtensions
 
 #### **Geographic Distribution Analysis**
 Exchange implementations organized by country/region (ISO 3166-1 alpha-2 codes):
@@ -159,7 +159,7 @@ Exchange implementations organized by country/region (ISO 3166-1 alpha-2 codes):
 - **Code Organization Improvements**:
   - Standardized all folder names to lowercase convention (`src/exchanges/`, `src/data/`, `src/models/`, etc.)
   - Renamed extension classes for consistency:
-    - `DateTimeXts` → `DateTimeExtensions`
+    - `DateTimeXts` → `TimeExtensions`
     - `JsonExtensions` → `JsonExtensions`
     - `StringXts` → `StringExtensions`
   - Removed WebSocket-related code to maintain REST API focus

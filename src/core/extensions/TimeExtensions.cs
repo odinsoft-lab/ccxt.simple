@@ -3,7 +3,7 @@
     /// <summary>
     ///
     /// </summary>
-    public static class DateTimeExtensions
+    public static class TimeExtensions
     {
         //-----------------------------------------------------------------------------------------------------------------------------
         //
@@ -20,6 +20,21 @@
                 return DateTimeUnixEpochStart;
             }
         }
+
+        /// <summary>
+        /// Gets the current UTC time as Unix epoch milliseconds.
+        /// </summary>
+        public static long UnixTimeMillisecondsNow => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+        /// <summary>
+        /// Gets the current UTC time as Unix epoch seconds.
+        /// </summary>
+        public static long UnixTimeSecondsNow => DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+        /// <summary>
+        /// Gets the current UTC time as Unix epoch milliseconds (legacy property for backward compatibility).
+        /// </summary>
+        public static long UnixTime => UnixTimeMillisecondsNow;
 
         /// <summary>
         /// The elapsed time from the current UTC (Coordinated Universal Time) of this computer, converted to seconds as an integer

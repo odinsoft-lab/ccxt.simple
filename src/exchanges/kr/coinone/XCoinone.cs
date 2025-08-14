@@ -20,6 +20,7 @@ using CCXT.Simple.Models.Funding;
 using CCXT.Simple.Models.Market;
 using CCXT.Simple.Models.Trading;
 using CCXT.Simple.Core.Utilities;
+using CCXT.Simple.Core.Extensions;
 
 namespace CCXT.Simple.Exchanges.Coinone
 {
@@ -405,7 +406,7 @@ namespace CCXT.Simple.Exchanges.Coinone
         {
             var _result = new Orderbook
             {
-                timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                timestamp = TimeExtensions.UnixTime,
                 asks = new List<OrderbookItem>(),
                 bids = new List<OrderbookItem>()
             };
@@ -743,7 +744,7 @@ namespace CCXT.Simple.Exchanges.Coinone
                             price = price,
                             filled = order["filled_qty"]?.Value<decimal>() ?? 0,
                             remaining = order["remain_qty"]?.Value<decimal>() ?? amount,
-                            timestamp = order["created_at"]?.Value<long>() ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                            timestamp = order["created_at"]?.Value<long>() ?? TimeExtensions.UnixTime,
                             fee = order["fee"]?.Value<decimal>(),
                             feeAsset = parts[1]
                         };
@@ -1128,7 +1129,7 @@ namespace CCXT.Simple.Exchanges.Coinone
                             tag = tag ?? "",
                             network = network ?? "",
                             status = withdrawal["status"]?.ToString() ?? "pending",
-                            timestamp = withdrawal["created_at"]?.Value<long>() ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                            timestamp = withdrawal["created_at"]?.Value<long>() ?? TimeExtensions.UnixTime,
                             fee = withdrawal["fee"]?.Value<decimal>() ?? 0
                         };
                     }
