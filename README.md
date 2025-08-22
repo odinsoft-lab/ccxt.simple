@@ -118,7 +118,7 @@ dotnet test               # Run 73 tests
 
 ## 📊 Project Status
 
-- **Current Version**: 1.1.9 (.NET 8.0 & 9.0 & 10.0)
+- **Current Version**: 1.1.10 (.NET 8.0 & 9.0 & 10.0)
 - **Architecture**: Thread-safe, event-driven, REST API focused
 - **Test Coverage**: 73 tests passing
 - **Active Development**: Monthly updates, community-driven priorities

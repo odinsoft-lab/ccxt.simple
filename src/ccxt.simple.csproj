@@ -10,9 +10,9 @@
 		<RootNamespace>CCXT.Simple</RootNamespace>
 
 		<!-- Versioning -->
-		<Version>1.1.9</Version>
-		<AssemblyVersion>1.1.9.0</AssemblyVersion>
-		<FileVersion>1.1.9.0</FileVersion>
+		<Version>1.1.10</Version>
+		<AssemblyVersion>1.1.10.0</AssemblyVersion>
+		<FileVersion>1.1.10.0</FileVersion>
 
 		<!-- Package Information -->
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
@@ -30,20 +30,12 @@
 		<PackageIcon>ccxt.simple.api.png</PackageIcon>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageTags>bitcoin;cryptocurrency;exchange;trading;market-data;ccxt;exchange-markets;altcoin;api;arbitrage;bot;crypto;e-commerce;invest;library;strategy;trade;merchant;cryptocoin</PackageTags>
-		<PackageReleaseNotes>v1.1.9 - Major Exchange Implementations (Bithumb, Kraken, Binance, Upbit)
-• New: Complete implementation of 4 major exchanges with all 16 standard API methods
-  - Bithumb (KR): Full JWT authentication, v2.1.0 API support
-  - Kraken (US): Complete implementation with legacy methods support
-  - Binance (Global): World's largest exchange - full spot trading support
-  - Upbit (KR): Complete JWT authentication implementation
-• Features: All exchanges now support:
-  - Market data (orderbook, trades, candles, price)
-  - Trading operations (place/cancel orders, order history)
-  - Account management (balance, account info)
-  - Funding operations (deposits, withdrawals, history)
-• Enhanced: Now supporting 8 fully functional exchanges (up from 4)
-• Documentation: Updated exchange status and implementation guides
-Full changelog: https://github.com/ccxt-net/ccxt.simple/blob/main/docs/CHANGELOG.md</PackageReleaseNotes>
+		<PackageReleaseNotes>v1.1.10 - Added: SHA256.HashDataCompat extension for .NET Standard 2.0/2.1 compatibility (static utility for hashing)
+Added: ConvertExtensions.ToHexString for byte[] to hex string conversion across all target frameworks
+Refactored: All usages of SHA256 hashing and hex string conversion to use new extension methods
+Improved: Ensured compatibility and consistent behavior for cryptographic operations on all supported .NET versions
+Maintenance: Minor code cleanup and namespace unification for extension methods
+This update improves cross-framework compatibility and code maintainability for cryptographic operations.</PackageReleaseNotes>
 
 		<!-- Repository Information -->
 		<RepositoryUrl>https://github.com/ccxt-net/ccxt.simple</RepositoryUrl>
@@ -69,10 +61,6 @@ Full changelog: https://github.com/ccxt-net/ccxt.simple/blob/main/docs/CHANGELOG
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-	</PropertyGroup>
-
-	<PropertyGroup>
-		<NoWarn>CS1998</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>

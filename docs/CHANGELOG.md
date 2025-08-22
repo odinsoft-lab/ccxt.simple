@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.1.9] - 2025-08-14
+## [1.1.10] - 2025-08-14
 
 ### Added
 - **Bithumb Exchange (Full Implementation)**: Complete implementation of all 16 standard API methods
@@ -452,8 +452,8 @@ All 16 exchanges now support the standardized API:
 
 ---
 
-[Unreleased]: https://github.com/ccxt-net/ccxt.simple/compare/v1.1.9...HEAD
-[1.1.9]: https://github.com/ccxt-net/ccxt.simple/compare/v1.1.8...v1.1.9
+[Unreleased]: https://github.com/ccxt-net/ccxt.simple/compare/v1.1.10...HEAD
+[1.1.10]: https://github.com/ccxt-net/ccxt.simple/compare/v1.1.8...v1.1.10
 [1.1.8]: https://github.com/ccxt-net/ccxt.simple/compare/v1.1.7...v1.1.8
 [1.1.7]: https://github.com/ccxt-net/ccxt.simple/compare/v1.1.6...v1.1.7
 [1.1.6]: https://github.com/ccxt-net/ccxt.simple/compare/v1.1.5...v1.1.6

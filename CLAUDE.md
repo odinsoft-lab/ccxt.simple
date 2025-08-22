@@ -14,7 +14,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Language**: C# with modern async/await patterns
 - **Architecture**: Multi-exchange adapter pattern with unified interfaces
 - **Purpose**: Cryptocurrency trading, market data access, and exchange integration
-- **Version**: 1.1.9
+- **Version**: 1.1.10
 
 ## Build and Development Commands
 
