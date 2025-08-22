@@ -1,27 +1,35 @@
 <Project Sdk="Microsoft.NET.Sdk">
+
 	<PropertyGroup>
-		<TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    	<!-- Target Framework -->
+		<TargetFrameworks>netstandard2.0;netstandard2.1;net8.0;net9.0</TargetFrameworks>
+		<LangVersion>latest</LangVersion>
+
+		<!-- Assembly Information -->
 		<AssemblyName>CCXT.Simple</AssemblyName>
 		<RootNamespace>CCXT.Simple</RootNamespace>
-		<Nullable>disable</Nullable>
-		<Title>CryptoCurrency eXchange Trading Library for .NET</Title>
-		<Product>CCXT</Product>
-		<Company>ODINSOFT</Company>
-		<Description>CCXT.SIMPLE ? CryptoCurrency eXchange Trading Library for .NET</Description>
-		<Copyright>Copyright OdinSoft Co., Ltd. 2015~2025</Copyright>
-		<AssemblyTitle>CCXT.SIMPLE</AssemblyTitle>
-		<Authors>SEONGAHN LEE</Authors>
-		<PackageId>CCXT.SIMPLE</PackageId>
-		<PackageTags>bitcoin;cryptocurrency;exchange;trading;market-data;ccxt;exchange-markets;altcoin;api;arbitrage;bot;crypto;e-commerce;invest;library;strategy;trade;merchant;cryptocoin</PackageTags>
-		<PackageProjectUrl>https://github.com/ccxt-net/ccxt.simple</PackageProjectUrl>
-		<PackageIcon>ccxt.simple.api.png</PackageIcon>
-		<GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-		<GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-		<GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+
+		<!-- Versioning -->
 		<Version>1.1.9</Version>
 		<AssemblyVersion>1.1.9.0</AssemblyVersion>
 		<FileVersion>1.1.9.0</FileVersion>
+
+		<!-- Package Information -->
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<PackageId>CCXT.SIMPLE</PackageId>
+		<Authors>SEONGAHN LEE</Authors>
+		<Product>CCXT</Product>
+		<Company>ODINSOFT</Company>
+		<Title>CryptoCurrency eXchange Trading Library for .NET</Title>
+		<Description>CCXT.SIMPLE ? CryptoCurrency eXchange Trading Library for .NET</Description>
+		<Copyright>Copyright OdinSoft Co., Ltd. 2015~2025</Copyright>
+
+		<!-- Package Settings -->
+		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+		<PackageProjectUrl>https://github.com/ccxt-net/ccxt.simple</PackageProjectUrl>
+		<PackageIcon>ccxt.simple.api.png</PackageIcon>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageTags>bitcoin;cryptocurrency;exchange;trading;market-data;ccxt;exchange-markets;altcoin;api;arbitrage;bot;crypto;e-commerce;invest;library;strategy;trade;merchant;cryptocoin</PackageTags>
 		<PackageReleaseNotes>v1.1.9 - Major Exchange Implementations (Bithumb, Kraken, Binance, Upbit)
 • New: Complete implementation of 4 major exchanges with all 16 standard API methods
   - Bithumb (KR): Full JWT authentication, v2.1.0 API support
@@ -36,12 +44,31 @@
 • Enhanced: Now supporting 8 fully functional exchanges (up from 4)
 • Documentation: Updated exchange status and implementation guides
 Full changelog: https://github.com/ccxt-net/ccxt.simple/blob/main/docs/CHANGELOG.md</PackageReleaseNotes>
-		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
+
+		<!-- Repository Information -->
 		<RepositoryUrl>https://github.com/ccxt-net/ccxt.simple</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+
+		<!-- Code Quality Settings - Simplified -->
+		<Nullable>disable</Nullable>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+
+		<!-- Suppress most warnings except critical ones -->
+		<NoWarn>$(NoWarn);CS1998;CS0618</NoWarn>
+
+		<!-- Build Settings -->
+		<Deterministic>true</Deterministic>
+		<ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+		<Platforms>AnyCPU;x64;x86</Platforms>
 		<ApplicationIcon>ccxt.simple.ico</ApplicationIcon>
+
+		<!-- Debugging and Symbols -->
+		<DebugType>embedded</DebugType>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	</PropertyGroup>
 
 	<PropertyGroup>

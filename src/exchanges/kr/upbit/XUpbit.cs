@@ -154,7 +154,7 @@ namespace CCXT.Simple.Exchanges.Upbit
             {
                 var _basePath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
                 var _jsonPath = Path.Combine(_basePath, "Exchanges", "KR", "Upbit", "CoinState.json");
-                var _cstring = await File.ReadAllTextAsync(_jsonPath);
+                var _cstring = File.ReadAllText(_jsonPath);
                 var _carray = JsonConvert.DeserializeObject<CoinState>(_cstring);
 
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);

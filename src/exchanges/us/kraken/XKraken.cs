@@ -77,7 +77,7 @@ namespace CCXT.Simple.Exchanges.Kraken
         {
             var np = nonce + postData;
             var pathBytes = Encoding.UTF8.GetBytes(path);
-            var hash256Bytes = SHA256.HashData(Encoding.UTF8.GetBytes(np));
+            var hash256Bytes = SHA256Extensions.HashDataCompat(Encoding.UTF8.GetBytes(np));
             var z = new byte[pathBytes.Length + hash256Bytes.Length];
             pathBytes.CopyTo(z, 0);
             hash256Bytes.CopyTo(z, pathBytes.Length);

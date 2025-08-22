@@ -7,21 +7,19 @@
 // LAST_REVIEWED: 2025-08-13
 // == CCXT-SIMPLE-META-END ==
 
-
 using CCXT.Simple.Core.Converters;
 using CCXT.Simple.Core.Extensions;
-using CCXT.Simple.Core.Services;
-using Newtonsoft.Json;
-using System.Globalization;
-using System.Security.Cryptography;
-using System.Text;
-
 using CCXT.Simple.Core.Interfaces;
 using CCXT.Simple.Core;
 using CCXT.Simple.Models.Account;
 using CCXT.Simple.Models.Funding;
 using CCXT.Simple.Models.Market;
 using CCXT.Simple.Models.Trading;
+using Newtonsoft.Json;
+using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
+
 namespace CCXT.Simple.Exchanges.Bitstamp
 {
     public class XBitstamp : IExchange
@@ -631,20 +629,20 @@ namespace CCXT.Simple.Exchanges.Bitstamp
                         if (tx.ContainsKey("type") && tx["type"].ToString() == "2")
                         {
                             var _orderSymbol = symbol ?? ""; // Would need to derive from transaction data
-                            var _price = Convert.ToDecimal(tx.GetValueOrDefault("price", 0));
-                            var _amount = Convert.ToDecimal(tx.GetValueOrDefault("amount", 0));
+                            var _price = Convert.ToDecimal(tx.GetOrDefault("price", 0));
+                            var _amount = Convert.ToDecimal(tx.GetOrDefault("amount", 0));
                             
                             _result.Add(new OrderInfo
                             {
-                                id = tx.GetValueOrDefault("order_id", "").ToString(),
+                                id = tx.GetOrDefault("order_id", "").ToString(),
                                 symbol = _orderSymbol,
                                 type = "limit",
                                 amount = Math.Abs(_amount),
                                 price = _price,
                                 status = "closed",
                                 side = _amount > 0 ? SideType.Bid : SideType.Ask,
-                                timestamp = Convert.ToInt64(tx.GetValueOrDefault("datetime", "0")) * 1000,
-                                fee = Convert.ToDecimal(tx.GetValueOrDefault("fee", 0))
+                                timestamp = Convert.ToInt64(tx.GetOrDefault("datetime", "0")) * 1000,
+                                fee = Convert.ToDecimal(tx.GetOrDefault("fee", 0))
                             });
                         }
                     }
@@ -686,20 +684,20 @@ namespace CCXT.Simple.Exchanges.Bitstamp
                         if (tx.ContainsKey("type") && tx["type"].ToString() == "2")
                         {
                             var _tradeSymbol = symbol ?? ""; // Would need to derive from transaction data
-                            var _price = Convert.ToDecimal(tx.GetValueOrDefault("price", 0));
-                            var _amount = Convert.ToDecimal(tx.GetValueOrDefault("amount", 0));
-                            var _fee = Convert.ToDecimal(tx.GetValueOrDefault("fee", 0));
+                            var _price = Convert.ToDecimal(tx.GetOrDefault("price", 0));
+                            var _amount = Convert.ToDecimal(tx.GetOrDefault("amount", 0));
+                            var _fee = Convert.ToDecimal(tx.GetOrDefault("fee", 0));
                             
                             _result.Add(new TradeInfo
                             {
-                                id = tx.GetValueOrDefault("tid", "").ToString(),
-                                orderId = tx.GetValueOrDefault("order_id", "").ToString(),
+                                id = tx.GetOrDefault("tid", "").ToString(),
+                                orderId = tx.GetOrDefault("order_id", "").ToString(),
                                 symbol = _tradeSymbol,
                                 side = _amount > 0 ? SideType.Bid : SideType.Ask,
                                 amount = Math.Abs(_amount),
                                 price = _price,
                                 fee = _fee,
-                                timestamp = Convert.ToInt64(tx.GetValueOrDefault("datetime", "0")) * 1000
+                                timestamp = Convert.ToInt64(tx.GetOrDefault("datetime", "0")) * 1000
                             });
                         }
                     }
@@ -772,7 +770,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
                 
                 if (_response != null)
                 {
-                    var _withdrawalId = _response.GetValueOrDefault("id", "")?.ToString();
+                    var _withdrawalId = _response.GetOrDefault("id", "")?.ToString();
                     
                     return new WithdrawalInfo
                     {
@@ -817,7 +815,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
                         if (tx.ContainsKey("type") && tx["type"].ToString() == "0")
                         {
                             var _txCurrency = ""; // Would need to derive from transaction data
-                            var _amount = Convert.ToDecimal(tx.GetValueOrDefault("amount", 0));
+                            var _amount = Convert.ToDecimal(tx.GetOrDefault("amount", 0));
                             
                             // If currency filter is specified and doesn't match, skip
                             if (!string.IsNullOrEmpty(currency) && _txCurrency.ToUpper() != currency.ToUpper())
@@ -825,13 +823,13 @@ namespace CCXT.Simple.Exchanges.Bitstamp
                             
                             _result.Add(new DepositInfo
                             {
-                                id = tx.GetValueOrDefault("id", "").ToString(),
+                                id = tx.GetOrDefault("id", "").ToString(),
                                 currency = _txCurrency.ToUpper(),
                                 amount = Math.Abs(_amount),
                                 status = "completed", // Historical deposits are typically completed
-                                timestamp = Convert.ToInt64(tx.GetValueOrDefault("datetime", "0")) * 1000,
+                                timestamp = Convert.ToInt64(tx.GetOrDefault("datetime", "0")) * 1000,
                                 address = "", // Not typically provided in transaction history
-                                txid = tx.GetValueOrDefault("txid", "").ToString()
+                                txid = tx.GetOrDefault("txid", "").ToString()
                             });
                         }
                     }
@@ -867,8 +865,8 @@ namespace CCXT.Simple.Exchanges.Bitstamp
                         if (tx.ContainsKey("type") && tx["type"].ToString() == "1")
                         {
                             var _txCurrency = ""; // Would need to derive from transaction data
-                            var _amount = Convert.ToDecimal(tx.GetValueOrDefault("amount", 0));
-                            var _fee = Convert.ToDecimal(tx.GetValueOrDefault("fee", 0));
+                            var _amount = Convert.ToDecimal(tx.GetOrDefault("amount", 0));
+                            var _fee = Convert.ToDecimal(tx.GetOrDefault("fee", 0));
                             
                             // If currency filter is specified and doesn't match, skip
                             if (!string.IsNullOrEmpty(currency) && _txCurrency.ToUpper() != currency.ToUpper())
@@ -876,12 +874,12 @@ namespace CCXT.Simple.Exchanges.Bitstamp
                             
                             _result.Add(new WithdrawalInfo
                             {
-                                id = tx.GetValueOrDefault("id", "").ToString(),
+                                id = tx.GetOrDefault("id", "").ToString(),
                                 currency = _txCurrency.ToUpper(),
                                 amount = Math.Abs(_amount),
                                 fee = _fee,
                                 status = "completed", // Historical withdrawals are typically completed
-                                timestamp = Convert.ToInt64(tx.GetValueOrDefault("datetime", "0")) * 1000,
+                                timestamp = Convert.ToInt64(tx.GetOrDefault("datetime", "0")) * 1000,
                                 address = "", // Not typically provided in transaction history
                                 network = ""
                             });

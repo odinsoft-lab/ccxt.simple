@@ -8,12 +8,6 @@
 // == CCXT-SIMPLE-META-END ==
 
 using CCXT.Simple.Core.Converters;
-using CCXT.Simple.Core.Extensions;
-using CCXT.Simple.Core.Services;
-using Newtonsoft.Json;
-using System.Security.Cryptography;
-using System.Text;
-
 using CCXT.Simple.Core.Interfaces;
 using CCXT.Simple.Core;
 using CCXT.Simple.Models.Account;
@@ -21,6 +15,11 @@ using CCXT.Simple.Models.Funding;
 using CCXT.Simple.Models.Market;
 using CCXT.Simple.Models.Trading;
 using CCXT.Simple.Core.Utilities;
+using CCXT.Simple.Core.Extensions;
+using Newtonsoft.Json;
+using System.Security.Cryptography;
+using System.Text;
+
 namespace CCXT.Simple.Exchanges.Crypto
 {
     public class XCrypto : IExchange
@@ -222,7 +221,7 @@ namespace CCXT.Simple.Exchanges.Crypto
             var _sign_data = $"{endpoint}{id}{this.ApiKey}{_post_data}{_nonce}";
             var _sign_hash = Encryptor.ComputeHash(Encoding.UTF8.GetBytes(_sign_data));
 
-            var _sign = Convert.ToHexString(_sign_hash).ToLower();
+            var _sign = _sign_hash.ToHexString().ToLower();
 
             return new Request
             {
@@ -231,7 +230,7 @@ namespace CCXT.Simple.Exchanges.Crypto
                 method = endpoint,
                 nonce = _nonce,
                 @params = args,
-                sig = _sign
+                sig = _sign.ToString()
             };
         }
 
