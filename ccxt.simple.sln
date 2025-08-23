@@ -18,10 +18,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{BD060379-51BD-40C9-9B57-DA65393CAD0E}"
 	ProjectSection(SolutionItems) = preProject
-		docs\ccxt.simple.api.png = docs\ccxt.simple.api.png
-		docs\ccxt.simple.ico = docs\ccxt.simple.ico
-		docs\CHANGELOG.md = docs\CHANGELOG.md
+		docs\DEPLOYMENT.md = docs\DEPLOYMENT.md
 		docs\EXCHANGES.md = docs\EXCHANGES.md
+		docs\GUIDE.md = docs\GUIDE.md
+		docs\ROADMAP.md = docs\ROADMAP.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{5CFF9EB6-24F9-4119-812E-FEF29D600887}"

@@ -73,7 +73,7 @@ This update improves cross-framework compatibility and code maintainability for 
 		</None>		
 		
 		<Content Include="ccxt.simple.ico" />
-		<None Include="..\docs\ccxt.simple.api.png">
+		<None Include="..\docs\logo-files\ccxt.simple.api.png">
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
 		</None>

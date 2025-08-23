@@ -94,7 +94,7 @@ exchange.OnUsdPriceEvent += price => Console.WriteLine($"BTC: ${price}");
 
 - **[🗺️ Development Roadmap](docs/ROADMAP.md)** - Future plans, milestones, technical tasks
 - **[🏢 Exchange Status](docs/EXCHANGES.md)** - Complete list of 110 exchanges and implementation status  
-- **[📝 Changelog](docs/CHANGELOG.md)** - Version history and recent updates
+ - **[📝 Changelog](docs/releases/README.md)** - Version history and recent updates
 - **[💻 Code Examples](samples/)** - Interactive samples for Bithumb, Bitget, Coinone, Kraken
 
 ### Running Examples
