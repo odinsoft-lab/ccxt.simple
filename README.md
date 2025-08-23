@@ -2,7 +2,7 @@
 
 [![NuGet](https://img.shields.io/nuget/v/CCXT.Simple.svg)](https://www.nuget.org/packages/CCXT.Simple/)
 [![.NET](https://img.shields.io/badge/.NET-8.0%20%7C%209.0-blue.svg)](https://dotnet.microsoft.com/)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.txt)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
 [![Downloads](https://img.shields.io/nuget/dt/CCXT.Simple.svg)](https://www.nuget.org/packages/CCXT.Simple/)
 
 > 🚀 **Modern .NET cryptocurrency trading library** - Unified API access to 110 exchange adapters (8 FULL, 3 PARTIAL, 99 SKELETON) with a focus on simplicity and performance.
@@ -137,7 +137,7 @@ dotnet test               # Run 73 tests
 
 ## 📄 License
 
-MIT License - see [LICENSE.txt](LICENSE.txt) for details.
+MIT License - see [LICENSE.md](LICENSE.md) for details.
 
 ---
 

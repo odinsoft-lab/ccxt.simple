@@ -25,7 +25,7 @@
 		<Copyright>Copyright OdinSoft Co., Ltd. 2015~2025</Copyright>
 
 		<!-- Package Settings -->
-		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
 		<PackageProjectUrl>https://github.com/ccxt-net/ccxt.simple</PackageProjectUrl>
 		<PackageIcon>ccxt.simple.api.png</PackageIcon>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
@@ -77,7 +77,7 @@ This update improves cross-framework compatibility and code maintainability for 
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
 		</None>
-		<None Include="..\LICENSE.txt">
+		<None Include="..\LICENSE.md">
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
 		</None>
