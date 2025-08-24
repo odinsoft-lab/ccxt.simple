@@ -2,15 +2,15 @@
 
 Tracks the latest implementation status based on heuristic v2 meta headers. (Total tracked exchange files with meta headers: 110)
 
-Last Updated: 2025-08-14
+Last Updated: 2025-08-13
 
 ## 🔄 Auto-Generated Summary
 
 The following numbers are merged from `docs/EXCHANGE_STATUS.generated.md`. The source file is generated and may be ignored by Git.
 
-- **FULL**: 8 (7.3%)
+- **FULL**: 9 (8.2%)
 - **PARTIAL**: 3 (2.7%)
-- **SKELETON**: 99 (90.0%)
+- **SKELETON**: 98 (89.1%)
 - **Total (with meta)**: 110
 <!-- Planned total previously stated as 178; consolidated current scope is 110 active adapter files. -->
 
@@ -19,7 +19,7 @@ Definitions:
 - PARTIAL: At least one implemented, at least one still pending
 - SKELETON: Zero standard methods with real implementation (only signatures / exceptions / empty body)
 
-## ✅ FULL Implementations (8)
+## ✅ FULL Implementations (9)
 
 | Exchange | Coverage (implemented/total) | Notes | Docs |
 |----------|------------------------------|-------|------|
@@ -31,6 +31,7 @@ Definitions:
 | Kraken   | 16/16 | Full implementation with legacy methods | [API](https://docs.kraken.com/rest/) |
 | Binance  | 16/16 | World's largest exchange - spot trading | [API](https://binance-docs.github.io/apidocs/) |
 | Upbit    | 16/16 | KRW spot market with JWT auth | [API](https://docs.upbit.com/reference) |
+| Bybit    | 16/16 | V5 API - Top 3 derivatives exchange | [API](https://bybit-exchange.github.io/docs/v5/) |
 
 ## 🟡 PARTIAL Implementations (3)
 
@@ -87,7 +88,7 @@ Definitions:
 | btcbox | SKELETON | 0 | 16 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 22 | 2025-08-13 | auto  (heuristic) |
 | btcmarkets | SKELETON | 0 | 16 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 22 | 2025-08-13 | auto  (heuristic) |
 | btcturk | SKELETON | 0 | 16 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 22 | 2025-08-13 | auto  (heuristic) |
-| bybit | SKELETON | 0 | 16 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 19 | 2025-08-13 | auto  (heuristic) |
+| bybit | FULL | 16 | 0 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 0 | 2025-08-13 | developer | Full V5 API implementation with spot trading |
 | cex | SKELETON | 0 | 16 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 22 | 2025-08-13 | auto  (heuristic) |
 | coinbaseadvanced | SKELETON | 0 | 16 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 22 | 2025-08-13 | auto  (heuristic) |
 | coinbaseexchange | SKELETON | 0 | 16 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 22 | 2025-08-13 | auto  (heuristic) |
@@ -319,6 +320,7 @@ High-priority exchanges for full API implementation (most have skeleton code rea
 
 ### August 2025
 - ✅ Complete Bitstamp integration
+- ✅ Complete Bybit V5 API implementation
 - ✅ Documentation updates
 
 ### September 2025

@@ -42,6 +42,54 @@ Thank you for helping improve ccxt.simple. This guide explains the project scope
    - Add or update release notes in `docs/releases/` if the change is user-visible.
 6. Add or update unit tests under `tests/` for the new exchange (happy path + 1–2 edge cases).
 
+## Exchange folder structure
+
+Each exchange implementation should organize its API model classes in a structured folder hierarchy. While standard CCXT.Simple models are used for external data output, exchange-specific models should be organized as follows:
+
+### Folder organization pattern
+
+```
+src/exchanges/<region>/<exchange>/
+├── X<Exchange>.cs           # Main exchange implementation
+├── <CommonResponse>.cs      # Common response structures (if any)
+├── public/                  # Public market data models
+│   ├── Ticker.cs
+│   ├── Orderbook.cs
+│   ├── Trade.cs
+│   └── ...
+├── private/                 # Private account/asset models
+│   ├── Account.cs
+│   ├── Balance.cs
+│   ├── Asset.cs
+│   └── ...
+├── trade/                   # Trading-related models
+│   ├── Order.cs
+│   ├── Trade.cs
+│   ├── Fill.cs
+│   └── ...
+└── funding/                 # Deposit/withdrawal models (optional)
+    ├── Deposit.cs
+    ├── Withdrawal.cs
+    └── ...
+```
+
+### Guidelines
+
+- **Exchange-specific models**: Each exchange folder contains its own API model classes that match the exchange's API structure.
+- **Standard output**: When returning data through `IExchange` methods, always convert exchange-specific models to standard CCXT.Simple models (e.g., `OrderInfo`, `BalanceInfo`, `TradeData`).
+- **Namespace convention**: All exchange-specific classes should use the namespace `CCXT.Simple.Exchanges.<ExchangeName>`.
+- **Folder categories**:
+  - `public/`: Models for public API endpoints (market data, tickers, orderbooks)
+  - `private/`: Models for authenticated endpoints (account info, balances)
+  - `trade/`: Models for trading operations (orders, fills, trade history)
+  - `funding/`: Models for deposit/withdrawal operations (optional, if supported)
+- **Common models**: Place shared response structures (like base API response) in the exchange root folder.
+
+### Example implementations
+
+- **Bitget**: See `src/exchanges/cn/bitget/` for a complete example with public/private/trade folders
+- **Bybit**: See `src/exchanges/cn/bybit/` for V5 API implementation with categorized models
+
 ## Build, test, and quality
 
 - Build with `dotnet build`; run tests with `dotnet test`.
