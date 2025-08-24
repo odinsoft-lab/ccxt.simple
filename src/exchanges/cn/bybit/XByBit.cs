@@ -13,7 +13,6 @@ using System.Security.Cryptography;
 using System.Text;
 using CCXT.Simple.Core.Converters;
 using CCXT.Simple.Core.Extensions;
-
 using CCXT.Simple.Core.Interfaces;
 using CCXT.Simple.Core;
 using CCXT.Simple.Models.Account;
@@ -21,6 +20,7 @@ using CCXT.Simple.Models.Funding;
 using CCXT.Simple.Models.Market;
 using CCXT.Simple.Models.Trading;
 using CCXT.Simple.Core.Utilities;
+
 namespace CCXT.Simple.Exchanges.Bybit
 {
     public class XByBit : IExchange
@@ -162,6 +162,7 @@ namespace CCXT.Simple.Exchanges.Bybit
             client.DefaultRequestHeaders.Add("X-BAPI-RECV-WINDOW", _recv_window.ToString());
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> VerifyStates(Tickers tickers)
         {
             var _result = false;
@@ -257,7 +258,9 @@ namespace CCXT.Simple.Exchanges.Bybit
             return _result;
         }
 
+        /// <inheritdoc />
 
+        /// <inheritdoc />
         public async ValueTask<bool> GetMarkets(Tickers tickers)
         {
             var _result = false;

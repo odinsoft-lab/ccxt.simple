@@ -1,4 +1,5 @@
 using CCXT.Simple.Core.Utilities;
+
 namespace CCXT.Simple.Models.Market
 {
     /// <summary>
@@ -26,6 +27,11 @@ namespace CCXT.Simple.Models.Market
             this.states = new List<WState>();
         }
 
+        /// <summary>
+        /// Initializes a new instance with the specified exchange name and coin capacity
+        /// </summary>
+        /// <param name="exchange">Exchange name</param>
+        /// <param name="symbols"></param>
         public Tickers(string exchange, List<QueueSymbol> symbols)
             : this(exchange, symbols.Count)
         {

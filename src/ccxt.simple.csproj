@@ -46,8 +46,9 @@ This update improves cross-framework compatibility and code maintainability for 
 		<Nullable>disable</Nullable>
 		<ImplicitUsings>disable</ImplicitUsings>
 		<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 
-		<!-- Suppress most warnings except critical ones -->
+		<!-- Suppress some noisy warnings, but keep CS1591 active to encourage documentation -->
 		<NoWarn>$(NoWarn);CS1998;CS0618</NoWarn>
 
 		<!-- Build Settings -->

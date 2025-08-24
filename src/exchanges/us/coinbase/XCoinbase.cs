@@ -15,7 +15,6 @@ using Newtonsoft.Json.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using CCXT.Simple.Core.Extensions;
-
 using CCXT.Simple.Core.Interfaces;
 using CCXT.Simple.Core;
 using CCXT.Simple.Models.Account;
@@ -23,8 +22,13 @@ using CCXT.Simple.Models.Funding;
 using CCXT.Simple.Models.Market;
 using CCXT.Simple.Models.Trading;
 using CCXT.Simple.Core.Utilities;
+
 namespace CCXT.Simple.Exchanges.Coinbase
 {
+    /// <summary>
+    /// Coinbase spot market adapter implementation.
+    /// </summary>
+    /// <inheritdoc cref="CCXT.Simple.Core.Interfaces.IExchange" />
     public class XCoinbase : IExchange
     {
         /*
@@ -44,7 +48,13 @@ namespace CCXT.Simple.Exchanges.Coinbase
 		 *     Private endpoints
 		 *         We throttle private endpoints by profile ID: 15 requests per second, up to 30 requests per second in bursts.
 		 */
-
+        /// <summary>
+        /// Initializes the Coinbase adapter.
+        /// </summary>
+        /// <param name="mainXchg">Main exchange orchestrator providing shared HTTP client, logging, and settings.</param>
+        /// <param name="apiKey">API key.</param>
+        /// <param name="secretKey">API secret.</param>
+        /// <param name="passPhrase">API passphrase.</param>
         public XCoinbase(Exchange mainXchg, string apiKey = "", string secretKey = "", string passPhrase = "")
         {
             this.mainXchg = mainXchg;
@@ -54,19 +64,31 @@ namespace CCXT.Simple.Exchanges.Coinbase
             this.PassPhrase = passPhrase;
         }
 
+        /// <inheritdoc />
         public Exchange mainXchg
         {
             get;
             set;
         }
 
+        /// <inheritdoc />
         public string ExchangeName { get; set; } = "coinbase";
+
+        /// <inheritdoc />
         public string ExchangeUrl { get; set; } = "https://api.exchange.coinbase.com";
+
+        /// <summary>
+        /// Coinbase Pro-compatible endpoint URL.
+        /// </summary>
         public string ExchangeUrlPro { get; set; } = "https://api.pro.coinbase.com";
 
+        /// <inheritdoc />
         public bool Alive { get; set; }
+        /// <inheritdoc />
         public string ApiKey { get; set; }
+        /// <inheritdoc />
         public string SecretKey { get; set; }
+        /// <inheritdoc />
         public string PassPhrase { get; set; }
 
 
@@ -74,6 +96,7 @@ namespace CCXT.Simple.Exchanges.Coinbase
         ///
         /// </summary>
         /// <returns></returns>
+        /// <inheritdoc />
         public async ValueTask<bool> VerifySymbols()
         {
             var _result = false;
@@ -118,6 +141,7 @@ namespace CCXT.Simple.Exchanges.Coinbase
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> VerifyStates(Tickers tickers)
         {
             var _result = false;
@@ -219,7 +243,7 @@ namespace CCXT.Simple.Exchanges.Coinbase
         private HMACSHA256 __encryptor = null;
 
         /// <summary>
-        ///
+        /// HMACSHA256 instance used for request signing.
         /// </summary>
         public HMACSHA256 Encryptor
         {
@@ -232,6 +256,12 @@ namespace CCXT.Simple.Exchanges.Coinbase
             }
         }
 
+        /// <summary>
+        /// Creates and applies Coinbase-compliant request signatures to headers.
+        /// </summary>
+        /// <param name="client">HttpClient to use for the request.</param>
+        /// <param name="method">HTTP method (uppercase).</param>
+        /// <param name="endpoint">Endpoint path or concatenated payload string used for signing.</param>
         public void CreateSignature(HttpClient client, string method, string endpoint)
         {
             var _timestamp = TimeExtensions.Now;
@@ -247,10 +277,11 @@ namespace CCXT.Simple.Exchanges.Coinbase
         }
 
         /// <summary>
-        ///
+        /// Fetches price/volume for a single symbol and updates the given ticker.
         /// </summary>
-        /// <param name="_ticker"></param>
-        /// <returns></returns>
+        /// <param name="_ticker">Target ticker.</param>
+        /// <param name="exchg_rate">Fiat conversion rate vs USD (e.g., KRW/USD).</param>
+        /// <returns>True on success.</returns>
         public async ValueTask<bool> GetMarket(Ticker _ticker, decimal exchg_rate)
         {
             var _result = false;
@@ -319,8 +350,9 @@ namespace CCXT.Simple.Exchanges.Coinbase
         }
 
         /// <summary>
-        /// Get price for a specific symbol
+        /// Get price for a specific symbol.
         /// </summary>
+        /// <inheritdoc />
         public async ValueTask<decimal> GetPrice(string symbol)
         {
             var _result = 0.0m;
@@ -347,16 +379,18 @@ namespace CCXT.Simple.Exchanges.Coinbase
         }
 
         /// <summary>
-        /// Get book tickers for all symbols
+        /// Get best bid/ask for all symbols.
         /// </summary>
+        /// <inheritdoc />
         public async ValueTask<bool> GetBookTickers(Tickers tickers)
         {
             return await GetMarkets(tickers);
         }
 
         /// <summary>
-        /// Get market data for all tickers
+        /// Get market data for all tickers.
         /// </summary>
+        /// <inheritdoc />
         public async ValueTask<bool> GetMarkets(Tickers tickers)
         {
             var _result = false;
@@ -396,16 +430,18 @@ namespace CCXT.Simple.Exchanges.Coinbase
         }
 
         /// <summary>
-        /// Get tickers
+        /// Get tickers.
         /// </summary>
+        /// <inheritdoc />
         public async ValueTask<bool> GetTickers(Tickers tickers)
         {
             return await GetMarkets(tickers);
         }
 
         /// <summary>
-        /// Get volumes
+        /// Get volumes.
         /// </summary>
+        /// <inheritdoc />
         public async ValueTask<bool> GetVolumes(Tickers tickers)
         {
             return await GetMarkets(tickers);
@@ -413,8 +449,9 @@ namespace CCXT.Simple.Exchanges.Coinbase
 
 
         /// <summary>
-        /// Get orderbook for a specific symbol
+        /// Get orderbook for a specific symbol.
         /// </summary>
+        /// <inheritdoc />
         public async ValueTask<Orderbook> GetOrderbook(string symbol, int limit = 5)
         {
             var _result = new Orderbook
@@ -473,8 +510,9 @@ namespace CCXT.Simple.Exchanges.Coinbase
         }
 
         /// <summary>
-        /// Get candlestick/OHLCV data
+        /// Get candlestick/OHLCV data.
         /// </summary>
+        /// <inheritdoc />
         public async ValueTask<List<decimal[]>> GetCandles(string symbol, string timeframe, long? since = null, int limit = 100)
         {
             var _result = new List<decimal[]>();
@@ -543,8 +581,9 @@ namespace CCXT.Simple.Exchanges.Coinbase
         }
 
         /// <summary>
-        /// Get recent trades for a symbol
+        /// Get recent trades for a symbol.
         /// </summary>
+        /// <inheritdoc />
         public async ValueTask<List<TradeData>> GetTrades(string symbol, int limit = 50)
         {
             var _result = new List<TradeData>();
@@ -581,8 +620,9 @@ namespace CCXT.Simple.Exchanges.Coinbase
         }
 
         /// <summary>
-        /// Get account balance
+        /// Get account balance.
         /// </summary>
+        /// <inheritdoc />
         public async ValueTask<Dictionary<string, BalanceInfo>> GetBalance()
         {
             var _result = new Dictionary<string, BalanceInfo>();
@@ -628,8 +668,9 @@ namespace CCXT.Simple.Exchanges.Coinbase
         }
 
         /// <summary>
-        /// Get account information
+        /// Get account information.
         /// </summary>
+        /// <inheritdoc />
         public async ValueTask<AccountInfo> GetAccount()
         {
             var _result = new AccountInfo
@@ -675,8 +716,9 @@ namespace CCXT.Simple.Exchanges.Coinbase
         }
 
         /// <summary>
-        /// Place a new order
+        /// Place a new order.
         /// </summary>
+        /// <inheritdoc />
         public async ValueTask<OrderInfo> PlaceOrder(string symbol, SideType side, string orderType, decimal amount, decimal? price = null, string clientOrderId = null)
         {
             var _result = new OrderInfo();
@@ -738,8 +780,9 @@ namespace CCXT.Simple.Exchanges.Coinbase
         }
 
         /// <summary>
-        /// Cancel an existing order
+        /// Cancel an existing order.
         /// </summary>
+        /// <inheritdoc />
         public async ValueTask<bool> CancelOrder(string orderId, string symbol = null, string clientOrderId = null)
         {
             var _result = false;
@@ -779,8 +822,9 @@ namespace CCXT.Simple.Exchanges.Coinbase
         }
 
         /// <summary>
-        /// Get order information
+        /// Get order information.
         /// </summary>
+        /// <inheritdoc />
         public async ValueTask<OrderInfo> GetOrder(string orderId, string symbol = null, string clientOrderId = null)
         {
             var _result = new OrderInfo();
@@ -828,8 +872,9 @@ namespace CCXT.Simple.Exchanges.Coinbase
         }
 
         /// <summary>
-        /// Get open orders
+        /// Get open orders.
         /// </summary>
+        /// <inheritdoc />
         public async ValueTask<List<OrderInfo>> GetOpenOrders(string symbol = null)
         {
             var _result = new List<OrderInfo>();
@@ -883,8 +928,9 @@ namespace CCXT.Simple.Exchanges.Coinbase
         }
 
         /// <summary>
-        /// Get order history
+        /// Get order history.
         /// </summary>
+        /// <inheritdoc />
         public async ValueTask<List<OrderInfo>> GetOrderHistory(string symbol = null, int limit = 100)
         {
             var _result = new List<OrderInfo>();
@@ -938,8 +984,9 @@ namespace CCXT.Simple.Exchanges.Coinbase
         }
 
         /// <summary>
-        /// Get trade history
+        /// Get trade history.
         /// </summary>
+        /// <inheritdoc />
         public async ValueTask<List<TradeInfo>> GetTradeHistory(string symbol = null, int limit = 100)
         {
             var _result = new List<TradeInfo>();
@@ -989,8 +1036,9 @@ namespace CCXT.Simple.Exchanges.Coinbase
         }
 
         /// <summary>
-        /// Get deposit address
+        /// Get deposit address.
         /// </summary>
+        /// <inheritdoc />
         public async ValueTask<DepositAddress> GetDepositAddress(string currency, string network = null)
         {
             var _result = new DepositAddress();
@@ -1044,8 +1092,9 @@ namespace CCXT.Simple.Exchanges.Coinbase
         }
 
         /// <summary>
-        /// Withdraw funds
+        /// Withdraw funds.
         /// </summary>
+        /// <inheritdoc />
         public async ValueTask<WithdrawalInfo> Withdraw(string currency, decimal amount, string address, string tag = null, string network = null)
         {
             var _result = new WithdrawalInfo();
@@ -1103,8 +1152,9 @@ namespace CCXT.Simple.Exchanges.Coinbase
         }
 
         /// <summary>
-        /// Get deposit history
+        /// Get deposit history.
         /// </summary>
+        /// <inheritdoc />
         public async ValueTask<List<DepositInfo>> GetDepositHistory(string currency = null, int limit = 100)
         {
             var _result = new List<DepositInfo>();
@@ -1155,8 +1205,9 @@ namespace CCXT.Simple.Exchanges.Coinbase
         }
 
         /// <summary>
-        /// Get withdrawal history
+        /// Get withdrawal history.
         /// </summary>
+        /// <inheritdoc />
         public async ValueTask<List<WithdrawalInfo>> GetWithdrawalHistory(string currency = null, int limit = 100)
         {
             var _result = new List<WithdrawalInfo>();
@@ -1207,8 +1258,3 @@ namespace CCXT.Simple.Exchanges.Coinbase
         }
     }
 }
-
-
-
-
-

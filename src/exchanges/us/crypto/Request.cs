@@ -11,18 +11,27 @@
      * }
      */
 
+    /// <summary>
+    /// Generic request payload for Crypto.com private endpoints.
+    /// </summary>
     public class Request
     {
+        /// <summary>Request identifier.</summary>
         public int id { get; set; }
         
+        /// <summary>API method name.</summary>
         public string method { get; set; }
         
+        /// <summary>Method parameters.</summary>
         public Dictionary<string, string> @params { get; set; }
         
+        /// <summary>API key.</summary>
         public string api_key { get; set; }
         
+        /// <summary>Request signature.</summary>
         public string sig { get; set; }
 
+        /// <summary>Nonce (milliseconds).</summary>
         public long nonce { get; set; }
     }
 }

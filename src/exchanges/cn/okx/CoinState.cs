@@ -6,47 +6,110 @@ namespace CCXT.Simple.Exchanges.Okx
     /// </summary>
     public class CoinStateItem
     {
-        /// <summary>Whether deposits are enabled for this currency/chain</summary>
+
+        /// <summary>
+        /// Whether deposits are enabled for this currency/chain
+        /// </summary>
         public bool canDep { get; set; }
-        /// <summary>Whether internal (in-exchange) transfers are allowed</summary>
+
+        /// <summary>
+        /// Whether internal (in-exchange) transfers are allowed
+        /// </summary>
         public bool canInternal { get; set; }
-        /// <summary>Whether withdrawals are enabled</summary>
+
+        /// <summary>
+        /// Whether withdrawals are enabled
+        /// </summary>
         public bool canWd { get; set; }
-        /// <summary>Currency code (e.g. BTC, USDT)</summary>
+
+        /// <summary>
+        /// Currency code (e.g. BTC, USDT)
+        /// </summary>
         public string ccy { get; set; }
-        /// <summary>Chain identifier (e.g. USDT-ERC20)</summary>
+
+        /// <summary>
+        /// Chain identifier (e.g. USDT-ERC20)
+        /// </summary>
         public string chain { get; set; }
-        /// <summary>Fixed deposit quota (string)</summary>
+
+        /// <summary>
+        /// Fixed deposit quota (string)
+        /// </summary>
         public string depQuotaFixed { get; set; }
-        /// <summary>Logo URL</summary>
+
+        /// <summary>
+        /// Logo URL
+        /// </summary>
         public string logoLink { get; set; }
-        /// <summary>True if this chain is treated as mainnet</summary>
+
+        /// <summary>
+        /// True if this chain is treated as mainnet
+        /// </summary>
         public bool mainNet { get; set; }
-        /// <summary>Maximum withdrawal fee</summary>
+
+        /// <summary>
+        /// Maximum withdrawal fee
+        /// </summary>
         public decimal maxFee { get; set; }
-        /// <summary>Maximum withdrawal amount</summary>
+
+        /// <summary>
+        /// Maximum withdrawal amount
+        /// </summary>
         public decimal maxWd { get; set; }
-        /// <summary>Minimum deposit amount</summary>
+
+        /// <summary>
+        /// Minimum deposit amount
+        /// </summary>
         public decimal minDep { get; set; }
-        /// <summary>Minimum confirmations for deposit arrival</summary>
+
+        /// <summary>
+        /// Minimum confirmations for deposit arrival
+        /// </summary>
         public int minDepArrivalConfirm { get; set; }
-        /// <summary>Minimum withdrawal fee</summary>
+
+        /// <summary>
+        /// Minimum withdrawal fee
+        /// </summary>
         public decimal minFee { get; set; }
-        /// <summary>Minimum withdrawal amount</summary>
+
+        /// <summary>
+        /// Minimum withdrawal amount
+        /// </summary>
         public decimal minWd { get; set; }
-        /// <summary>Minimum confirmations required to unlock withdrawal</summary>
+
+        /// <summary>
+        /// Minimum confirmations required to unlock withdrawal
+        /// </summary>
         public int minWdUnlockConfirm { get; set; }
-        /// <summary>Display name</summary>
+
+        /// <summary>
+        /// Display name
+        /// </summary>
         public string name { get; set; }
-        /// <summary>Whether a tag / memo is required (e.g. for XRP, EOS)</summary>
+
+        /// <summary>
+        /// Whether a tag / memo is required (e.g. for XRP, EOS)
+        /// </summary>
         public bool needTag { get; set; }
-        /// <summary>Used fixed deposit quota</summary>
+
+        /// <summary>
+        /// Used fixed deposit quota
+        /// </summary>
         public string usedDepQuotaFixed { get; set; }
-        /// <summary>Used withdrawal quota</summary>
+
+        /// <summary>
+        /// Used withdrawal quota
+        /// </summary>
         public decimal usedWdQuota { get; set; }
-        /// <summary>Total withdrawal quota</summary>
+
+        /// <summary>
+        /// Total withdrawal quota
+        /// </summary>
         public decimal wdQuota { get; set; }
-        /// <summary>Withdrawal size increment (tick size)</summary>
+
+        /// <summary>
+        /// Withdrawal size increment (tick size)
+        /// </summary>
         public decimal wdTickSz { get; set; }
     }
 
@@ -56,11 +119,20 @@ namespace CCXT.Simple.Exchanges.Okx
     /// </summary>
     public class CoinState
     {
-        /// <summary>Response code (0 = success)</summary>
+
+        /// <summary>
+        /// Response code (0 = success)
+        /// </summary>
         public int code { get; set; }
-        /// <summary>List of currency + chain status entries</summary>
+
+        /// <summary>
+        /// List of currency + chain status entries
+        /// </summary>
         public List<CoinStateItem> data { get; set; }
-        /// <summary>Message (error or informational)</summary>
+
+        /// <summary>
+        /// Message (error or informational)
+        /// </summary>
         public string msg { get; set; }
     }
 }

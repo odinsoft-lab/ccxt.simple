@@ -13,15 +13,19 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-
 using CCXT.Simple.Core.Interfaces;
 using CCXT.Simple.Core;
 using CCXT.Simple.Models.Account;
 using CCXT.Simple.Models.Funding;
 using CCXT.Simple.Models.Market;
 using CCXT.Simple.Models.Trading;
+
 namespace CCXT.Simple.Exchanges.CoinbaseInternational
 {
+    /// <summary>
+    /// Coinbase International exchange adapter skeleton.
+    /// </summary>
+    /// <inheritdoc cref="CCXT.Simple.Core.Interfaces.IExchange" />
     public class XCoinbaseInternational : IExchange
     {
         /*
@@ -32,6 +36,13 @@ namespace CCXT.Simple.Exchanges.CoinbaseInternational
          * Rate Limits: TBD
          */
 
+        /// <summary>
+        /// Creates a new Coinbase International exchange adapter.
+        /// </summary>
+        /// <param name="mainXchg">Main exchange orchestrator/service.</param>
+        /// <param name="apiKey">API key.</param>
+        /// <param name="secretKey">API secret key.</param>
+        /// <param name="passPhrase">API passphrase.</param>
         public XCoinbaseInternational(Exchange mainXchg, string apiKey = "", string secretKey = "", string passPhrase = "")
         {
             this.mainXchg = mainXchg;
@@ -40,16 +51,28 @@ namespace CCXT.Simple.Exchanges.CoinbaseInternational
             this.PassPhrase = passPhrase;
         }
 
+        /// <inheritdoc />
         public Exchange mainXchg { get; set; }
+        /// <inheritdoc />
         public string ExchangeName { get; set; } = "coinbaseinternational";
+
+        /// <inheritdoc />
         public string ExchangeUrl { get; set; } = "https://api.international.coinbase.com";
+
+        /// <inheritdoc />
         public bool Alive { get; set; }
+        /// <inheritdoc />
         public string ApiKey { get; set; }
+        /// <inheritdoc />
         public string SecretKey { get; set; }
+        /// <inheritdoc />
         public string PassPhrase { get; set; }
 
         private HMACSHA256 __encryptor = null;
 
+        /// <summary>
+        /// Lazy HMACSHA256 signer initialized with <see cref="SecretKey"/>.
+        /// </summary>
         public HMACSHA256 Encryptor
         {
             get
@@ -61,125 +84,142 @@ namespace CCXT.Simple.Exchanges.CoinbaseInternational
         }
 
         // Legacy Methods
+        /// <inheritdoc />
         public async ValueTask<bool> VerifySymbols()
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> VerifyStates(Tickers tickers)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> GetTickers(Tickers tickers)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> GetBookTickers(Tickers tickers)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> GetMarkets(Tickers tickers)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> GetVolumes(Tickers tickers)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         public async ValueTask<decimal> GetPrice(string symbol)
         {
             throw new NotImplementedException();
         }
 
         // New Standardized API Methods (v1.1.6+)
-        
+
         // Market Data
+        /// <inheritdoc />
         public async ValueTask<Orderbook> GetOrderbook(string symbol, int limit = 5)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         public async ValueTask<List<decimal[]>> GetCandles(string symbol, string timeframe, long? since = null, int limit = 100)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         public async ValueTask<List<TradeData>> GetTrades(string symbol, int limit = 50)
         {
             throw new NotImplementedException();
         }
 
         // Account
+        /// <inheritdoc />
         public async ValueTask<Dictionary<string, BalanceInfo>> GetBalance()
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         public async ValueTask<AccountInfo> GetAccount()
         {
             throw new NotImplementedException();
         }
 
         // Trading
+        /// <inheritdoc />
         public async ValueTask<OrderInfo> PlaceOrder(string symbol, SideType side, string orderType, decimal amount, decimal? price = null, string clientOrderId = null)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> CancelOrder(string orderId, string symbol = null, string clientOrderId = null)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         public async ValueTask<OrderInfo> GetOrder(string orderId, string symbol = null, string clientOrderId = null)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         public async ValueTask<List<OrderInfo>> GetOpenOrders(string symbol = null)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         public async ValueTask<List<OrderInfo>> GetOrderHistory(string symbol = null, int limit = 100)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         public async ValueTask<List<TradeInfo>> GetTradeHistory(string symbol = null, int limit = 100)
         {
             throw new NotImplementedException();
         }
 
         // Funding
+        /// <inheritdoc />
         public async ValueTask<DepositAddress> GetDepositAddress(string currency, string network = null)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         public async ValueTask<WithdrawalInfo> Withdraw(string currency, decimal amount, string address, string tag = null, string network = null)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         public async ValueTask<List<DepositInfo>> GetDepositHistory(string currency = null, int limit = 100)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         public async ValueTask<List<WithdrawalInfo>> GetWithdrawalHistory(string currency = null, int limit = 100)
         {
             throw new NotImplementedException();
         }
     }
 }
-
-
-
-
-

@@ -11,7 +11,6 @@ using CCXT.Simple.Core.Services;
 using CCXT.Simple.Core.Converters;
 using Newtonsoft.Json;
 using CCXT.Simple.Core.Extensions;
-
 using CCXT.Simple.Core.Interfaces;
 using CCXT.Simple.Core;
 using CCXT.Simple.Models.Account;
@@ -19,6 +18,7 @@ using CCXT.Simple.Models.Funding;
 using CCXT.Simple.Models.Market;
 using CCXT.Simple.Models.Trading;
 using CCXT.Simple.Core.Utilities;
+
 namespace CCXT.Simple.Exchanges.GateIO
 {
     public class XGateIO : IExchange
@@ -200,6 +200,7 @@ namespace CCXT.Simple.Exchanges.GateIO
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> GetMarkets(Tickers tickers)
         {
             var _result = false;

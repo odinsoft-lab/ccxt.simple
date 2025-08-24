@@ -244,6 +244,7 @@ namespace CCXT.Simple.Core
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> UpdateProtocols(Tickers tickers)
         {
             var _result = false;

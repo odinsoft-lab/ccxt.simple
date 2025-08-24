@@ -22,6 +22,10 @@ using System.Text;
 
 namespace CCXT.Simple.Exchanges.Crypto
 {
+    /// <summary>
+    /// Crypto.com exchange adapter implementation.
+    /// </summary>
+    /// <inheritdoc cref="CCXT.Simple.Core.Interfaces.IExchange" />
     public class XCrypto : IExchange
     {
         /*
@@ -37,6 +41,13 @@ namespace CCXT.Simple.Exchanges.Crypto
 		 *
 		 */
 
+        /// <summary>
+        /// Initializes the Crypto.com exchange adapter.
+        /// </summary>
+        /// <param name="mainXchg">Main exchange orchestrator providing shared HTTP client, logging, and settings.</param>
+        /// <param name="apiKey">API key for authenticated endpoints.</param>
+        /// <param name="secretKey">API secret key for request signing.</param>
+        /// <param name="passPhrase">API passphrase (if required).</param>
         public XCrypto(Exchange mainXchg, string apiKey = "", string secretKey = "", string passPhrase = "")
         {
             this.mainXchg = mainXchg;
@@ -46,26 +57,30 @@ namespace CCXT.Simple.Exchanges.Crypto
             this.PassPhrase = passPhrase;
         }
 
+        /// <inheritdoc />
         public Exchange mainXchg
         {
             get;
             set;
         }
 
+        /// <inheritdoc />
         public string ExchangeName { get; set; } = "crypto";
 
+        /// <inheritdoc />
         public string ExchangeUrl { get; set; } = "https://api.crypto.com";
 
+        /// <inheritdoc />
         public bool Alive { get; set; }
+        /// <inheritdoc />
         public string ApiKey { get; set; }
+        /// <inheritdoc />
         public string SecretKey { get; set; }
+        /// <inheritdoc />
         public string PassPhrase { get; set; }
 
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
+        /// <inheritdoc />
         public async ValueTask<bool> VerifySymbols()
         {
             var _result = false;
@@ -114,6 +129,7 @@ namespace CCXT.Simple.Exchanges.Crypto
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> GetMarkets(Tickers tickers)
         {
             var _result = false;
@@ -197,7 +213,7 @@ namespace CCXT.Simple.Exchanges.Crypto
         private HMACSHA256 __encryptor = null;
 
         /// <summary>
-        ///
+        /// Lazy HMACSHA256 signer initialized with <see cref="SecretKey"/>.
         /// </summary>
         public HMACSHA256 Encryptor
         {
@@ -210,6 +226,14 @@ namespace CCXT.Simple.Exchanges.Crypto
             }
         }
 
+        /// <summary>
+        /// Creates a signed request object for authenticated API calls.
+        /// </summary>
+        /// <param name="client">HTTP client instance.</param>
+        /// <param name="id">Request ID.</param>
+        /// <param name="endpoint">API endpoint path.</param>
+        /// <param name="args">Optional query parameters.</param>
+        /// <returns>Signed request object.</returns>
         public Request CreateSignature(HttpClient client, int id, string endpoint, Dictionary<string, string> args = null)
         {
             if (args == null)
@@ -234,6 +258,7 @@ namespace CCXT.Simple.Exchanges.Crypto
             };
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> VerifyStates(Tickers tickers)
         {
             var _result = false;
@@ -333,21 +358,25 @@ namespace CCXT.Simple.Exchanges.Crypto
             return _result;
         }
 
+        /// <inheritdoc />
         ValueTask<bool> IExchange.GetBookTickers(Tickers tickers)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         ValueTask<decimal> IExchange.GetPrice(string symbol)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         ValueTask<bool> IExchange.GetTickers(Tickers tickers)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         ValueTask<bool> IExchange.GetVolumes(Tickers tickers)
         {
             throw new NotImplementedException();
@@ -355,76 +384,91 @@ namespace CCXT.Simple.Exchanges.Crypto
 
 
 
+        /// <inheritdoc />
         public ValueTask<Orderbook> GetOrderbook(string symbol, int limit = 5)
         {
             throw new NotImplementedException("GetOrderbook not implemented for Crypto exchange");
         }
 
+        /// <inheritdoc />
         public ValueTask<List<decimal[]>> GetCandles(string symbol, string timeframe, long? since = null, int limit = 100)
         {
             throw new NotImplementedException("GetCandles not implemented for Crypto exchange");
         }
 
+        /// <inheritdoc />
         public ValueTask<List<TradeData>> GetTrades(string symbol, int limit = 50)
         {
             throw new NotImplementedException("GetTrades not implemented for Crypto exchange");
         }
 
+        /// <inheritdoc />
         public ValueTask<Dictionary<string, BalanceInfo>> GetBalance()
         {
             throw new NotImplementedException("GetBalance not implemented for Crypto exchange");
         }
 
+        /// <inheritdoc />
         public ValueTask<AccountInfo> GetAccount()
         {
             throw new NotImplementedException("GetAccount not implemented for Crypto exchange");
         }
 
+        /// <inheritdoc />
         public ValueTask<OrderInfo> PlaceOrder(string symbol, SideType side, string orderType, decimal amount, decimal? price = null, string clientOrderId = null)
         {
             throw new NotImplementedException("PlaceOrder not implemented for Crypto exchange");
         }
 
+        /// <inheritdoc />
         public ValueTask<bool> CancelOrder(string orderId, string symbol = null, string clientOrderId = null)
         {
             throw new NotImplementedException("CancelOrder not implemented for Crypto exchange");
         }
 
+        /// <inheritdoc />
         public ValueTask<OrderInfo> GetOrder(string orderId, string symbol = null, string clientOrderId = null)
         {
             throw new NotImplementedException("GetOrder not implemented for Crypto exchange");
         }
 
+        /// <inheritdoc />
         public ValueTask<List<OrderInfo>> GetOpenOrders(string symbol = null)
         {
             throw new NotImplementedException("GetOpenOrders not implemented for Crypto exchange");
         }
 
+        /// <inheritdoc />
         public ValueTask<List<OrderInfo>> GetOrderHistory(string symbol = null, int limit = 100)
         {
             throw new NotImplementedException("GetOrderHistory not implemented for Crypto exchange");
         }
 
+        /// <inheritdoc />
         public ValueTask<List<TradeInfo>> GetTradeHistory(string symbol = null, int limit = 100)
         {
             throw new NotImplementedException("GetTradeHistory not implemented for Crypto exchange");
         }
 
+        /// <inheritdoc />
         public ValueTask<DepositAddress> GetDepositAddress(string currency, string network = null)
         {
             throw new NotImplementedException("GetDepositAddress not implemented for Crypto exchange");
         }
 
+        /// <inheritdoc />
         public ValueTask<WithdrawalInfo> Withdraw(string currency, decimal amount, string address, string tag = null, string network = null)
         {
             throw new NotImplementedException("Withdraw not implemented for Crypto exchange");
         }
 
+        /// <inheritdoc />
         public ValueTask<List<DepositInfo>> GetDepositHistory(string currency = null, int limit = 100)
         {
             throw new NotImplementedException("GetDepositHistory not implemented for Crypto exchange");
         }
 
+        /// <inheritdoc />
         public ValueTask<List<WithdrawalInfo>> GetWithdrawalHistory(string currency = null, int limit = 100)
         {
             throw new NotImplementedException("GetWithdrawalHistory not implemented for Crypto exchange");

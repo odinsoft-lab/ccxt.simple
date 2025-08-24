@@ -7,61 +7,145 @@ namespace CCXT.Simple.Exchanges.Okx
     /// </summary>
     public class CoinInforItem
     {
-        /// <summary>Alias (short display) for the instrument</summary>
+
+        /// <summary>
+        /// Alias (short display) for the instrument
+        /// </summary>
         public string alias { get; set; }
-        /// <summary>Base currency</summary>
+
+        /// <summary>
+        /// Base currency
+        /// </summary>
         public string baseCcy { get; set; }
-        /// <summary>Category (e.g. spot, futures)</summary>
+
+        /// <summary>
+        /// Category (e.g. spot, futures)
+        /// </summary>
         public string category { get; set; }
-        /// <summary>Contract multiplier</summary>
+
+        /// <summary>
+        /// Contract multiplier
+        /// </summary>
         public string ctMult { get; set; }
-        /// <summary>Contract type</summary>
+
+        /// <summary>
+        /// Contract type
+        /// </summary>
         public string ctType { get; set; }
-        /// <summary>Contract value</summary>
+
+        /// <summary>
+        /// Contract value
+        /// </summary>
         public string ctVal { get; set; }
-        /// <summary>Contract value currency</summary>
+
+        /// <summary>
+        /// Contract value currency
+        /// </summary>
         public string ctValCcy { get; set; }
-        /// <summary>Expiration time (for derivatives)</summary>
+
+        /// <summary>
+        /// Expiration time (for derivatives)
+        /// </summary>
         public string expTime { get; set; }
-        /// <summary>Instrument family (e.g. BTC-USDT)</summary>
+
+        /// <summary>
+        /// Instrument family (e.g. BTC-USDT)
+        /// </summary>
         public string instFamily { get; set; }
-        /// <summary>Instrument ID (e.g. BTC-USDT)</summary>
+
+        /// <summary>
+        /// Instrument ID (e.g. BTC-USDT)
+        /// </summary>
         public string instId { get; set; }
-        /// <summary>Instrument type (SPOT / SWAP / FUTURES / OPTION)</summary>
+
+        /// <summary>
+        /// Instrument type (SPOT / SWAP / FUTURES / OPTION)
+        /// </summary>
         public string instType { get; set; }
-        /// <summary>Maximum leverage (string)</summary>
+
+        /// <summary>
+        /// Maximum leverage (string)
+        /// </summary>
         public string lever { get; set; }
-        /// <summary>Listing time (Unix milliseconds as string)</summary>
+
+        /// <summary>
+        /// Listing time (Unix milliseconds as string)
+        /// </summary>
         public string listTime { get; set; }
-        /// <summary>Lot size (minimum order increment)</summary>
+
+        /// <summary>
+        /// Lot size (minimum order increment)
+        /// </summary>
         public decimal lotSz { get; set; }
-        /// <summary>Maximum iceberg order size</summary>
+
+        /// <summary>
+        /// Maximum iceberg order size
+        /// </summary>
         public decimal maxIcebergSz { get; set; }
-        /// <summary>Maximum limit order size</summary>
+
+        /// <summary>
+        /// Maximum limit order size
+        /// </summary>
         public decimal maxLmtSz { get; set; }
-        /// <summary>Maximum market order size</summary>
+
+        /// <summary>
+        /// Maximum market order size
+        /// </summary>
         public decimal maxMktSz { get; set; }
-        /// <summary>Maximum stop order size</summary>
+
+        /// <summary>
+        /// Maximum stop order size
+        /// </summary>
         public decimal maxStopSz { get; set; }
-        /// <summary>Maximum trigger order size</summary>
+
+        /// <summary>
+        /// Maximum trigger order size
+        /// </summary>
         public decimal maxTriggerSz { get; set; }
-        /// <summary>Maximum TWAP order size</summary>
+
+        /// <summary>
+        /// Maximum TWAP order size
+        /// </summary>
         public decimal maxTwapSz { get; set; }
-        /// <summary>Minimum order size</summary>
+
+        /// <summary>
+        /// Minimum order size
+        /// </summary>
         public decimal minSz { get; set; }
-        /// <summary>Option type (e.g. C, P)</summary>
+
+        /// <summary>
+        /// Option type (e.g. C, P)
+        /// </summary>
         public string optType { get; set; }
-        /// <summary>Quote currency</summary>
+
+        /// <summary>
+        /// Quote currency
+        /// </summary>
         public string quoteCcy { get; set; }
-        /// <summary>Settlement currency</summary>
+
+        /// <summary>
+        /// Settlement currency
+        /// </summary>
         public string settleCcy { get; set; }
-        /// <summary>Instrument state (live, suspend, etc.)</summary>
+
+        /// <summary>
+        /// Instrument state (live, suspend, etc.)
+        /// </summary>
         public string state { get; set; }
-        /// <summary>Underlying (for derivatives)</summary>
+
+        /// <summary>
+        /// Underlying (for derivatives)
+        /// </summary>
         public string stk { get; set; }
-        /// <summary>Price tick size</summary>
+
+        /// <summary>
+        /// Price tick size
+        /// </summary>
         public decimal tickSz { get; set; }
-        /// <summary>Underlying asset(s)</summary>
+
+        /// <summary>
+        /// Underlying asset(s)
+        /// </summary>
         public string uly { get; set; }
     }
 
@@ -71,11 +155,20 @@ namespace CCXT.Simple.Exchanges.Okx
     /// </summary>
     public class CoinInfor
     {
-        /// <summary>Response code (0 = success)</summary>
+
+        /// <summary>
+        /// Response code (0 = success)
+        /// </summary>
         public int code { get; set; }
-        /// <summary>Instrument information list</summary>
+
+        /// <summary>
+        /// Instrument information list
+        /// </summary>
         public List<CoinInforItem> data { get; set; }
-        /// <summary>Message (error or info)</summary>
+
+        /// <summary>
+        /// Message (error or info)
+        /// </summary>
         public string msg { get; set; }
     }
 }

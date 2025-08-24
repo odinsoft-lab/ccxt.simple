@@ -2,6 +2,7 @@
 
 Release notes are now split by version under this folder.
 
+- [v1.1.11](./v1.1.11.md) — 2025-08-24
 - [v1.1.10](./v1.1.10.md) — 2025-08-14
 - [v1.1.8](./v1.1.8.md) — 2025-08-10
 - [v1.1.7](./v1.1.7.md) — 2025-08-08

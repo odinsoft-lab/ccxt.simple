@@ -213,6 +213,7 @@ namespace CCXT.Simple.Exchanges.Huobi
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<decimal> GetPrice(string symbol)
         {
             var _result = 0.0m;
@@ -400,6 +401,7 @@ namespace CCXT.Simple.Exchanges.Huobi
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> GetMarkets(Tickers tickers)
         {
             var _result = false;

@@ -6,27 +6,94 @@ using CCXT.Simple.Models.Trading;
 
 namespace CCXT.Simple.Core.Interfaces
 {
+    /// <summary>
+    /// Standardized exchange interface abstracting common market data, account, trading,
+    /// and funding operations across supported crypto exchanges.
+    /// </summary>
     public interface IExchange
     {
+        /// <summary>
+        /// Reference to the main exchange orchestrator/service used to obtain HTTP clients,
+        /// configuration, logging and shared utilities.
+        /// </summary>
         Exchange mainXchg { get; set; }
 
+        /// <summary>
+        /// Canonical exchange identifier (e.g., "binance", "kraken").
+        /// </summary>
         string ExchangeName { get; set; }
+
+        /// <summary>
+        /// Base REST API endpoint for the exchange.
+        /// </summary>
         string ExchangeUrl { get; set; }
 
+        /// <summary>
+        /// Health indicator; true when last operation succeeded and the exchange is reachable.
+        /// </summary>
         bool Alive { get; set; }
 
+        /// <summary>
+        /// API key for authenticated/private endpoints.
+        /// </summary>
         string ApiKey { get; set; }
+
+        /// <summary>
+        /// API passphrase if required by the exchange (optional for some exchanges).
+        /// </summary>
         string PassPhrase { get; set; }
+
+        /// <summary>
+        /// API secret key used for request signing.
+        /// </summary>
         string SecretKey { get; set; }
 
+        /// <summary>
+        /// Fetch and register tradable symbols/markets supported by the exchange.
+        /// </summary>
+        /// <returns>True on success; otherwise false.</returns>
         ValueTask<bool> VerifySymbols();
+
+        /// <summary>
+        /// Verify and update current market states for the provided <see cref="Tickers"/> collection.
+        /// </summary>
+        /// <param name="tickers">Shared tickers container to populate/update.</param>
+        /// <returns>True on success; otherwise false.</returns>
         ValueTask<bool> VerifyStates(Tickers tickers);
        
+        /// <summary>
+        /// Get the latest price for a specific symbol.
+        /// </summary>
+        /// <param name="symbol">Trading symbol (e.g., BTC/USDT).</param>
+        /// <returns>Latest trade/mark/last price depending on exchange capability.</returns>
         ValueTask<decimal> GetPrice(string symbol);
 
+        /// <summary>
+        /// Fetch best bid/ask (book tickers) for symbols in the provided <see cref="Tickers"/>.
+        /// </summary>
+        /// <param name="tickers">Shared tickers container to populate/update.</param>
+        /// <returns>True on success; otherwise false.</returns>
         ValueTask<bool> GetBookTickers(Tickers tickers);
+
+        /// <summary>
+        /// Fetch market metadata (filters, precisions, min/max rules, etc.) for symbols.
+        /// </summary>
+        /// <param name="tickers">Shared tickers container to populate/update.</param>
+        /// <returns>True on success; otherwise false.</returns>
         ValueTask<bool> GetMarkets(Tickers tickers);
+
+        /// <summary>
+        /// Fetch recent ticker/24h statistics for symbols.
+        /// </summary>
+        /// <param name="tickers">Shared tickers container to populate/update.</param>
+        /// <returns>True on success; otherwise false.</returns>
         ValueTask<bool> GetTickers(Tickers tickers);
+
+        /// <summary>
+        /// Fetch volume-focused metrics for symbols (alias to market/ticker retrieval depending on the exchange).
+        /// </summary>
+        /// <param name="tickers">Shared tickers container to populate/update.</param>
+        /// <returns>True on success; otherwise false.</returns>
         ValueTask<bool> GetVolumes(Tickers tickers);
 
         // ===== STANDARDIZED MARKET DATA API =====

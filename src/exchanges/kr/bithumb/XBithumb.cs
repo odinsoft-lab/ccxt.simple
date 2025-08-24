@@ -104,7 +104,7 @@ namespace CCXT.Simple.Exchanges.Bithumb
 
         public string ExchangeName { get; set; } = "bithumb";
 
-        public string ExchangeUrl { get; set; } = "https://api.bithumb.com/v1";
+        public string ExchangeUrl { get; set; } = "https://api.bithumb.com";
 
         public bool Alive { get; set; }
         public string ApiKey { get; set; }
@@ -123,36 +123,32 @@ namespace CCXT.Simple.Exchanges.Bithumb
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                var _response = await _client.GetAsync("/market/all");
+                var _response = await _client.GetAsync("/public/ticker/ALL_KRW");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _markets = JsonConvert.DeserializeObject<JArray>(_jstring);
+                var _jobj = JsonConvert.DeserializeObject<JObject>(_jstring);
 
                 var _queue_info = mainXchg.GetXInfors(ExchangeName);
 
-                foreach (var market in _markets)
+                if (_jobj?["status"]?.ToString() == "0000" && _jobj["data"] != null)
                 {
-                    var _marketCode = market["market"]?.Value<string>();
-                    if (string.IsNullOrEmpty(_marketCode))
-                        continue;
-
-                    // Parse market code format: "KRW-BTC" or "BTC-ETH"
-                    var _parts = _marketCode.Split('-');
-                    if (_parts.Length != 2)
-                        continue;
-
-                    var _quote = _parts[0];
-                    var _base = _parts[1];
-
-                    _queue_info.symbols.Add(new QueueSymbol
+                    var _data = _jobj["data"] as JObject;
+                    foreach (var item in _data.Properties())
                     {
-                        symbol = $"{_base}_{_quote}",
-                        compName = _base,
-                        baseName = _base,
-                        quoteName = _quote
-                    });
-                }
+                        var _base = item.Name;
+                        if (_base == "date") // Skip the date field
+                            continue;
 
-                _result = true;
+                        _queue_info.symbols.Add(new QueueSymbol
+                        {
+                            symbol = $"{_base}_KRW",
+                            compName = _base,
+                            baseName = _base,
+                            quoteName = "KRW"
+                        });
+                    }
+
+                    _result = true;
+                }
             }
             catch (Exception ex)
             {

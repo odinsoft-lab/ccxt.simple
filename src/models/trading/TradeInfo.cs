@@ -1,4 +1,5 @@
 using CCXT.Simple.Core.Converters;
+
 namespace CCXT.Simple.Models.Trading
 {
     /// <summary>

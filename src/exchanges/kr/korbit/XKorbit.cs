@@ -108,6 +108,7 @@ namespace CCXT.Simple.Exchanges.Korbit
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> VerifyStates(Tickers tickers)
         {
             var _result = false;
@@ -207,6 +208,7 @@ namespace CCXT.Simple.Exchanges.Korbit
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> VerifyStatesQL(Tickers tickers)
         {
             var _result = false;

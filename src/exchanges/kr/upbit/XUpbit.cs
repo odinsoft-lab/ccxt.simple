@@ -458,6 +458,7 @@ namespace CCXT.Simple.Exchanges.Upbit
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> GetOrderbookForTickers(Tickers tickers)
         {
             var _result = false;
@@ -512,6 +513,7 @@ namespace CCXT.Simple.Exchanges.Upbit
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> GetBookTickers(Tickers tickers)
         {
             var _result = false;
@@ -553,7 +555,9 @@ namespace CCXT.Simple.Exchanges.Upbit
             return _result;
         }
 
+        /// <inheritdoc />
 
+        /// <inheritdoc />
 
         public async ValueTask<Orderbook> GetOrderbook(string symbol, int limit = 5)
         {
@@ -603,6 +607,7 @@ namespace CCXT.Simple.Exchanges.Upbit
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<List<decimal[]>> GetCandles(string symbol, string timeframe, long? since = null, int limit = 100)
         {
             var _result = new List<decimal[]>();
@@ -665,6 +670,7 @@ namespace CCXT.Simple.Exchanges.Upbit
             };
         }
 
+        /// <inheritdoc />
         public async ValueTask<List<TradeData>> GetTrades(string symbol, int limit = 50)
         {
             var _result = new List<TradeData>();
@@ -696,6 +702,7 @@ namespace CCXT.Simple.Exchanges.Upbit
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<Dictionary<string, BalanceInfo>> GetBalance()
         {
             var _result = new Dictionary<string, BalanceInfo>();
@@ -740,6 +747,7 @@ namespace CCXT.Simple.Exchanges.Upbit
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<AccountInfo> GetAccount()
         {
             var _result = new AccountInfo();
@@ -789,6 +797,7 @@ namespace CCXT.Simple.Exchanges.Upbit
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<OrderInfo> PlaceOrder(string symbol, SideType side, string orderType, decimal amount, decimal? price = null, string clientOrderId = null)
         {
             var _result = new OrderInfo();
@@ -865,6 +874,7 @@ namespace CCXT.Simple.Exchanges.Upbit
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> CancelOrder(string orderId, string symbol = null, string clientOrderId = null)
         {
             var _result = false;
@@ -913,6 +923,7 @@ namespace CCXT.Simple.Exchanges.Upbit
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<OrderInfo> GetOrder(string orderId, string symbol = null, string clientOrderId = null)
         {
             var _result = new OrderInfo();
@@ -969,6 +980,7 @@ namespace CCXT.Simple.Exchanges.Upbit
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<List<OrderInfo>> GetOpenOrders(string symbol = null)
         {
             var _result = new List<OrderInfo>();
@@ -1032,6 +1044,7 @@ namespace CCXT.Simple.Exchanges.Upbit
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<List<OrderInfo>> GetOrderHistory(string symbol = null, int limit = 100)
         {
             var _result = new List<OrderInfo>();
@@ -1096,6 +1109,7 @@ namespace CCXT.Simple.Exchanges.Upbit
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<List<TradeInfo>> GetTradeHistory(string symbol = null, int limit = 100)
         {
             var _result = new List<TradeInfo>();
@@ -1170,6 +1184,7 @@ namespace CCXT.Simple.Exchanges.Upbit
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<DepositAddress> GetDepositAddress(string currency, string network = null)
         {
             var _result = new DepositAddress();
@@ -1222,6 +1237,7 @@ namespace CCXT.Simple.Exchanges.Upbit
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<WithdrawalInfo> Withdraw(string currency, decimal amount, string address, string tag = null, string network = null)
         {
             var _result = new WithdrawalInfo();
@@ -1285,6 +1301,7 @@ namespace CCXT.Simple.Exchanges.Upbit
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<List<DepositInfo>> GetDepositHistory(string currency = null, int limit = 100)
         {
             var _result = new List<DepositInfo>();
@@ -1347,6 +1364,7 @@ namespace CCXT.Simple.Exchanges.Upbit
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<List<WithdrawalInfo>> GetWithdrawalHistory(string currency = null, int limit = 100)
         {
             var _result = new List<WithdrawalInfo>();

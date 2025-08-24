@@ -122,7 +122,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
             }
         }
 
-        // Legacy Methods
+        /// Legacy Methods
         public async ValueTask<bool> VerifySymbols()
         {
             var _result = false;
@@ -148,31 +148,37 @@ namespace CCXT.Simple.Exchanges.Bitstamp
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> VerifyStates(Tickers tickers)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> GetTickers(Tickers tickers)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> GetBookTickers(Tickers tickers)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> GetMarkets(Tickers tickers)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> GetVolumes(Tickers tickers)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         public async ValueTask<decimal> GetPrice(string symbol)
         {
             try
@@ -209,7 +215,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
 
         // New Standardized API Methods (v1.1.6+)
         
-        // Market Data
+        /// Market Data
         public async ValueTask<Orderbook> GetOrderbook(string symbol, int limit = 5)
         {
             try
@@ -242,6 +248,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
             }
         }
 
+        /// <inheritdoc />
         public async ValueTask<List<decimal[]>> GetCandles(string symbol, string timeframe, long? since = null, int limit = 100)
         {
             try
@@ -309,6 +316,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
             };
         }
 
+        /// <inheritdoc />
         public async ValueTask<List<TradeData>> GetTrades(string symbol, int limit = 50)
         {
             try
@@ -346,7 +354,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
             }
         }
 
-        // Account
+        /// Account
         public async ValueTask<Dictionary<string, BalanceInfo>> GetBalance()
         {
             try
@@ -389,6 +397,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
             }
         }
 
+        /// <inheritdoc />
         public async ValueTask<AccountInfo> GetAccount()
         {
             try
@@ -417,7 +426,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
             }
         }
 
-        // Trading
+        /// Trading
         public async ValueTask<OrderInfo> PlaceOrder(string symbol, SideType side, string orderType, decimal amount, decimal? price = null, string clientOrderId = null)
         {
             try
@@ -475,6 +484,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
             }
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> CancelOrder(string orderId, string symbol = null, string clientOrderId = null)
         {
             try
@@ -497,6 +507,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
             }
         }
 
+        /// <inheritdoc />
         public async ValueTask<OrderInfo> GetOrder(string orderId, string symbol = null, string clientOrderId = null)
         {
             try
@@ -551,6 +562,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
             }
         }
 
+        /// <inheritdoc />
         public async ValueTask<List<OrderInfo>> GetOpenOrders(string symbol = null)
         {
             try
@@ -601,6 +613,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
             }
         }
 
+        /// <inheritdoc />
         public async ValueTask<List<OrderInfo>> GetOrderHistory(string symbol = null, int limit = 100)
         {
             try
@@ -657,6 +670,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
             }
         }
 
+        /// <inheritdoc />
         public async ValueTask<List<TradeInfo>> GetTradeHistory(string symbol = null, int limit = 100)
         {
             try
@@ -712,7 +726,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
             }
         }
 
-        // Funding
+        /// Funding
         public async ValueTask<DepositAddress> GetDepositAddress(string currency, string network = null)
         {
             try
@@ -746,6 +760,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
             }
         }
 
+        /// <inheritdoc />
         public async ValueTask<WithdrawalInfo> Withdraw(string currency, decimal amount, string address, string tag = null, string network = null)
         {
             try
@@ -794,6 +809,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
             }
         }
 
+        /// <inheritdoc />
         public async ValueTask<List<DepositInfo>> GetDepositHistory(string currency = null, int limit = 100)
         {
             try
@@ -844,6 +860,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
             }
         }
 
+        /// <inheritdoc />
         public async ValueTask<List<WithdrawalInfo>> GetWithdrawalHistory(string currency = null, int limit = 100)
         {
             try

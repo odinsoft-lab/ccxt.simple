@@ -24,6 +24,10 @@ using CCXT.Simple.Models.Trading;
 
 namespace CCXT.Simple.Exchanges.Kraken
 {
+    /// <summary>
+    /// Kraken spot exchange adapter implementation.
+    /// </summary>
+    /// <inheritdoc cref="CCXT.Simple.Core.Interfaces.IExchange" />
     public class XKraken : IExchange
     {
         /*
@@ -45,6 +49,13 @@ namespace CCXT.Simple.Exchanges.Kraken
          *     - Pro: 20/second, 20 counter decrease
          */
 
+        /// <summary>
+        /// Initializes a new instance of the Kraken adapter.
+        /// </summary>
+        /// <param name="mainXchg">Main exchange orchestrator.</param>
+        /// <param name="apiKey">API key.</param>
+        /// <param name="secretKey">API secret.</param>
+        /// <param name="passPhrase">API passphrase.</param>
         public XKraken(Exchange mainXchg, string apiKey = "", string secretKey = "", string passPhrase = "")
         {
             this.mainXchg = mainXchg;
@@ -53,16 +64,28 @@ namespace CCXT.Simple.Exchanges.Kraken
             this.PassPhrase = passPhrase;
         }
 
+        /// <inheritdoc />
         public Exchange mainXchg { get; set; }
+        /// <inheritdoc />
         public string ExchangeName { get; set; } = "kraken";
+
+        /// <inheritdoc />
         public string ExchangeUrl { get; set; } = "https://api.kraken.com";
+
+        /// <inheritdoc />
         public bool Alive { get; set; }
+        /// <inheritdoc />
         public string ApiKey { get; set; }
+        /// <inheritdoc />
         public string SecretKey { get; set; }
+        /// <inheritdoc />
         public string PassPhrase { get; set; }
 
         private HMACSHA256 __encryptor = null;
 
+        /// <summary>
+        /// Lazy HMACSHA256 signer initialized with <see cref="SecretKey"/>.
+        /// </summary>
         public HMACSHA256 Encryptor
         {
             get
@@ -73,6 +96,13 @@ namespace CCXT.Simple.Exchanges.Kraken
             }
         }
 
+        /// <summary>
+        /// Creates base64-encoded API signature for Kraken private endpoints.
+        /// </summary>
+        /// <param name="path">Request path including version and endpoint (e.g., /0/private/Balance).</param>
+        /// <param name="nonce">Nonce value.</param>
+        /// <param name="postData">Raw POST data string.</param>
+        /// <returns>Base64 signature string.</returns>
         private string GetKrakenSignature(string path, string nonce, string postData)
         {
             var np = nonce + postData;
@@ -86,13 +116,17 @@ namespace CCXT.Simple.Exchanges.Kraken
             return signature;
         }
 
+        /// <summary>
+        /// Returns a millisecond Unix timestamp for nonce usage.
+        /// </summary>
         private long GetNonce()
         {
             return TimeExtensions.UnixTime;
         }
 
-        // Legacy Methods
-        public async ValueTask<bool> VerifySymbols()
+    /// Legacy Methods
+    /// <inheritdoc />
+    public async ValueTask<bool> VerifySymbols()
         {
             var _result = false;
 
@@ -158,6 +192,7 @@ namespace CCXT.Simple.Exchanges.Kraken
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> VerifyStates(Tickers tickers)
         {
             var _result = false;
@@ -238,11 +273,13 @@ namespace CCXT.Simple.Exchanges.Kraken
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> GetTickers(Tickers tickers)
         {
             return await GetMarkets(tickers);
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> GetBookTickers(Tickers tickers)
         {
             var _result = false;
@@ -279,16 +316,16 @@ namespace CCXT.Simple.Exchanges.Kraken
                             continue;
 
                         var krakenSymbol = ConvertToKrakenSymbol($"{ticker.baseName}/{ticker.quoteName}");
-                        
+
                         // Find matching pair in result
-                        var pairData = result.Properties().FirstOrDefault(p => 
-                            p.Name.Contains(krakenSymbol) || 
+                        var pairData = result.Properties().FirstOrDefault(p =>
+                            p.Name.Contains(krakenSymbol) ||
                             p.Name.Replace("X", "").Replace("Z", "").Contains(ticker.baseName + ticker.quoteName));
-                        
+
                         if (pairData != null)
                         {
                             var tickerData = pairData.Value;
-                            
+
                             // a = ask array [price, whole lot volume, lot volume]
                             var ask = tickerData["a"] as JArray;
                             if (ask != null && ask.Count >= 2)
@@ -323,6 +360,7 @@ namespace CCXT.Simple.Exchanges.Kraken
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> GetMarkets(Tickers tickers)
         {
             var _result = false;
@@ -359,16 +397,16 @@ namespace CCXT.Simple.Exchanges.Kraken
                             continue;
 
                         var krakenSymbol = ConvertToKrakenSymbol($"{ticker.baseName}/{ticker.quoteName}");
-                        
+
                         // Find matching pair in result
-                        var pairData = result.Properties().FirstOrDefault(p => 
-                            p.Name.Contains(krakenSymbol) || 
+                        var pairData = result.Properties().FirstOrDefault(p =>
+                            p.Name.Contains(krakenSymbol) ||
                             p.Name.Replace("X", "").Replace("Z", "").Contains(ticker.baseName + ticker.quoteName));
-                        
+
                         if (pairData != null)
                         {
                             var tickerData = pairData.Value;
-                            
+
                             // c = last trade closed array [price, lot volume]
                             var lastPrice = tickerData["c"] as JArray;
                             if (lastPrice != null && lastPrice.Count > 0)
@@ -415,11 +453,13 @@ namespace CCXT.Simple.Exchanges.Kraken
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> GetVolumes(Tickers tickers)
         {
             return await GetMarkets(tickers);
         }
 
+        /// <inheritdoc />
         public async ValueTask<decimal> GetPrice(string symbol)
         {
             var _result = 0.0m;
@@ -427,7 +467,7 @@ namespace CCXT.Simple.Exchanges.Kraken
             try
             {
                 var krakenSymbol = ConvertToKrakenSymbol(symbol);
-                
+
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync($"/0/public/Ticker?pair={krakenSymbol}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
@@ -465,8 +505,8 @@ namespace CCXT.Simple.Exchanges.Kraken
         }
 
         // New Standardized API Methods (v1.1.6+)
-        
-        // Market Data
+
+        /// Market Data
         public async ValueTask<Orderbook> GetOrderbook(string symbol, int limit = 5)
         {
             var _result = new Orderbook();
@@ -475,7 +515,7 @@ namespace CCXT.Simple.Exchanges.Kraken
             {
                 // Convert symbol format (e.g., BTC/USD to XBTUSD)
                 var krakenSymbol = ConvertToKrakenSymbol(symbol);
-                
+
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync($"/0/public/Depth?pair={krakenSymbol}&count={limit}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
@@ -495,7 +535,7 @@ namespace CCXT.Simple.Exchanges.Kraken
                     if (pairData != null)
                     {
                         var orderbook = pairData.Value;
-                        
+
                         // Process asks
                         var asks = orderbook["asks"] as JArray;
                         if (asks != null)
@@ -550,10 +590,10 @@ namespace CCXT.Simple.Exchanges.Kraken
             // Kraken uses specific prefixes for some assets
             if (baseAsset == "BTC")
                 baseAsset = "XBT";
-            
+
             // Add X prefix for crypto currencies (except ETH, EOS, etc.)
             var cryptoAssets = new[] { "XBT", "XRP", "XLM", "XMR", "XTZ", "XDG" };
-            if (!cryptoAssets.Contains(baseAsset) && baseAsset != "ETH" && baseAsset != "EOS" && 
+            if (!cryptoAssets.Contains(baseAsset) && baseAsset != "ETH" && baseAsset != "EOS" &&
                 baseAsset != "ADA" && baseAsset != "ALGO" && baseAsset != "ATOM")
             {
                 if (baseAsset == "BTC")
@@ -570,6 +610,7 @@ namespace CCXT.Simple.Exchanges.Kraken
             return baseAsset + quoteAsset;
         }
 
+        /// <inheritdoc />
         public async ValueTask<List<decimal[]>> GetCandles(string symbol, string timeframe, long? since = null, int limit = 100)
         {
             var _result = new List<decimal[]>();
@@ -578,7 +619,7 @@ namespace CCXT.Simple.Exchanges.Kraken
             {
                 var krakenSymbol = ConvertToKrakenSymbol(symbol);
                 var interval = ConvertTimeframeToKraken(timeframe);
-                
+
                 var url = $"/0/public/OHLC?pair={krakenSymbol}&interval={interval}";
                 if (since.HasValue)
                     url += $"&since={since.Value / 1000}"; // Kraken uses seconds
@@ -646,6 +687,7 @@ namespace CCXT.Simple.Exchanges.Kraken
             };
         }
 
+        /// <inheritdoc />
         public async ValueTask<List<TradeData>> GetTrades(string symbol, int limit = 50)
         {
             var _result = new List<TradeData>();
@@ -653,7 +695,7 @@ namespace CCXT.Simple.Exchanges.Kraken
             try
             {
                 var krakenSymbol = ConvertToKrakenSymbol(symbol);
-                
+
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync($"/0/public/Trades?pair={krakenSymbol}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
@@ -698,7 +740,7 @@ namespace CCXT.Simple.Exchanges.Kraken
             return _result;
         }
 
-        // Account
+        /// Account
         public async ValueTask<Dictionary<string, BalanceInfo>> GetBalance()
         {
             var _result = new Dictionary<string, BalanceInfo>();
@@ -711,7 +753,7 @@ namespace CCXT.Simple.Exchanges.Kraken
                 var signature = GetKrakenSignature(path, nonce, postData);
 
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var request = new HttpRequestMessage(HttpMethod.Post, path);
                 request.Headers.Add("API-Key", ApiKey);
                 request.Headers.Add("API-Sign", signature);
@@ -735,7 +777,7 @@ namespace CCXT.Simple.Exchanges.Kraken
                     {
                         var currency = NormalizeKrakenCurrency(balance.Name);
                         var amount = decimal.Parse(balance.Value.ToString());
-                        
+
                         _result[currency] = new BalanceInfo
                         {
                             free = amount,
@@ -759,16 +801,17 @@ namespace CCXT.Simple.Exchanges.Kraken
             // Remove X/Z prefixes and convert XBT to BTC
             if (krakenCurrency == "XBT" || krakenCurrency == "XXBT")
                 return "BTC";
-            
+
             if (krakenCurrency.StartsWith("X") && krakenCurrency.Length > 3)
                 return krakenCurrency.Substring(1);
-            
+
             if (krakenCurrency.StartsWith("Z"))
                 return krakenCurrency.Substring(1);
-            
+
             return krakenCurrency;
         }
 
+        /// <inheritdoc />
         public async ValueTask<AccountInfo> GetAccount()
         {
             var _result = new AccountInfo();
@@ -781,7 +824,7 @@ namespace CCXT.Simple.Exchanges.Kraken
                 var signature = GetKrakenSignature(path, nonce, postData);
 
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var request = new HttpRequestMessage(HttpMethod.Post, path);
                 request.Headers.Add("API-Key", ApiKey);
                 request.Headers.Add("API-Sign", signature);
@@ -817,7 +860,7 @@ namespace CCXT.Simple.Exchanges.Kraken
             return _result;
         }
 
-        // Trading
+        /// Trading
         public async ValueTask<OrderInfo> PlaceOrder(string symbol, SideType side, string orderType, decimal amount, decimal? price = null, string clientOrderId = null)
         {
             var _result = new OrderInfo();
@@ -827,22 +870,22 @@ namespace CCXT.Simple.Exchanges.Kraken
                 var krakenSymbol = ConvertToKrakenSymbol(symbol);
                 var nonce = GetNonce().ToString();
                 var path = "/0/private/AddOrder";
-                
+
                 var krakenSide = side == SideType.Bid ? "buy" : "sell";
                 var krakenOrderType = ConvertOrderType(orderType);
-                
+
                 var postData = $"nonce={nonce}&pair={krakenSymbol}&type={krakenSide}&ordertype={krakenOrderType}&volume={amount}";
-                
+
                 if (price.HasValue && krakenOrderType != "market")
                     postData += $"&price={price.Value}";
-                
+
                 if (!string.IsNullOrEmpty(clientOrderId))
                     postData += $"&userref={clientOrderId}";
-                
+
                 var signature = GetKrakenSignature(path, nonce, postData);
 
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var request = new HttpRequestMessage(HttpMethod.Post, path);
                 request.Headers.Add("API-Key", ApiKey);
                 request.Headers.Add("API-Sign", signature);
@@ -897,6 +940,7 @@ namespace CCXT.Simple.Exchanges.Kraken
             };
         }
 
+        /// <inheritdoc />
         public async ValueTask<bool> CancelOrder(string orderId, string symbol = null, string clientOrderId = null)
         {
             try
@@ -907,7 +951,7 @@ namespace CCXT.Simple.Exchanges.Kraken
                 var signature = GetKrakenSignature(path, nonce, postData);
 
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var request = new HttpRequestMessage(HttpMethod.Post, path);
                 request.Headers.Add("API-Key", ApiKey);
                 request.Headers.Add("API-Sign", signature);
@@ -939,6 +983,7 @@ namespace CCXT.Simple.Exchanges.Kraken
             return false;
         }
 
+        /// <inheritdoc />
         public async ValueTask<OrderInfo> GetOrder(string orderId, string symbol = null, string clientOrderId = null)
         {
             var _result = new OrderInfo();
@@ -951,7 +996,7 @@ namespace CCXT.Simple.Exchanges.Kraken
                 var signature = GetKrakenSignature(path, nonce, postData);
 
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var request = new HttpRequestMessage(HttpMethod.Post, path);
                 request.Headers.Add("API-Key", ApiKey);
                 request.Headers.Add("API-Sign", signature);
@@ -1009,6 +1054,7 @@ namespace CCXT.Simple.Exchanges.Kraken
             };
         }
 
+        /// <inheritdoc />
         public async ValueTask<List<OrderInfo>> GetOpenOrders(string symbol = null)
         {
             var _result = new List<OrderInfo>();
@@ -1021,7 +1067,7 @@ namespace CCXT.Simple.Exchanges.Kraken
                 var signature = GetKrakenSignature(path, nonce, postData);
 
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var request = new HttpRequestMessage(HttpMethod.Post, path);
                 request.Headers.Add("API-Key", ApiKey);
                 request.Headers.Add("API-Sign", signature);
@@ -1045,7 +1091,7 @@ namespace CCXT.Simple.Exchanges.Kraken
                     {
                         var orderId = orderProp.Name;
                         var order = orderProp.Value;
-                        
+
                         var orderSymbol = order["descr"]?["pair"]?.ToString();
                         if (symbol == null || orderSymbol == ConvertToKrakenSymbol(symbol))
                         {
@@ -1075,6 +1121,7 @@ namespace CCXT.Simple.Exchanges.Kraken
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<List<OrderInfo>> GetOrderHistory(string symbol = null, int limit = 100)
         {
             var _result = new List<OrderInfo>();
@@ -1087,7 +1134,7 @@ namespace CCXT.Simple.Exchanges.Kraken
                 var signature = GetKrakenSignature(path, nonce, postData);
 
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var request = new HttpRequestMessage(HttpMethod.Post, path);
                 request.Headers.Add("API-Key", ApiKey);
                 request.Headers.Add("API-Sign", signature);
@@ -1112,7 +1159,7 @@ namespace CCXT.Simple.Exchanges.Kraken
                     {
                         var orderId = orderProp.Name;
                         var order = orderProp.Value;
-                        
+
                         var orderSymbol = order["descr"]?["pair"]?.ToString();
                         if (symbol == null || orderSymbol == ConvertToKrakenSymbol(symbol))
                         {
@@ -1142,6 +1189,7 @@ namespace CCXT.Simple.Exchanges.Kraken
             return _result;
         }
 
+        /// <inheritdoc />
         public async ValueTask<List<TradeInfo>> GetTradeHistory(string symbol = null, int limit = 100)
         {
             var _result = new List<TradeInfo>();
@@ -1154,7 +1202,7 @@ namespace CCXT.Simple.Exchanges.Kraken
                 var signature = GetKrakenSignature(path, nonce, postData);
 
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var request = new HttpRequestMessage(HttpMethod.Post, path);
                 request.Headers.Add("API-Key", ApiKey);
                 request.Headers.Add("API-Sign", signature);
@@ -1179,7 +1227,7 @@ namespace CCXT.Simple.Exchanges.Kraken
                     {
                         var tradeId = tradeProp.Name;
                         var trade = tradeProp.Value;
-                        
+
                         var tradeSymbol = trade["pair"]?.ToString();
                         if (symbol == null || tradeSymbol == ConvertToKrakenSymbol(symbol))
                         {
@@ -1207,7 +1255,7 @@ namespace CCXT.Simple.Exchanges.Kraken
             return _result;
         }
 
-        // Funding
+        /// Funding
         public async ValueTask<DepositAddress> GetDepositAddress(string currency, string network = null)
         {
             var _result = new DepositAddress();
@@ -1221,7 +1269,7 @@ namespace CCXT.Simple.Exchanges.Kraken
                 var signature = GetKrakenSignature(path, nonce, postData);
 
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var request = new HttpRequestMessage(HttpMethod.Post, path);
                 request.Headers.Add("API-Key", ApiKey);
                 request.Headers.Add("API-Sign", signature);
@@ -1265,17 +1313,18 @@ namespace CCXT.Simple.Exchanges.Kraken
             // Convert standard currency to Kraken format
             if (currency == "BTC")
                 return "XBT";
-            
+
             // Add prefixes for certain currencies
             var cryptoAssets = new[] { "ETH", "EOS", "ADA", "ALGO", "ATOM", "DOT", "LINK", "MATIC" };
             if (!cryptoAssets.Contains(currency))
             {
                 return "X" + currency;
             }
-            
+
             return currency;
         }
 
+        /// <inheritdoc />
         public async ValueTask<WithdrawalInfo> Withdraw(string currency, decimal amount, string address, string tag = null, string network = null)
         {
             var _result = new WithdrawalInfo();
@@ -1285,7 +1334,7 @@ namespace CCXT.Simple.Exchanges.Kraken
                 var krakenCurrency = ConvertToKrakenCurrency(currency);
                 var nonce = GetNonce().ToString();
                 var path = "/0/private/Withdraw";
-                
+
                 // First need to get the withdrawal key for the address
                 var withdrawKey = await GetWithdrawKey(krakenCurrency, address);
                 if (string.IsNullOrEmpty(withdrawKey))
@@ -1293,12 +1342,12 @@ namespace CCXT.Simple.Exchanges.Kraken
                     mainXchg.OnMessageEvent(ExchangeName, "Withdrawal address not found in whitelist", 3025);
                     return _result;
                 }
-                
+
                 var postData = $"nonce={nonce}&asset={krakenCurrency}&key={withdrawKey}&amount={amount}";
                 var signature = GetKrakenSignature(path, nonce, postData);
 
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var request = new HttpRequestMessage(HttpMethod.Post, path);
                 request.Headers.Add("API-Key", ApiKey);
                 request.Headers.Add("API-Sign", signature);
@@ -1346,7 +1395,7 @@ namespace CCXT.Simple.Exchanges.Kraken
                 var signature = GetKrakenSignature(path, nonce, postData);
 
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var request = new HttpRequestMessage(HttpMethod.Post, path);
                 request.Headers.Add("API-Key", ApiKey);
                 request.Headers.Add("API-Sign", signature);
@@ -1380,6 +1429,7 @@ namespace CCXT.Simple.Exchanges.Kraken
             return string.Empty;
         }
 
+        /// <inheritdoc />
         public async ValueTask<List<DepositInfo>> GetDepositHistory(string currency = null, int limit = 100)
         {
             var _result = new List<DepositInfo>();
@@ -1389,17 +1439,17 @@ namespace CCXT.Simple.Exchanges.Kraken
                 var nonce = GetNonce().ToString();
                 var path = "/0/private/DepositStatus";
                 var postData = $"nonce={nonce}";
-                
+
                 if (!string.IsNullOrEmpty(currency))
                 {
                     var krakenCurrency = ConvertToKrakenCurrency(currency);
                     postData += $"&asset={krakenCurrency}";
                 }
-                
+
                 var signature = GetKrakenSignature(path, nonce, postData);
 
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var request = new HttpRequestMessage(HttpMethod.Post, path);
                 request.Headers.Add("API-Key", ApiKey);
                 request.Headers.Add("API-Sign", signature);
@@ -1460,6 +1510,7 @@ namespace CCXT.Simple.Exchanges.Kraken
             };
         }
 
+        /// <inheritdoc />
         public async ValueTask<List<WithdrawalInfo>> GetWithdrawalHistory(string currency = null, int limit = 100)
         {
             var _result = new List<WithdrawalInfo>();
@@ -1469,17 +1520,17 @@ namespace CCXT.Simple.Exchanges.Kraken
                 var nonce = GetNonce().ToString();
                 var path = "/0/private/WithdrawStatus";
                 var postData = $"nonce={nonce}";
-                
+
                 if (!string.IsNullOrEmpty(currency))
                 {
                     var krakenCurrency = ConvertToKrakenCurrency(currency);
                     postData += $"&asset={krakenCurrency}";
                 }
-                
+
                 var signature = GetKrakenSignature(path, nonce, postData);
 
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var request = new HttpRequestMessage(HttpMethod.Post, path);
                 request.Headers.Add("API-Key", ApiKey);
                 request.Headers.Add("API-Sign", signature);
@@ -1541,8 +1592,3 @@ namespace CCXT.Simple.Exchanges.Kraken
         }
     }
 }
-
-
-
-
-
