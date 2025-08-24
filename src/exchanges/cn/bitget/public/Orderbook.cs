@@ -2,7 +2,7 @@ using CCXT.Simple.Models.Market;
 ﻿namespace CCXT.Simple.Exchanges.Bitget.Public
 {
     /// <summary>
-    /// GET /api/spot/v1/market/depth?symbol=BTCUSDT_SPBL&type=step0&limit=100
+    /// GET /api/spot/v1/market/depth?symbol=BTCUSDT_SPBL&amp;type=step0&amp;limit=100
     /// </summary>
 
     public class Orderbook : RResult<OrderbookData>

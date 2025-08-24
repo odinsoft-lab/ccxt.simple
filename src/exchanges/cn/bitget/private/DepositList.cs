@@ -1,7 +1,7 @@
 ﻿namespace CCXT.Simple.Exchanges.Bitget.Private
 {
     /// <summary>
-    /// GET /api/spot/v1/wallet/deposit-list?coin=USDT&startTime=1659036670000&endTime=1659076670000&pageNo=1&pageSize=20
+    /// GET /api/spot/v1/wallet/deposit-list?coin=USDT&amp;startTime=1659036670000&amp;endTime=1659076670000&amp;pageNo=1&amp;pageSize=20
     /// </summary>
 
     public class DepositList : RResult<List<DepositListData>>

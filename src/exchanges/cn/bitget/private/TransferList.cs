@@ -1,7 +1,7 @@
 ﻿namespace CCXT.Simple.Exchanges.Bitget.Private
 {
     /// <summary>
-    /// GET /api/spot/v1/account/transferRecords?coinId=2&fromType=exchange&after=1659076670000&before=1659076670000&limit=100
+    /// GET /api/spot/v1/account/transferRecords?coinId=2&amp;fromType=exchange&amp;after=1659076670000&amp;before=1659076670000&amp;limit=100
     /// </summary>
 
     public class TransferList : RResult<List<TransferListData>>

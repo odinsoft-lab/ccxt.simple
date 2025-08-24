@@ -63,11 +63,11 @@ namespace CCXT.Simple.Exchanges.Okx
         public string PassPhrase { get; set; }
 
 
-    /// <summary>
-    /// Fetches tradable spot instruments from OKX, filters for USDT / BTC quote markets,
-    /// and populates internal QueueSymbol collection including price tick size.
-    /// </summary>
-    /// <returns>true on success (Alive flag set), otherwise false</returns>
+        /// <summary>
+        /// Fetches tradable spot instruments from OKX, filters for USDT / BTC quote markets,
+        /// and populates internal QueueSymbol collection including price tick size.
+        /// </summary>
+        /// <returns>true on success (Alive flag set), otherwise false</returns>
         public async ValueTask<bool> VerifySymbols()
         {
             var _result = false;
@@ -121,12 +121,12 @@ namespace CCXT.Simple.Exchanges.Okx
             return _result;
         }
 
-    /// <summary>
-    /// Queries /asset/currencies and updates per-currency active/deposit/withdraw flags and network metadata.
-    /// Synchronizes these states to tickers.items.
-    /// </summary>
-    /// <param name="tickers">Shared tickers/state container</param>
-    /// <returns>true if successful</returns>
+        /// <summary>
+        /// Queries /asset/currencies and updates per-currency active/deposit/withdraw flags and network metadata.
+        /// Synchronizes these states to tickers.items.
+        /// </summary>
+        /// <param name="tickers">Shared tickers/state container</param>
+        /// <returns>true if successful</returns>
         public async ValueTask<bool> VerifyStates(Tickers tickers)
         {
             var _result = false;
@@ -226,9 +226,9 @@ namespace CCXT.Simple.Exchanges.Okx
 
         private HMACSHA256 __encryptor = null;
 
-    /// <summary>
-    /// Creates required OKX authentication headers (OK-ACCESS-*) using HMAC-SHA256(Base64) over timestamp + method + path + body.
-    /// </summary>
+        /// <summary>
+        /// Creates required OKX authentication headers (OK-ACCESS-*) using HMAC-SHA256(Base64) over timestamp + method + path + body.
+        /// </summary>
         public HMACSHA256 Encryptor
         {
             get
@@ -254,11 +254,11 @@ namespace CCXT.Simple.Exchanges.Okx
             client.DefaultRequestHeaders.Add("OK-ACCESS-PASSPHRASE", this.PassPhrase);
         }
 
-    /// <summary>
-    /// Returns the latest traded price (last) for a given symbol.
-    /// </summary>
-    /// <param name="symbol">Instrument ID, e.g. BTC-USDT</param>
-    /// <returns>Price or 0 if not found</returns>
+        /// <summary>
+        /// Returns the latest traded price (last) for a given symbol.
+        /// </summary>
+        /// <param name="symbol">Instrument ID, e.g. BTC-USDT</param>
+        /// <returns>Price or 0 if not found</returns>
         public async ValueTask<decimal> GetPrice(string symbol)
         {
             var _result = 0.0m;
@@ -282,12 +282,12 @@ namespace CCXT.Simple.Exchanges.Okx
             return _result;
         }
 
-    /// <summary>
-    /// Bulk-fetches OKX spot tickers and updates lastPrice within tickers.items.
-    /// USDT values converted using exchgRate; BTC via fiat_btc_price.
-    /// </summary>
-    /// <param name="tickers">Ticker container to update</param>
-    /// <returns>true if successful</returns>
+        /// <summary>
+        /// Bulk-fetches OKX spot tickers and updates lastPrice within tickers.items.
+        /// USDT values converted using exchgRate; BTC via fiat_btc_price.
+        /// </summary>
+        /// <param name="tickers">Ticker container to update</param>
+        /// <returns>true if successful</returns>
         public async ValueTask<bool> GetTickers(Tickers tickers)
         {
             var _result = false;
@@ -337,12 +337,12 @@ namespace CCXT.Simple.Exchanges.Okx
             return _result;
         }
 
-    /// <summary>
-    /// Updates best bid/ask (including sizes) and last price for each symbol.
-    /// Converts prices for USDT/BTC quoted pairs as needed.
-    /// </summary>
-    /// <param name="tickers">Ticker container to update</param>
-    /// <returns>true if successful</returns>
+        /// <summary>
+        /// Updates best bid/ask (including sizes) and last price for each symbol.
+        /// Converts prices for USDT/BTC quoted pairs as needed.
+        /// </summary>
+        /// <param name="tickers">Ticker container to update</param>
+        /// <returns>true if successful</returns>
         public async ValueTask<bool> GetBookTickers(Tickers tickers)
         {
             var _result = false;
@@ -404,12 +404,12 @@ namespace CCXT.Simple.Exchanges.Okx
             return _result;
         }
 
-    /// <summary>
-    /// Calculates and updates 24h volume and 1-minute rolling volume based on volCcy24h.
-    /// Converts quote-denominated volume for USDT / BTC pairs.
-    /// </summary>
-    /// <param name="tickers">Ticker container to update</param>
-    /// <returns>true if successful</returns>
+        /// <summary>
+        /// Calculates and updates 24h volume and 1-minute rolling volume based on volCcy24h.
+        /// Converts quote-denominated volume for USDT / BTC pairs.
+        /// </summary>
+        /// <param name="tickers">Ticker container to update</param>
+        /// <returns>true if successful</returns>
         public async ValueTask<bool> GetVolumes(Tickers tickers)
         {
             var _result = false;
@@ -469,11 +469,11 @@ namespace CCXT.Simple.Exchanges.Okx
             return _result;
         }
 
-    /// <summary>
-    /// Consolidated market update: prices (last/bid/ask) and volumes (24h & 1m) in one pass.
-    /// </summary>
-    /// <param name="tickers">Ticker container to update</param>
-    /// <returns>true if successful</returns>
+        /// <summary>
+        /// Consolidated market update: prices (last/bid/ask) and volumes (24h and 1m) in one pass.
+        /// </summary>
+        /// <param name="tickers">Ticker container to update</param>
+        /// <returns>true if successful</returns>
         public async ValueTask<bool> GetMarkets(Tickers tickers)
         {
             var _result = false;
@@ -559,9 +559,9 @@ namespace CCXT.Simple.Exchanges.Okx
 
 
 
-    /// <summary>
-    /// Fetches order book depth for a symbol (default top 5 levels both sides).
-    /// </summary>
+        /// <summary>
+        /// Fetches order book depth for a symbol (default top 5 levels both sides).
+        /// </summary>
         public async ValueTask<Orderbook> GetOrderbook(string symbol, int limit = 5)
         {
             var _result = new Orderbook
@@ -613,9 +613,9 @@ namespace CCXT.Simple.Exchanges.Okx
             return _result;
         }
 
-    /// <summary>
-    /// Retrieves OHLCV candles. Timeframe is converted to OKX bar parameter. If since is provided, fetches data after that timestamp.
-    /// </summary>
+        /// <summary>
+        /// Retrieves OHLCV candles. Timeframe is converted to OKX bar parameter. If since is provided, fetches data after that timestamp.
+        /// </summary>
         public async ValueTask<List<decimal[]>> GetCandles(string symbol, string timeframe, long? since = null, int limit = 100)
         {
             var _result = new List<decimal[]>();
@@ -659,12 +659,12 @@ namespace CCXT.Simple.Exchanges.Okx
             return _result;
         }
 
-    /// <summary>
-    /// Maps internal timeframe strings to OKX bar values (default 1H).
-    /// </summary>
-    /// <param name="timeframe">e.g. 1m, 5m, 1h, 1d</param>
-    /// <returns>OKX bar value</returns>
-    private string ConvertTimeframe(string timeframe)
+        /// <summary>
+        /// Maps internal timeframe strings to OKX bar values (default 1H).
+        /// </summary>
+        /// <param name="timeframe">e.g. 1m, 5m, 1h, 1d</param>
+        /// <returns>OKX bar value</returns>
+        private string ConvertTimeframe(string timeframe)
         {
             return timeframe switch
             {
@@ -685,9 +685,9 @@ namespace CCXT.Simple.Exchanges.Okx
             };
         }
 
-    /// <summary>
-    /// Fetches recent public trades for the symbol.
-    /// </summary>
+        /// <summary>
+        /// Fetches recent public trades for the symbol.
+        /// </summary>
         public async ValueTask<List<TradeData>> GetTrades(string symbol, int limit = 50)
         {
             var _result = new List<TradeData>();
@@ -722,9 +722,9 @@ namespace CCXT.Simple.Exchanges.Okx
             return _result;
         }
 
-    /// <summary>
-    /// Retrieves spot account balances as a dictionary (free/used/total).
-    /// </summary>
+        /// <summary>
+        /// Retrieves spot account balances as a dictionary (free/used/total).
+        /// </summary>
         public async ValueTask<Dictionary<string, BalanceInfo>> GetBalance()
         {
             var _result = new Dictionary<string, BalanceInfo>();
@@ -769,9 +769,9 @@ namespace CCXT.Simple.Exchanges.Okx
             return _result;
         }
 
-    /// <summary>
-    /// Retrieves account basic info (UID/level) and balances.
-    /// </summary>
+        /// <summary>
+        /// Retrieves account basic info (UID/level) and balances.
+        /// </summary>
         public async ValueTask<AccountInfo> GetAccount()
         {
             var _result = new AccountInfo
@@ -815,9 +815,9 @@ namespace CCXT.Simple.Exchanges.Okx
             return _result;
         }
 
-    /// <summary>
-    /// Places a new spot order (tdMode=cash). Price omitted for market orders.
-    /// </summary>
+        /// <summary>
+        /// Places a new spot order (tdMode=cash). Price omitted for market orders.
+        /// </summary>
         public async ValueTask<OrderInfo> PlaceOrder(string symbol, SideType side, string orderType, decimal amount, decimal? price = null, string clientOrderId = null)
         {
             var _result = new OrderInfo();
@@ -882,9 +882,9 @@ namespace CCXT.Simple.Exchanges.Okx
             return _result;
         }
 
-    /// <summary>
-    /// Cancels an existing order by orderId or clientOrderId.
-    /// </summary>
+        /// <summary>
+        /// Cancels an existing order by orderId or clientOrderId.
+        /// </summary>
         public async ValueTask<bool> CancelOrder(string orderId, string symbol = null, string clientOrderId = null)
         {
             var _result = false;
@@ -931,9 +931,9 @@ namespace CCXT.Simple.Exchanges.Okx
             return _result;
         }
 
-    /// <summary>
-    /// Retrieves a single order's details using orderId or clientOrderId.
-    /// </summary>
+        /// <summary>
+        /// Retrieves a single order's details using orderId or clientOrderId.
+        /// </summary>
         public async ValueTask<OrderInfo> GetOrder(string orderId, string symbol = null, string clientOrderId = null)
         {
             var _result = new OrderInfo();
@@ -992,9 +992,9 @@ namespace CCXT.Simple.Exchanges.Okx
             return _result;
         }
 
-    /// <summary>
-    /// Lists open (pending) spot orders. If symbol omitted returns all spot open orders.
-    /// </summary>
+        /// <summary>
+        /// Lists open (pending) spot orders. If symbol omitted returns all spot open orders.
+        /// </summary>
         public async ValueTask<List<OrderInfo>> GetOpenOrders(string symbol = null)
         {
             var _result = new List<OrderInfo>();
@@ -1050,9 +1050,9 @@ namespace CCXT.Simple.Exchanges.Okx
             return _result;
         }
 
-    /// <summary>
-    /// Returns historical orders (default limit 100).
-    /// </summary>
+        /// <summary>
+        /// Returns historical orders (default limit 100).
+        /// </summary>
         public async ValueTask<List<OrderInfo>> GetOrderHistory(string symbol = null, int limit = 100)
         {
             var _result = new List<OrderInfo>();
@@ -1106,9 +1106,9 @@ namespace CCXT.Simple.Exchanges.Okx
             return _result;
         }
 
-    /// <summary>
-    /// Retrieves fills (trade history) (default limit 100).
-    /// </summary>
+        /// <summary>
+        /// Retrieves fills (trade history) (default limit 100).
+        /// </summary>
         public async ValueTask<List<TradeInfo>> GetTradeHistory(string symbol = null, int limit = 100)
         {
             var _result = new List<TradeInfo>();
@@ -1158,9 +1158,9 @@ namespace CCXT.Simple.Exchanges.Okx
             return _result;
         }
 
-    /// <summary>
-    /// Gets deposit address (and optional tag/memo) for a currency.
-    /// </summary>
+        /// <summary>
+        /// Gets deposit address (and optional tag/memo) for a currency.
+        /// </summary>
         public async ValueTask<DepositAddress> GetDepositAddress(string currency, string network = null)
         {
             var _result = new DepositAddress();
@@ -1200,9 +1200,9 @@ namespace CCXT.Simple.Exchanges.Okx
             return _result;
         }
 
-    /// <summary>
-    /// Executes an on-chain withdrawal (dest=4).
-    /// </summary>
+        /// <summary>
+        /// Executes an on-chain withdrawal (dest=4).
+        /// </summary>
         public async ValueTask<WithdrawalInfo> Withdraw(string currency, decimal amount, string address, string tag = null, string network = null)
         {
             var _result = new WithdrawalInfo();
@@ -1263,9 +1263,9 @@ namespace CCXT.Simple.Exchanges.Okx
             return _result;
         }
 
-    /// <summary>
-    /// Retrieves deposit history.
-    /// </summary>
+        /// <summary>
+        /// Retrieves deposit history.
+        /// </summary>
         public async ValueTask<List<DepositInfo>> GetDepositHistory(string currency = null, int limit = 100)
         {
             var _result = new List<DepositInfo>();
@@ -1315,9 +1315,9 @@ namespace CCXT.Simple.Exchanges.Okx
             return _result;
         }
 
-    /// <summary>
-    /// Retrieves withdrawal history.
-    /// </summary>
+        /// <summary>
+        /// Retrieves withdrawal history.
+        /// </summary>
         public async ValueTask<List<WithdrawalInfo>> GetWithdrawalHistory(string currency = null, int limit = 100)
         {
             var _result = new List<WithdrawalInfo>();

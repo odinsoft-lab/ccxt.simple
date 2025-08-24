@@ -49,7 +49,7 @@ This update improves cross-framework compatibility and code maintainability for 
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 
 		<!-- Suppress some noisy warnings, but keep CS1591 active to encourage documentation -->
-		<NoWarn>$(NoWarn);CS1998;CS0618</NoWarn>
+		<NoWarn>$(NoWarn);CS1998;CS0618;CS1591</NoWarn>
 
 		<!-- Build Settings -->
 		<Deterministic>true</Deterministic>

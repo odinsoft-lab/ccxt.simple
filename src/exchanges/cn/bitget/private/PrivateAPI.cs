@@ -158,6 +158,7 @@ namespace CCXT.Simple.Exchanges.Bitget.Private
         /// <param name="address"></param>
         /// <param name="chain"></param>
         /// <param name="amount"></param>
+        /// <param name="tag"></param>
         /// <returns></returns>
         public async ValueTask<RResult<string>> WithdrawAsync(string coin, string address, string chain, decimal amount, string tag = null)
         {

@@ -1,7 +1,7 @@
 ﻿namespace CCXT.Simple.Exchanges.Bitget.Private
 {
     /// <summary>
-    /// GET /api/spot/v1/wallet/deposit-address?coin=USDT&chain=trc20
+    /// GET /api/spot/v1/wallet/deposit-address?coin=USDT&amp;chain=trc20
     /// </summary>
 
     public class Address : RResult<AddressData>

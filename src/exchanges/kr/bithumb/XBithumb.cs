@@ -355,7 +355,7 @@ namespace CCXT.Simple.Exchanges.Bithumb
         }
 
     /// <summary>
-    /// Updates best bid/ask prices & sizes for all registered tickers using consolidated KRW & BTC orderbook snapshots.
+    /// Updates best bid/ask prices and sizes for all registered tickers using consolidated KRW and BTC orderbook snapshots.
     /// </summary>
     /// <param name="tickers">Ticker container to update</param>
     /// <returns>true if successful</returns>
@@ -424,7 +424,7 @@ namespace CCXT.Simple.Exchanges.Bithumb
 
     /// <summary>
     /// Refreshes market prices (last) and rolling volume (24h / 1m) for all tickers.
-    /// Acts as unified implementation for GetTickers & GetVolumes.
+    /// Acts as unified implementation for GetTickers and GetVolumes.
     /// </summary>
     /// <param name="tickers">Ticker container to update</param>
     /// <returns>true if successful</returns>
@@ -786,7 +786,7 @@ namespace CCXT.Simple.Exchanges.Bithumb
 
     /// <summary>
     /// Maps generic timeframe string to Bithumb candle endpoint path.
-    /// Minutes & hours are converted to minutes-based endpoint.
+    /// Minutes and hours are converted to minutes-based endpoint.
     /// </summary>
     private string GetCandleEndpoint(string timeframe)
         {
@@ -824,7 +824,7 @@ namespace CCXT.Simple.Exchanges.Bithumb
     /// Retrieves recent public trades (ticks) up to specified limit.
     /// </summary>
     /// <param name="symbol">Symbol BASE_QUOTE</param>
-    /// <param name="limit">Max trades (<=500)</param>
+    /// <param name="limit">Max trades (less than or equal to 500)</param>
     public async ValueTask<List<TradeData>> GetTrades(string symbol, int limit = 50)
         {
             var _result = new List<TradeData>();

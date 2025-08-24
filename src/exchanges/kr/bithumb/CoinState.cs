@@ -3,7 +3,7 @@
     /// <summary>
     /// Root structure for coin state information from:
     ///  https://www.bithumb.com/withdraw_address/coincodeinfo
-    /// Contains English & Korean display names and withdrawal/deposit related flags.
+    /// Contains English and Korean display names and withdrawal/deposit related flags.
     /// </summary>
     public class CoinState
     {

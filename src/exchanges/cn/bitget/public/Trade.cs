@@ -2,7 +2,7 @@ using CCXT.Simple.Models.Trading;
 ﻿namespace CCXT.Simple.Exchanges.Bitget.Public
 {
     /// <summary>
-    /// GET /api/spot/v1/market/fills?symbol=BTCUSDT_SPBL&limit=100
+    /// GET /api/spot/v1/market/fills?symbol=BTCUSDT_SPBL&amp;limit=100
     /// </summary>
 
     public class Trade : RResult<List<TradeData>>

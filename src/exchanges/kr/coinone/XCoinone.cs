@@ -118,7 +118,7 @@ namespace CCXT.Simple.Exchanges.Coinone
         /// <summary>
         ///
         /// </summary>
-        /// <param name="states"></param>
+        /// <param name="tickers"></param>
         /// <returns></returns>
         public async ValueTask<bool> VerifyStates(Tickers tickers)
         {
