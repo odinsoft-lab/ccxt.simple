@@ -582,7 +582,7 @@ Common country codes used in this project:
 
 ## 📞 Contact
 
-- **Issues**: [GitHub Issues](https://github.com/ccxt-net/ccxt.simple/issues)
+- **Issues**: [GitHub Issues](https://github.com/odinsoft-lab/ccxt.simple/issues)
 - **Email**: help@odinsoft.co.kr
 
 ---
