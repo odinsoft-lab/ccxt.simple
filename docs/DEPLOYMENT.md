@@ -108,7 +108,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 - **Package ID**: CCXT.SIMPLE
 - **NuGet URL**: https://www.nuget.org/packages/CCXT.SIMPLE/
-- **Source**: https://github.com/ccxt-net/ccxt.simple
+- **Source**: https://github.com/odinsoft-lab/ccxt.simple
 
 ## Manual Publishing (Alternative)
 
@@ -133,5 +133,5 @@ dotnet nuget push src/bin/Release/CCXT.Simple.1.1.7.nupkg \
 ## Support
 
 For issues or questions:
-- GitHub Issues: https://github.com/ccxt-net/ccxt.simple/issues
+- GitHub Issues: https://github.com/odinsoft-lab/ccxt.simple/issues
 - Email: help@odinsoft.co.kr
