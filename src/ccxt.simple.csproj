@@ -26,7 +26,7 @@
 
 		<!-- Package Settings -->
 		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
-		<PackageProjectUrl>https://github.com/ccxt-net/ccxt.simple</PackageProjectUrl>
+		<PackageProjectUrl>https://github.com/odinsoft-lab/ccxt.simple</PackageProjectUrl>
 		<PackageIcon>ccxt.simple.api.png</PackageIcon>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageTags>bitcoin;cryptocurrency;exchange;trading;market-data;ccxt;exchange-markets;altcoin;api;arbitrage;bot;crypto;e-commerce;invest;library;strategy;trade;merchant;cryptocoin</PackageTags>
@@ -38,7 +38,7 @@ Maintenance: Minor code cleanup and namespace unification for extension methods
 This update improves cross-framework compatibility and code maintainability for cryptographic operations.</PackageReleaseNotes>
 
 		<!-- Repository Information -->
-		<RepositoryUrl>https://github.com/ccxt-net/ccxt.simple</RepositoryUrl>
+		<RepositoryUrl>https://github.com/odinsoft-lab/ccxt.simple</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PublishRepositoryUrl>true</PublishRepositoryUrl>
 

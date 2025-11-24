@@ -99,18 +99,18 @@ exchange.OnUsdPriceEvent += price => Console.WriteLine($"BTC: ${price}");
 
 ### Running Examples
 ```bash
-git clone https://github.com/ccxt-net/ccxt.simple.git
+git clone https://github.com/odinsoft-lab/ccxt.simple.git
 cd ccxt.simple
 dotnet run --project samples/ccxt.sample.csproj
 ```
 
 ## 🤝 Contributing
 
-We welcome contributions! **Need a specific exchange implemented?** [Create an issue](https://github.com/ccxt-net/ccxt.simple/issues/new) - exchanges with more community requests get priority.
+We welcome contributions! **Need a specific exchange implemented?** [Create an issue](https://github.com/odinsoft-lab/ccxt.simple/issues/new) - exchanges with more community requests get priority.
 
 ### Development Setup
 ```bash
-git clone https://github.com/ccxt-net/ccxt.simple.git
+git clone https://github.com/odinsoft-lab/ccxt.simple.git
 cd ccxt.simple
 dotnet build              # Build solution  
 dotnet test               # Run 73 tests
@@ -132,7 +132,7 @@ dotnet test               # Run 73 tests
 
 ## 📞 Support & Contact
 
-- **🐛 Issues**: [GitHub Issues](https://github.com/ccxt-net/ccxt.simple/issues)
+- **🐛 Issues**: [GitHub Issues](https://github.com/odinsoft-lab/ccxt.simple/issues)
 - **📧 Email**: help@odinsoft.co.kr
 
 ## 📄 License
@@ -141,4 +141,4 @@ MIT License - see [LICENSE.md](LICENSE.md) for details.
 
 ---
 
-**Built with ❤️ by the ODINSOFT Team** | [⭐ Star us on GitHub](https://github.com/ccxt-net/ccxt.simple)
+**Built with ❤️ by the ODINSOFT Team** | [⭐ Star us on GitHub](https://github.com/odinsoft-lab/ccxt.simple)
