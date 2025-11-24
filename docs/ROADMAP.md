@@ -201,7 +201,7 @@ Based on community demand and market importance:
 ## 📞 Contact
 
 For roadmap discussions and suggestions:
-- **GitHub Issues**: [Create an Issue](https://github.com/ccxt-net/ccxt.simple/issues)
+- **GitHub Issues**: [Create an Issue](https://github.com/odinsoft-lab/ccxt.simple/issues)
 - **Email**: help@odinsoft.co.kr
 
 ---
