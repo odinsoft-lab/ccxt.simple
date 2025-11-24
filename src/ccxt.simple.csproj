@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
     	<!-- Target Framework -->
-		<TargetFrameworks>netstandard2.0;netstandard2.1;net8.0;net9.0</TargetFrameworks>
+		<TargetFrameworks>netstandard2.0;netstandard2.1;net8.0;net9.0;net10.0</TargetFrameworks>
 		<LangVersion>latest</LangVersion>
 
 		<!-- Assembly Information -->
@@ -65,8 +65,7 @@ This update improves cross-framework compatibility and code maintainability for 
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Include="Exchanges\**\*.json" Pack="true"
-				PackagePath="contentFiles\any\any\%(RecursiveDir)%(Filename)%(Extension)">
+		<None Include="Exchanges\**\*.json" Pack="true" PackagePath="contentFiles\any\any\%(RecursiveDir)%(Filename)%(Extension)">
 			<BuildAction>Content</BuildAction>
 			<PackageCopyToOutput>true</PackageCopyToOutput>
 			<PackageFlatten>false</PackageFlatten>
@@ -89,10 +88,10 @@ This update improves cross-framework compatibility and code maintainability for 
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />		
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />		
 		<PackageReference Include="GraphQL.Client" Version="6.1.0" />
 		<PackageReference Include="GraphQL.Client.Serializer.SystemTextJson" Version="6.1.0" />
-		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.13.1" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
 	</ItemGroup>
 
 </Project>
