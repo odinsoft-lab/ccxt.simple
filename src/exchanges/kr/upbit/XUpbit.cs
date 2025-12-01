@@ -4,14 +4,16 @@
 // PROGRESS_STATUS: DONE
 // MARKET_SCOPE: spot
 // NOT_IMPLEMENTED_EXCEPTIONS: 0
-// LAST_REVIEWED: 2025-08-13
+// LAST_REVIEWED: 2025-12-01
 // REVIEWER: manual
-// NOTES: Complete implementation of all 16 standard API methods with JWT authentication
+// NOTES: Complete implementation of all 16 standard API methods with JWT authentication (SHA512 query hash)
+// API_VERSION: Upbit REST API v1 (2025-12-01) - Updated to latest API spec with new endpoints
 // == CCXT-SIMPLE-META-END ==
 
 using CCXT.Simple.Core.Converters;
 using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
 using System.Text;
 using CCXT.Simple.Core.Interfaces;
 using CCXT.Simple.Core;
@@ -24,23 +26,34 @@ using CCXT.Simple.Core.Extensions;
 
 namespace CCXT.Simple.Exchanges.Upbit
 {
+    /// <summary>
+    /// Upbit Exchange API implementation for CCXT.Simple
+    /// </summary>
+    /// <remarks>
+    /// <para>Upbit is a South Korean cryptocurrency exchange operated by Dunamu Inc.</para>
+    /// <para>Supported markets: KRW, USDT, BTC</para>
+    /// <para>API Documentation:</para>
+    /// <list type="bullet">
+    ///   <item>Korean: https://docs.upbit.com/reference</item>
+    ///   <item>Global: https://global-docs.upbit.com/reference</item>
+    /// </list>
+    /// <para>Authentication: JWT token with SHA512 query hash</para>
+    /// <para>Rate Limits:</para>
+    /// <list type="bullet">
+    ///   <item>Order API: 8 requests/second per account</item>
+    ///   <item>Exchange API: 30 requests/second per account</item>
+    ///   <item>Market API: 10 requests/second per IP</item>
+    /// </list>
+    /// </remarks>
     public class XUpbit : IExchange
     {
-        /*
-		 * Upbit Support Markets: KRW, USDT, BTC
-		 *
-		 * API Documentation:
-		 *     Korean: https://docs.upbit.com/docs/%EC%9A%94%EC%B2%AD-%EC%88%98-%EC%A0%9C%ED%95%9C
-		 *     Global: https://global-docs.upbit.com/reference/today-trades-history
-		 *
-		 * REST API
-		 *     https://docs.upbit.com/reference
-		 *     https://upbit.com/service_center/wallet_status
-		 *
-		 * Fees:
-		 *     https://upbit.com/service_center/guide
-		 */
-
+        /// <summary>
+        /// Initializes a new instance of the XUpbit exchange adapter
+        /// </summary>
+        /// <param name="mainXchg">The main exchange coordinator instance</param>
+        /// <param name="apiKey">Upbit API access key</param>
+        /// <param name="secretKey">Upbit API secret key</param>
+        /// <param name="passPhrase">Not used for Upbit (reserved for compatibility)</param>
         public XUpbit(Exchange mainXchg, string apiKey = "", string secretKey = "", string passPhrase = "")
         {
             this.mainXchg = mainXchg;
@@ -50,27 +63,55 @@ namespace CCXT.Simple.Exchanges.Upbit
             this.PassPhrase = passPhrase;
         }
 
-        public Exchange mainXchg
-        {
-            get;
-            set;
-        }
+        /// <summary>
+        /// Reference to the main exchange coordinator
+        /// </summary>
+        public Exchange mainXchg { get; set; }
 
+        /// <summary>
+        /// Exchange identifier name
+        /// </summary>
         public string ExchangeName { get; set; } = "upbit";
 
+        /// <summary>
+        /// Base URL for Upbit REST API (https://api.upbit.com)
+        /// </summary>
         public string ExchangeUrl { get; set; } = "https://api.upbit.com";
+
+        /// <summary>
+        /// URL for Upbit CCX API (internal endpoints)
+        /// </summary>
         public string ExchangeUrlCc { get; set; } = "https://ccx.upbit.com";
 
+        /// <summary>
+        /// Indicates whether the exchange connection is active
+        /// </summary>
         public bool Alive { get; set; }
+
+        /// <summary>
+        /// Upbit API access key for authentication
+        /// </summary>
         public string ApiKey { get; set; }
+
+        /// <summary>
+        /// Upbit API secret key for JWT signing
+        /// </summary>
         public string SecretKey { get; set; }
+
+        /// <summary>
+        /// Passphrase (not used for Upbit, reserved for compatibility)
+        /// </summary>
         public string PassPhrase { get; set; }
 
 
         /// <summary>
-        ///
+        /// Verifies and loads all available trading symbols from Upbit
         /// </summary>
-        /// <returns></returns>
+        /// <remarks>
+        /// API Endpoint: GET /v1/market/all?isDetails=true
+        /// Rate Limit: 10 requests/second per IP (market group)
+        /// </remarks>
+        /// <returns>True if symbols were successfully loaded, false otherwise</returns>
         public async ValueTask<bool> VerifySymbols()
         {
             var _result = false;
@@ -124,6 +165,15 @@ namespace CCXT.Simple.Exchanges.Upbit
         }
 
 
+        /// <summary>
+        /// Creates a JWT token without query parameters (for simple GET requests)
+        /// </summary>
+        /// <remarks>
+        /// Used for API calls that don't require query parameters (e.g., GET /v1/accounts)
+        /// JWT payload includes: access_key, nonce
+        /// </remarks>
+        /// <param name="nonce">Unix timestamp in milliseconds for request uniqueness</param>
+        /// <returns>Bearer token string for Authorization header</returns>
         public string CreateToken(long nonce)
         {
             var _payload = new JwtPayload
@@ -143,9 +193,54 @@ namespace CCXT.Simple.Exchanges.Upbit
         }
 
         /// <summary>
-        ///
+        /// Creates a JWT token with query hash for requests with parameters
         /// </summary>
-        /// <returns></returns>
+        /// <remarks>
+        /// <para>Required for all authenticated API calls with query parameters (since March 2022)</para>
+        /// <para>JWT payload includes: access_key, nonce, query_hash, query_hash_alg</para>
+        /// <para>The query_hash is SHA512 hash of the query string in lowercase hex format</para>
+        /// </remarks>
+        /// <param name="nonce">Unix timestamp in milliseconds for request uniqueness</param>
+        /// <param name="queryString">URL-encoded query string (e.g., "market=KRW-BTC&amp;side=bid")</param>
+        /// <returns>Bearer token string for Authorization header</returns>
+        public string CreateTokenWithQueryHash(long nonce, string queryString)
+        {
+            // Calculate SHA512 hash of query string (compatible with .NET Standard 2.0+)
+            string queryHashHex;
+            using (var sha512 = SHA512.Create())
+            {
+                var queryHashBytes = sha512.ComputeHash(Encoding.UTF8.GetBytes(queryString));
+                queryHashHex = BitConverter.ToString(queryHashBytes).Replace("-", "").ToLower();
+            }
+
+            var _payload = new JwtPayload
+            {
+                { "access_key", this.ApiKey },
+                { "nonce", nonce },
+                { "query_hash", queryHashHex },
+                { "query_hash_alg", "SHA512" }
+            };
+
+            var _security_key = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.Default.GetBytes(this.SecretKey));
+            var _credentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(_security_key, "HS256");
+
+            var _header = new JwtHeader(_credentials);
+            var _security_token = new JwtSecurityToken(_header, _payload);
+
+            var _jwt_token = new JwtSecurityTokenHandler().WriteToken(_security_token);
+            return "Bearer " + _jwt_token;
+        }
+
+        /// <summary>
+        /// Verifies and updates wallet states for all currencies
+        /// </summary>
+        /// <remarks>
+        /// <para>API Endpoint: GET /api/v1/status/wallet (CCX API)</para>
+        /// <para>Wallet states: working, paused, withdraw_only, deposit_only, unsupported</para>
+        /// <para>Loads currency information from local CoinState.json and merges with live wallet status</para>
+        /// </remarks>
+        /// <param name="tickers">Tickers object to update with wallet state information</param>
+        /// <returns>True if wallet states were successfully verified, false otherwise</returns>
         public async ValueTask<bool> VerifyStates(Tickers tickers)
         {
             var _result = false;
@@ -240,9 +335,14 @@ namespace CCXT.Simple.Exchanges.Upbit
         }
 
         /// <summary>
-        ///
+        /// Gets the current price for a specific trading symbol
         /// </summary>
-        /// <returns></returns>
+        /// <remarks>
+        /// API Endpoint: GET /v1/ticker?markets={symbol}
+        /// Rate Limit: 10 requests/second per IP (market group)
+        /// </remarks>
+        /// <param name="symbol">Trading pair symbol (e.g., "KRW-BTC")</param>
+        /// <returns>Current trade price of the symbol</returns>
         public async ValueTask<decimal> GetPrice(string symbol)
         {
             var _result = 0.0m;
@@ -268,10 +368,15 @@ namespace CCXT.Simple.Exchanges.Upbit
         }
 
         /// <summary>
-        /// Get Upbit Tickers
+        /// Gets current ticker data for multiple trading symbols
         /// </summary>
-        /// <param name="tickers"></param>
-        /// <returns></returns>
+        /// <remarks>
+        /// <para>API Endpoint: GET /v1/ticker?markets={symbols}</para>
+        /// <para>Rate Limit: 10 requests/second per IP (market group)</para>
+        /// <para>Automatically converts prices based on quote currency (KRW, USDT, BTC)</para>
+        /// </remarks>
+        /// <param name="tickers">Tickers object containing symbols to query and store results</param>
+        /// <returns>True if ticker data was successfully retrieved, false otherwise</returns>
         public async ValueTask<bool> GetTickers(Tickers tickers)
         {
             var _result = false;
@@ -321,10 +426,15 @@ namespace CCXT.Simple.Exchanges.Upbit
         }
 
         /// <summary>
-        ///
+        /// Gets 24-hour trading volume data for multiple trading symbols
         /// </summary>
-        /// <param name="tickers"></param>
-        /// <returns></returns>
+        /// <remarks>
+        /// <para>API Endpoint: GET /v1/ticker?markets={symbols}</para>
+        /// <para>Rate Limit: 10 requests/second per IP (market group)</para>
+        /// <para>Updates volume24h (24h KRW volume) and value24h (calculated from acc_trade_price_24h)</para>
+        /// </remarks>
+        /// <param name="tickers">Tickers object containing symbols to query and store volume results</param>
+        /// <returns>True if volume data was successfully retrieved, false otherwise</returns>
         public async ValueTask<bool> GetVolumes(Tickers tickers)
         {
             var _result = false;
@@ -381,10 +491,15 @@ namespace CCXT.Simple.Exchanges.Upbit
         }
 
         /// <summary>
-        ///
+        /// Gets comprehensive market data including price and volume for multiple symbols
         /// </summary>
-        /// <param name="tickers"></param>
-        /// <returns></returns>
+        /// <remarks>
+        /// <para>API Endpoint: GET /v1/ticker?markets={symbols}</para>
+        /// <para>Rate Limit: 10 requests/second per IP (market group)</para>
+        /// <para>Updates lastPrice, volume24h, volume1m with automatic currency conversion</para>
+        /// </remarks>
+        /// <param name="tickers">Tickers object containing symbols to query and store market data</param>
+        /// <returns>True if market data was successfully retrieved, false otherwise</returns>
         public async ValueTask<bool> GetMarkets(Tickers tickers)
         {
             var _result = false;
@@ -470,7 +585,7 @@ namespace CCXT.Simple.Exchanges.Upbit
 
                 var _response = await _client.GetAsync("/v1/ticker?markets=" + _request);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JsonConvert.DeserializeObject<List<UOrderboook>>(_jstring);
+                var _jarray = JsonConvert.DeserializeObject<List<UOrderbook>>(_jstring);
 
                 foreach (var o in _jarray)
                 {
@@ -525,7 +640,7 @@ namespace CCXT.Simple.Exchanges.Upbit
 
                 var _response = await _client.GetAsync("/v1/orderbook?markets=" + _request);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JsonConvert.DeserializeObject<List<UOrderboook>>(_jstring);
+                var _jarray = JsonConvert.DeserializeObject<List<UOrderbook>>(_jstring);
 
                 foreach (var o in _jarray)
                 {
@@ -555,10 +670,51 @@ namespace CCXT.Simple.Exchanges.Upbit
             return _result;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets order chance (trading possibility) information for a specific market
+        /// </summary>
+        /// <remarks>
+        /// <para>API Endpoint: GET /v1/orders/chance?market={market}</para>
+        /// <para>Rate Limit: 30 requests/second per account (exchange basic group)</para>
+        /// <para>Requires API key with order query permission</para>
+        /// <para>Returns fee rates, minimum order amounts, and account balances</para>
+        /// </remarks>
+        /// <param name="symbol">Market code (e.g., "KRW-BTC")</param>
+        /// <returns>OrderChance object containing fee rates, order limits, and account balances</returns>
+        public async ValueTask<OrderChance> GetOrderChance(string symbol)
+        {
+            var _result = new OrderChance();
+
+            try
+            {
+                var _params = new Dictionary<string, string>
+                {
+                    { "market", symbol }
+                };
+
+                var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
+                var _nonce = TimeExtensions.UnixTime;
+
+                // Create query string for JWT hash calculation
+                var queryString = string.Join("&", _params.Select(p => $"{p.Key}={p.Value}"));
+                var _token = CreateTokenWithQueryHash(_nonce, queryString);
+
+                _client.DefaultRequestHeaders.Add("Authorization", _token);
+
+                var _response = await _client.GetAsync($"/v1/orders/chance?{queryString}");
+                var _jstring = await _response.Content.ReadAsStringAsync();
+
+                _result = JsonConvert.DeserializeObject<OrderChance>(_jstring);
+            }
+            catch (Exception ex)
+            {
+                mainXchg.OnMessageEvent(ExchangeName, ex, 4210);
+            }
+
+            return _result;
+        }
 
         /// <inheritdoc />
-
         public async ValueTask<Orderbook> GetOrderbook(string symbol, int limit = 5)
         {
             var _result = new Orderbook();
@@ -568,7 +724,7 @@ namespace CCXT.Simple.Exchanges.Upbit
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync($"/v1/orderbook?markets={symbol}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JsonConvert.DeserializeObject<List<UOrderboook>>(_jstring);
+                var _jarray = JsonConvert.DeserializeObject<List<UOrderbook>>(_jstring);
 
                 if (_jarray != null && _jarray.Count > 0)
                 {
@@ -805,9 +961,19 @@ namespace CCXT.Simple.Exchanges.Upbit
             try
             {
                 var upbitSide = side == SideType.Bid ? "bid" : "ask";
-                var upbitOrderType = orderType.ToLower() == "market" ? "price" : "limit";
 
-                var _params = new Dictionary<string, string>
+                // Upbit order types: limit, price (market buy), market (market sell), best
+                string upbitOrderType;
+                if (orderType.ToLower() == "market")
+                {
+                    upbitOrderType = side == SideType.Bid ? "price" : "market";
+                }
+                else
+                {
+                    upbitOrderType = "limit";
+                }
+
+                var _params = new Dictionary<string, object>
                 {
                     { "market", symbol },
                     { "side", upbitSide },
@@ -819,13 +985,15 @@ namespace CCXT.Simple.Exchanges.Upbit
                     _params.Add("volume", amount.ToString());
                     _params.Add("price", price?.ToString() ?? "0");
                 }
-                else
+                else if (upbitOrderType == "price")
                 {
-                    // For market orders, use price for buy, volume for sell
-                    if (side == SideType.Bid)
-                        _params.Add("price", (amount * (price ?? 0)).ToString());
-                    else
-                        _params.Add("volume", amount.ToString());
+                    // Market buy: use total KRW amount
+                    _params.Add("price", (amount * (price ?? 0)).ToString());
+                }
+                else if (upbitOrderType == "market")
+                {
+                    // Market sell: use volume
+                    _params.Add("volume", amount.ToString());
                 }
 
                 if (!string.IsNullOrEmpty(clientOrderId))
@@ -834,25 +1002,19 @@ namespace CCXT.Simple.Exchanges.Upbit
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _nonce = TimeExtensions.UnixTime;
 
-                // Create JWT with query parameters
+                // Create query string for JWT hash calculation
                 var queryString = string.Join("&", _params.Select(p => $"{p.Key}={p.Value}"));
-                var _payload = new JwtPayload
-                {
-                    { "access_key", this.ApiKey },
-                    { "nonce", _nonce },
-                    { "query", queryString }
-                };
+                var _token = CreateTokenWithQueryHash(_nonce, queryString);
 
-                var _security_key = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.Default.GetBytes(this.SecretKey));
-                var _credentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(_security_key, "HS256");
-                var _header = new JwtHeader(_credentials);
-                var _security_token = new JwtSecurityToken(_header, _payload);
-                var _jwt_token = new JwtSecurityTokenHandler().WriteToken(_security_token);
+                _client.DefaultRequestHeaders.Add("Authorization", _token);
 
-                _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _jwt_token);
-
-                var content = new FormUrlEncodedContent(_params);
-                var _response = await _client.PostAsync("/v1/orders", content);
+                // Use JSON body (required since March 2022)
+                var jsonContent = new StringContent(
+                    JsonConvert.SerializeObject(_params),
+                    Encoding.UTF8,
+                    "application/json"
+                );
+                var _response = await _client.PostAsync("/v1/orders", jsonContent);
                 var _jstring = await _response.Content.ReadAsStringAsync();
                 var _jdata = Newtonsoft.Json.Linq.JObject.Parse(_jstring);
 
@@ -891,22 +1053,11 @@ namespace CCXT.Simple.Exchanges.Upbit
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _nonce = TimeExtensions.UnixTime;
 
-                // Create JWT with query parameters
+                // Create query string for JWT hash calculation
                 var queryString = string.Join("&", _params.Select(p => $"{p.Key}={p.Value}"));
-                var _payload = new JwtPayload
-                {
-                    { "access_key", this.ApiKey },
-                    { "nonce", _nonce },
-                    { "query", queryString }
-                };
+                var _token = CreateTokenWithQueryHash(_nonce, queryString);
 
-                var _security_key = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.Default.GetBytes(this.SecretKey));
-                var _credentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(_security_key, "HS256");
-                var _header = new JwtHeader(_credentials);
-                var _security_token = new JwtSecurityToken(_header, _payload);
-                var _jwt_token = new JwtSecurityTokenHandler().WriteToken(_security_token);
-
-                _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _jwt_token);
+                _client.DefaultRequestHeaders.Add("Authorization", _token);
 
                 var _response = await _client.DeleteAsync($"/v1/order?{queryString}");
 
@@ -940,22 +1091,11 @@ namespace CCXT.Simple.Exchanges.Upbit
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _nonce = TimeExtensions.UnixTime;
 
-                // Create JWT with query parameters
+                // Create query string for JWT hash calculation
                 var queryString = string.Join("&", _params.Select(p => $"{p.Key}={p.Value}"));
-                var _payload = new JwtPayload
-                {
-                    { "access_key", this.ApiKey },
-                    { "nonce", _nonce },
-                    { "query", queryString }
-                };
+                var _token = CreateTokenWithQueryHash(_nonce, queryString);
 
-                var _security_key = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.Default.GetBytes(this.SecretKey));
-                var _credentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(_security_key, "HS256");
-                var _header = new JwtHeader(_credentials);
-                var _security_token = new JwtSecurityToken(_header, _payload);
-                var _jwt_token = new JwtSecurityTokenHandler().WriteToken(_security_token);
-
-                _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _jwt_token);
+                _client.DefaultRequestHeaders.Add("Authorization", _token);
 
                 var _response = await _client.GetAsync($"/v1/order?{queryString}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
@@ -987,10 +1127,7 @@ namespace CCXT.Simple.Exchanges.Upbit
 
             try
             {
-                var _params = new Dictionary<string, string>
-                {
-                    { "state", "wait" }
-                };
+                var _params = new Dictionary<string, string>();
 
                 if (!string.IsNullOrEmpty(symbol))
                     _params.Add("market", symbol);
@@ -998,24 +1135,27 @@ namespace CCXT.Simple.Exchanges.Upbit
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _nonce = TimeExtensions.UnixTime;
 
-                // Create JWT with query parameters
-                var queryString = string.Join("&", _params.Select(p => $"{p.Key}={p.Value}"));
-                var _payload = new JwtPayload
+                // Create query string for JWT hash calculation
+                var queryString = _params.Count > 0
+                    ? string.Join("&", _params.Select(p => $"{p.Key}={p.Value}"))
+                    : "";
+
+                string _token;
+                string _url;
+                if (string.IsNullOrEmpty(queryString))
                 {
-                    { "access_key", this.ApiKey },
-                    { "nonce", _nonce },
-                    { "query", queryString }
-                };
+                    _token = CreateToken(_nonce);
+                    _url = "/v1/orders/open";
+                }
+                else
+                {
+                    _token = CreateTokenWithQueryHash(_nonce, queryString);
+                    _url = $"/v1/orders/open?{queryString}";
+                }
 
-                var _security_key = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.Default.GetBytes(this.SecretKey));
-                var _credentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(_security_key, "HS256");
-                var _header = new JwtHeader(_credentials);
-                var _security_token = new JwtSecurityToken(_header, _payload);
-                var _jwt_token = new JwtSecurityTokenHandler().WriteToken(_security_token);
+                _client.DefaultRequestHeaders.Add("Authorization", _token);
 
-                _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _jwt_token);
-
-                var _response = await _client.GetAsync($"/v1/orders?{queryString}");
+                var _response = await _client.GetAsync(_url);
                 var _jstring = await _response.Content.ReadAsStringAsync();
                 var _jarray = Newtonsoft.Json.Linq.JArray.Parse(_jstring);
 
@@ -1053,7 +1193,6 @@ namespace CCXT.Simple.Exchanges.Upbit
             {
                 var _params = new Dictionary<string, string>
                 {
-                    { "state", "done" },
                     { "limit", limit.ToString() }
                 };
 
@@ -1063,24 +1202,14 @@ namespace CCXT.Simple.Exchanges.Upbit
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _nonce = TimeExtensions.UnixTime;
 
-                // Create JWT with query parameters
+                // Create query string for JWT hash calculation
                 var queryString = string.Join("&", _params.Select(p => $"{p.Key}={p.Value}"));
-                var _payload = new JwtPayload
-                {
-                    { "access_key", this.ApiKey },
-                    { "nonce", _nonce },
-                    { "query", queryString }
-                };
+                var _token = CreateTokenWithQueryHash(_nonce, queryString);
 
-                var _security_key = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.Default.GetBytes(this.SecretKey));
-                var _credentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(_security_key, "HS256");
-                var _header = new JwtHeader(_credentials);
-                var _security_token = new JwtSecurityToken(_header, _payload);
-                var _jwt_token = new JwtSecurityTokenHandler().WriteToken(_security_token);
+                _client.DefaultRequestHeaders.Add("Authorization", _token);
 
-                _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _jwt_token);
-
-                var _response = await _client.GetAsync($"/v1/orders?{queryString}");
+                // Use new /v1/orders/closed endpoint
+                var _response = await _client.GetAsync($"/v1/orders/closed?{queryString}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
                 var _jarray = Newtonsoft.Json.Linq.JArray.Parse(_jstring);
 
@@ -1132,22 +1261,11 @@ namespace CCXT.Simple.Exchanges.Upbit
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _nonce = TimeExtensions.UnixTime;
 
-                // Create JWT with query parameters
+                // Create query string for JWT hash calculation
                 var queryString = string.Join("&", _params.Select(p => $"{p.Key}={p.Value}"));
-                var _payload = new JwtPayload
-                {
-                    { "access_key", this.ApiKey },
-                    { "nonce", _nonce },
-                    { "query", queryString }
-                };
+                var _token = CreateTokenWithQueryHash(_nonce, queryString);
 
-                var _security_key = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.Default.GetBytes(this.SecretKey));
-                var _credentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(_security_key, "HS256");
-                var _header = new JwtHeader(_credentials);
-                var _security_token = new JwtSecurityToken(_header, _payload);
-                var _jwt_token = new JwtSecurityTokenHandler().WriteToken(_security_token);
-
-                _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _jwt_token);
+                _client.DefaultRequestHeaders.Add("Authorization", _token);
 
                 var _response = await _client.GetAsync($"/v1/orders?{queryString}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
@@ -1191,7 +1309,7 @@ namespace CCXT.Simple.Exchanges.Upbit
 
             try
             {
-                var _params = new Dictionary<string, string>
+                var _params = new Dictionary<string, object>
                 {
                     { "currency", currency }
                 };
@@ -1202,32 +1320,26 @@ namespace CCXT.Simple.Exchanges.Upbit
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _nonce = TimeExtensions.UnixTime;
 
-                // Create JWT with query parameters
+                // Create query string for JWT hash calculation
                 var queryString = string.Join("&", _params.Select(p => $"{p.Key}={p.Value}"));
-                var _payload = new JwtPayload
-                {
-                    { "access_key", this.ApiKey },
-                    { "nonce", _nonce },
-                    { "query", queryString }
-                };
+                var _token = CreateTokenWithQueryHash(_nonce, queryString);
 
-                var _security_key = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.Default.GetBytes(this.SecretKey));
-                var _credentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(_security_key, "HS256");
-                var _header = new JwtHeader(_credentials);
-                var _security_token = new JwtSecurityToken(_header, _payload);
-                var _jwt_token = new JwtSecurityTokenHandler().WriteToken(_security_token);
+                _client.DefaultRequestHeaders.Add("Authorization", _token);
 
-                _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _jwt_token);
-
-                var content = new FormUrlEncodedContent(_params);
-                var _response = await _client.PostAsync("/v1/deposits/generate_coin_address", content);
+                // Use JSON body (required since March 2022)
+                var jsonContent = new StringContent(
+                    JsonConvert.SerializeObject(_params),
+                    Encoding.UTF8,
+                    "application/json"
+                );
+                var _response = await _client.PostAsync("/v1/deposits/generate_coin_address", jsonContent);
                 var _jstring = await _response.Content.ReadAsStringAsync();
                 var _jdata = Newtonsoft.Json.Linq.JObject.Parse(_jstring);
 
                 _result.currency = currency;
                 _result.address = _jdata.Value<string>("deposit_address");
                 _result.tag = _jdata.Value<string>("secondary_address");
-                _result.network = network;
+                _result.network = network ?? _jdata.Value<string>("net_type");
             }
             catch (Exception ex)
             {
@@ -1244,7 +1356,7 @@ namespace CCXT.Simple.Exchanges.Upbit
 
             try
             {
-                var _params = new Dictionary<string, string>
+                var _params = new Dictionary<string, object>
                 {
                     { "currency", currency },
                     { "amount", amount.ToString() },
@@ -1261,25 +1373,19 @@ namespace CCXT.Simple.Exchanges.Upbit
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _nonce = TimeExtensions.UnixTime;
 
-                // Create JWT with query parameters
+                // Create query string for JWT hash calculation
                 var queryString = string.Join("&", _params.Select(p => $"{p.Key}={p.Value}"));
-                var _payload = new JwtPayload
-                {
-                    { "access_key", this.ApiKey },
-                    { "nonce", _nonce },
-                    { "query", queryString }
-                };
+                var _token = CreateTokenWithQueryHash(_nonce, queryString);
 
-                var _security_key = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.Default.GetBytes(this.SecretKey));
-                var _credentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(_security_key, "HS256");
-                var _header = new JwtHeader(_credentials);
-                var _security_token = new JwtSecurityToken(_header, _payload);
-                var _jwt_token = new JwtSecurityTokenHandler().WriteToken(_security_token);
+                _client.DefaultRequestHeaders.Add("Authorization", _token);
 
-                _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _jwt_token);
-
-                var content = new FormUrlEncodedContent(_params);
-                var _response = await _client.PostAsync("/v1/withdraws/coin", content);
+                // Use JSON body (required since March 2022)
+                var jsonContent = new StringContent(
+                    JsonConvert.SerializeObject(_params),
+                    Encoding.UTF8,
+                    "application/json"
+                );
+                var _response = await _client.PostAsync("/v1/withdraws/coin", jsonContent);
                 var _jstring = await _response.Content.ReadAsStringAsync();
                 var _jdata = Newtonsoft.Json.Linq.JObject.Parse(_jstring);
 
@@ -1288,7 +1394,7 @@ namespace CCXT.Simple.Exchanges.Upbit
                 _result.amount = amount;
                 _result.address = address;
                 _result.tag = tag;
-                _result.network = network;
+                _result.network = network ?? _jdata.Value<string>("net_type");
                 _result.status = _jdata.Value<string>("state");
                 _result.fee = _jdata.Value<decimal>("fee");
                 _result.timestamp = DateTimeOffset.Parse(_jdata.Value<string>("created_at")).ToUnixTimeMilliseconds();
@@ -1320,22 +1426,11 @@ namespace CCXT.Simple.Exchanges.Upbit
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _nonce = TimeExtensions.UnixTime;
 
-                // Create JWT with query parameters
+                // Create query string for JWT hash calculation
                 var queryString = string.Join("&", _params.Select(p => $"{p.Key}={p.Value}"));
-                var _payload = new JwtPayload
-                {
-                    { "access_key", this.ApiKey },
-                    { "nonce", _nonce },
-                    { "query", queryString }
-                };
+                var _token = CreateTokenWithQueryHash(_nonce, queryString);
 
-                var _security_key = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.Default.GetBytes(this.SecretKey));
-                var _credentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(_security_key, "HS256");
-                var _header = new JwtHeader(_credentials);
-                var _security_token = new JwtSecurityToken(_header, _payload);
-                var _jwt_token = new JwtSecurityTokenHandler().WriteToken(_security_token);
-
-                _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _jwt_token);
+                _client.DefaultRequestHeaders.Add("Authorization", _token);
 
                 var _response = await _client.GetAsync($"/v1/deposits?{queryString}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
@@ -1383,22 +1478,11 @@ namespace CCXT.Simple.Exchanges.Upbit
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _nonce = TimeExtensions.UnixTime;
 
-                // Create JWT with query parameters
+                // Create query string for JWT hash calculation
                 var queryString = string.Join("&", _params.Select(p => $"{p.Key}={p.Value}"));
-                var _payload = new JwtPayload
-                {
-                    { "access_key", this.ApiKey },
-                    { "nonce", _nonce },
-                    { "query", queryString }
-                };
+                var _token = CreateTokenWithQueryHash(_nonce, queryString);
 
-                var _security_key = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.Default.GetBytes(this.SecretKey));
-                var _credentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(_security_key, "HS256");
-                var _header = new JwtHeader(_credentials);
-                var _security_token = new JwtSecurityToken(_header, _payload);
-                var _jwt_token = new JwtSecurityTokenHandler().WriteToken(_security_token);
-
-                _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _jwt_token);
+                _client.DefaultRequestHeaders.Add("Authorization", _token);
 
                 var _response = await _client.GetAsync($"/v1/withdraws?{queryString}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
