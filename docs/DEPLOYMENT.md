@@ -72,9 +72,9 @@ $env:NUGET_API_KEY = "YOUR_API_KEY_HERE"
 Before publishing, update the version in `src/ccxt.simple.csproj`:
 
 ```xml
-<Version>1.1.10</Version>
-<AssemblyVersion>1.1.10.0</AssemblyVersion>
-<FileVersion>1.1.10.0</FileVersion>
+<Version>1.1.11</Version>
+<AssemblyVersion>1.1.11.0</AssemblyVersion>
+<FileVersion>1.1.11.0</FileVersion>
 ```
 
 ## Security Notes
@@ -125,7 +125,7 @@ dotnet test tests/CCXT.Simple.Tests.csproj -c Release
 dotnet pack src/ccxt.simple.csproj -c Release
 
 # 4. Publish to NuGet
-dotnet nuget push src/bin/Release/CCXT.Simple.1.1.10.nupkg \
+dotnet nuget push src/bin/Release/CCXT.Simple.1.1.11.nupkg \
   --api-key YOUR_API_KEY \
   --source https://api.nuget.org/v3/index.json
 ```

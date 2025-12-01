@@ -578,9 +578,9 @@ foreach (var f in files) {
 #### 2. Version Update
 Edit `src/ccxt.simple.csproj`:
 ```xml
-<Version>1.1.10</Version>
-<AssemblyVersion>1.1.10.0</AssemblyVersion>
-<FileVersion>1.1.10.0</FileVersion>
+<Version>1.1.11</Version>
+<AssemblyVersion>1.1.11.0</AssemblyVersion>
+<FileVersion>1.1.11.0</FileVersion>
 <PackageReleaseNotes>...</PackageReleaseNotes>
 ```
 
