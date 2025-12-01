@@ -361,11 +361,16 @@ public async ValueTask<OrderInfo> GetOrder(string orderId, string symbol = null,
 
 ## 🚀 Reference Implementations
 
-Reference implementations:
-- **Binance**: `src/exchanges/us/binance/XBinance.cs` - Complete feature implementation
+Reference implementations (all FULL status with 16/16 methods):
+- **Binance**: `src/exchanges/us/binance/XBinance.cs` - Complete feature implementation, world's largest exchange
 - **Kraken**: `src/exchanges/us/kraken/XKraken.cs` - Complex API with excellent error handling
-- **Bitstamp**: `src/exchanges/gb/bitstamp/XBitstamp.cs` - Partial (Market Data + some standardization). Account/Trading/Funding mapping in progress
-- **Bithumb**: `src/exchanges/kr/bithumb/XBithumb.cs` - Korean exchange specific features
+- **Bitstamp**: `src/exchanges/gb/bitstamp/XBitstamp.cs` - Full implementation with clean API design
+- **Bithumb**: `src/exchanges/kr/bithumb/XBithumb.cs` - Korean exchange with JWT authentication
+- **Bybit**: `src/exchanges/cn/bybit/XBybit.cs` - V5 API implementation with structured model classes
+- **Coinbase**: `src/exchanges/us/coinbase/XCoinbase.cs` - US exchange with stable account + trading
+- **Coinone**: `src/exchanges/kr/coinone/XCoinone.cs` - Korean KRW spot market
+- **OKX**: `src/exchanges/cn/okx/XOkx.cs` - Integrated spot + derivatives
+- **Upbit**: `src/exchanges/kr/upbit/XUpbit.cs` - Korean exchange with JWT authentication
 
 ---
 
@@ -652,4 +657,4 @@ For questions or support regarding exchange implementations:
 
 ---
 
-*Last Updated: 2025-08-14*
+*Last Updated: 2025-12-01*

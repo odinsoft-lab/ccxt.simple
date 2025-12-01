@@ -265,10 +265,12 @@ __pycache__/
 .claude/
 .mcp.json
 ./CLAUD.local.md
+./CLAUD.md
 nul
 appsettings.Development.json
 *.trx
 PROMPTS.txt
+cache/
 
 # Allow documentation release notes to be tracked
 !docs/releases/
