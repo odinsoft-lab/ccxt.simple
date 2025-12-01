@@ -167,7 +167,7 @@ Sources:
 
 ---
 
-## Summary Statistics (Last Updated: 2025-08-13)
+## Summary Statistics (Last Updated: 2025-12-01)
 
 ### Implementation Status
 - **FULL**: 9 exchanges (8.2%)
@@ -176,6 +176,8 @@ Sources:
   - Huobi, Korbit, Kucoin
 - **SKELETON**: 98 exchanges (89.1%)
 - **TOTAL**: 110 exchanges
+- **NotImplementedException Count**: 2,197 across 103 files
+- **Test Coverage**: 90 tests across 7 test files
 
 ### High Priority Implementation Targets
 
@@ -208,7 +210,9 @@ Sources:
 
 ### Implementation Recommendations
 - ✅ **Completed**: Bybit (2025-08-13) - Now FULL implementation with V5 API
-- Start with Tier 3 (Kucoin, Huobi) to quickly achieve 2 more FULL implementations
+- ✅ **Completed**: Bithumb (2025-08-14) - FULL implementation with JWT auth
+- ✅ **Completed**: Upbit (2025-08-14) - FULL implementation with JWT auth
+- Start with Tier 3 (Kucoin, Huobi, Korbit) to quickly achieve 3 more FULL implementations
 - BinanceUs can leverage existing Binance implementation for rapid development
 - Bitget as next major growing platform after completing partial implementations
 - Consider parallel development if resources allow

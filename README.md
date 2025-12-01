@@ -1,18 +1,18 @@
 # CCXT.Simple
 
 [![NuGet](https://img.shields.io/nuget/v/CCXT.Simple.svg)](https://www.nuget.org/packages/CCXT.Simple/)
-[![.NET](https://img.shields.io/badge/.NET-8.0%20%7C%209.0-blue.svg)](https://dotnet.microsoft.com/)
+[![.NET](https://img.shields.io/badge/.NET-8.0%20%7C%209.0%20%7C%2010.0-blue.svg)](https://dotnet.microsoft.com/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
 [![Downloads](https://img.shields.io/nuget/dt/CCXT.Simple.svg)](https://www.nuget.org/packages/CCXT.Simple/)
 
-> 🚀 **Modern .NET cryptocurrency trading library** - Unified API access to 110 exchange adapters (8 FULL, 3 PARTIAL, 99 SKELETON) with a focus on simplicity and performance.
+> 🚀 **Modern .NET cryptocurrency trading library** - Unified API access to 110 exchange adapters (9 FULL, 3 PARTIAL, 98 SKELETON) with a focus on simplicity and performance.
 
 ## ✨ Key Features
 
 - **🎯 Unified Interface** - Same API across all exchanges
 - **⚡ High Performance** - `ValueTask<T>` async patterns, HTTP client pooling
 - **🔒 Type Safe** - Strong typing with comprehensive data models
-- **🌍 Global Coverage** - 110 exchange adapters (8 fully validated, 3 in progress)
+- **🌍 Global Coverage** - 110 exchange adapters (9 fully validated, 3 in progress)
 - **📊 Complete API** - Market data, trading, account management, funding operations
 
 ## 🚀 Quick Start
@@ -41,8 +41,8 @@ var order = await binance.PlaceOrder("BTCUSDT", SideType.Buy, "limit", 0.001m, 5
 
 ## 🏢 Exchange Support
 
-### ✅ Fully Functional (8 exchanges)
-**OKX** | **Bitstamp** | **Coinbase** | **Coinone** | **Bithumb** | **Kraken** | **Binance** | **Upbit**
+### ✅ Fully Functional (9 exchanges)
+**Binance** | **Bitstamp** | **Bithumb** | **Bybit** | **Coinbase** | **Coinone** | **Kraken** | **OKX** | **Upbit**
 
 ### 🌓 Partial / In Progress (3)
 **Huobi** | **KuCoin** | **Korbit**
@@ -50,7 +50,7 @@ var order = await binance.PlaceOrder("BTCUSDT", SideType.Buy, "limit", 0.001m, 5
 ### 🚧 Priority Development Queue
 **Bitfinex** • **Gemini** • **Poloniex** • **Mexc** • **Deribit** • **Bitmex**
 
-### 📋 Skeleton Ready (99 exchanges)
+### 📋 Skeleton Ready (98 exchanges)
 Remaining adapters are generated skeletons awaiting implementation.
 
 > 📖 **[View complete exchange list and status →](docs/EXCHANGES.md)**
@@ -112,15 +112,15 @@ We welcome contributions! **Need a specific exchange implemented?** [Create an i
 ```bash
 git clone https://github.com/odinsoft-lab/ccxt.simple.git
 cd ccxt.simple
-dotnet build              # Build solution  
-dotnet test               # Run 73 tests
+dotnet build              # Build solution
+dotnet test               # Run 90 tests
 ```
 
 ## 📊 Project Status
 
-- **Current Version**: 1.1.10 (.NET 8.0 & 9.0 & 10.0)
+- **Current Version**: 1.1.10 (.NET Standard 2.0/2.1, .NET 8.0, 9.0, 10.0)
 - **Architecture**: Thread-safe, event-driven, REST API focused
-- **Test Coverage**: 73 tests passing
+- **Test Coverage**: 90 tests passing across 7 test files
 - **Active Development**: Monthly updates, community-driven priorities
 
 ## 👥 Team
