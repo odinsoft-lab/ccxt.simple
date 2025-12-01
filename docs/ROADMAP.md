@@ -8,10 +8,10 @@
 - **SKELETON Implementations**: 98 (89.1%)
 - **NotImplementedException Count**: 2,197 across 103 files
 - **Target Framework**: .NET Standard 2.0/2.1, .NET 8.0, .NET 9.0, .NET 10.0
-- **Current Version**: 1.1.10
+- **Current Version**: 1.1.11
 - **Test Coverage**: 90 tests passing across 7 test files
 
-## ✅ Completed Features (v1.1.10)
+## ✅ Completed Features (v1.1.11)
 
 - ✅ 9 fully implemented exchanges: Binance, Bitstamp, Bithumb, Bybit, Coinbase, Coinone, Kraken, OKX, Upbit
 - ✅ 3 partial implementations: Huobi, Korbit, Kucoin
