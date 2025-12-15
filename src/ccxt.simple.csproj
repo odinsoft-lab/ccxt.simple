@@ -10,9 +10,9 @@
 		<RootNamespace>CCXT.Simple</RootNamespace>
 
 		<!-- Versioning -->
-		<Version>1.1.11</Version>
-		<AssemblyVersion>1.1.11.9</AssemblyVersion>
-		<FileVersion>1.1.11.9</FileVersion>
+		<Version>1.1.12</Version>
+		<AssemblyVersion>1.1.12.0</AssemblyVersion>
+		<FileVersion>1.1.12.0</FileVersion>
 
 		<!-- Package Information -->
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
@@ -30,13 +30,12 @@
 		<PackageIcon>ccxt.simple.api.png</PackageIcon>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageTags>bitcoin;cryptocurrency;exchange;trading;market-data;ccxt;exchange-markets;altcoin;api;arbitrage;bot;crypto;e-commerce;invest;library;strategy;trade;merchant;cryptocoin</PackageTags>
-		<PackageReleaseNotes>v1.1.11 - Upbit: Fixed JWT authentication with SHA512 query hash (required since March 2022)
-Upbit: Changed POST requests from FormUrlEncoded to JSON body format
-Upbit: Updated order endpoints to use new /v1/orders/open and /v1/orders/closed APIs
-Upbit: Added GetOrderChance API for fee rates and minimum order amounts
-Upbit: Added comprehensive XML documentation for all model classes
-Scripts: Improved publish-nuget.ps1 with symbol package support and version display
-Maintenance: Code quality improvements and documentation updates</PackageReleaseNotes>
+		<PackageReleaseNotes>v1.1.12 - Fix: Clear Authorization header in HttpClientService to prevent accumulation bug
+Fix: Resolved InvalidOperationException on consecutive authenticated API calls
+HttpClientService: Reset Authorization header before returning cached HttpClient
+Samples: Added Upbit sample for testing GetOpenOrders and trading APIs
+Samples: Added environment variables support for API key configuration
+Samples: Added README.md with usage instructions</PackageReleaseNotes>
 
 		<!-- Repository Information -->
 		<RepositoryUrl>https://github.com/odinsoft-lab/ccxt.simple</RepositoryUrl>

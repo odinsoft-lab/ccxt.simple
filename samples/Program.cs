@@ -10,6 +10,7 @@ namespace CCXT.Simple.Samples
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false)
+                .AddEnvironmentVariables()
                 .Build();
 
             Console.WriteLine("===== CCXT.Simple Exchange Samples =====");
@@ -20,8 +21,9 @@ namespace CCXT.Simple.Samples
             Console.WriteLine("3. Coinone  - Basic sample");
             Console.WriteLine("4. Kraken   - Standard API sample");
             Console.WriteLine("5. Bitstamp - European market leader");
+            Console.WriteLine("6. Upbit    - Open orders test");
             Console.WriteLine();
-            Console.Write("Select exchange (1-5) or 'q' to quit: ");
+            Console.Write("Select exchange (1-6) or 'q' to quit: ");
 
             var choice = Console.ReadLine();
 
@@ -42,12 +44,15 @@ namespace CCXT.Simple.Samples
                 case "5":
                     await RunBitstampSample(configuration);
                     break;
+                case "6":
+                    await RunUpbitSample(configuration);
+                    break;
                 case "q":
                 case "Q":
                     Console.WriteLine("Exiting...");
                     return;
                 default:
-                    Console.WriteLine("Invalid choice. Please select 1-5 or 'q' to quit.");
+                    Console.WriteLine("Invalid choice. Please select 1-6 or 'q' to quit.");
                     break;
             }
 
@@ -83,6 +88,12 @@ namespace CCXT.Simple.Samples
         static async Task RunBitstampSample(IConfiguration configuration)
         {
             var sample = new Samples.BitstampSample(configuration);
+            await sample.Run();
+        }
+
+        static async Task RunUpbitSample(IConfiguration configuration)
+        {
+            var sample = new Samples.UpbitSample(configuration);
             await sample.Run();
         }
     }
