@@ -75,6 +75,7 @@ namespace CCXT.Simple.Core.Services
             _lastUsed.AddOrUpdate(key, DateTimeOffset.UtcNow, (k, v) => DateTimeOffset.UtcNow);
 
             // Clear authentication headers to prevent accumulation
+            client.DefaultRequestHeaders.Remove("Authorization");
             client.DefaultRequestHeaders.Authorization = null;
 
             return client;
