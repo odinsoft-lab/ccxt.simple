@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace CCXT.Simple.Exchanges.Bybit.Public
 {
@@ -7,61 +7,61 @@ namespace CCXT.Simple.Exchanges.Bybit.Public
     /// </summary>
     public class V5InstrumentInfo
     {
-        [JsonProperty("symbol")]
+        [JsonPropertyName("symbol")]
         public string Symbol { get; set; }
 
-        [JsonProperty("baseCoin")]
+        [JsonPropertyName("baseCoin")]
         public string BaseCoin { get; set; }
 
-        [JsonProperty("quoteCoin")]
+        [JsonPropertyName("quoteCoin")]
         public string QuoteCoin { get; set; }
 
-        [JsonProperty("innovation")]
+        [JsonPropertyName("innovation")]
         public string Innovation { get; set; }
 
-        [JsonProperty("status")]
+        [JsonPropertyName("status")]
         public string Status { get; set; }
 
-        [JsonProperty("marginTrading")]
+        [JsonPropertyName("marginTrading")]
         public string MarginTrading { get; set; }
 
-        [JsonProperty("lotSizeFilter")]
+        [JsonPropertyName("lotSizeFilter")]
         public LotSizeFilter LotSizeFilter { get; set; }
 
-        [JsonProperty("priceFilter")]
+        [JsonPropertyName("priceFilter")]
         public PriceFilter PriceFilter { get; set; }
     }
 
     public class LotSizeFilter
     {
-        [JsonProperty("basePrecision")]
+        [JsonPropertyName("basePrecision")]
         public string BasePrecision { get; set; }
 
-        [JsonProperty("quotePrecision")]
+        [JsonPropertyName("quotePrecision")]
         public string QuotePrecision { get; set; }
 
-        [JsonProperty("minOrderQty")]
+        [JsonPropertyName("minOrderQty")]
         public string MinOrderQty { get; set; }
 
-        [JsonProperty("maxOrderQty")]
+        [JsonPropertyName("maxOrderQty")]
         public string MaxOrderQty { get; set; }
 
-        [JsonProperty("minOrderAmt")]
+        [JsonPropertyName("minOrderAmt")]
         public string MinOrderAmt { get; set; }
 
-        [JsonProperty("maxOrderAmt")]
+        [JsonPropertyName("maxOrderAmt")]
         public string MaxOrderAmt { get; set; }
     }
 
     public class PriceFilter
     {
-        [JsonProperty("tickSize")]
+        [JsonPropertyName("tickSize")]
         public string TickSize { get; set; }
 
-        [JsonProperty("minPrice")]
+        [JsonPropertyName("minPrice")]
         public string MinPrice { get; set; }
 
-        [JsonProperty("maxPrice")]
+        [JsonPropertyName("maxPrice")]
         public string MaxPrice { get; set; }
     }
 }

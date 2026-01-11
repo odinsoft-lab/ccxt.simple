@@ -1,4 +1,4 @@
-// == CCXT-SIMPLE-META-BEGIN ==
+﻿// == CCXT-SIMPLE-META-BEGIN ==
 // EXCHANGE: latoken
 // IMPLEMENTATION_STATUS: SKELETON
 // PROGRESS_STATUS: TODO
@@ -8,7 +8,6 @@
 // == CCXT-SIMPLE-META-END ==
 
 using CCXT.Simple.Core.Converters;
-using Newtonsoft.Json;
 using System.Security.Cryptography;
 using System.Text;
 using CCXT.Simple.Core.Interfaces;

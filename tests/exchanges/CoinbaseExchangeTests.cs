@@ -2,7 +2,8 @@ using CCXT.Simple.Core;
 using CCXT.Simple.Core.Converters;
 using CCXT.Simple.Exchanges.Coinbase;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Xunit;
 using Xunit.Abstractions;
 using CCXT.Simple.Models.Funding;
@@ -49,8 +50,7 @@ namespace CCXT.Simple.Tests.Exchanges
             // Assert
             Assert.NotNull(coinbase);
             Assert.Equal("coinbase", coinbase.ExchangeName);
-            Assert.Equal("https://api.exchange.coinbase.com", coinbase.ExchangeUrl);
-            Assert.Equal("https://api.pro.coinbase.com", coinbase.ExchangeUrlPro);
+            Assert.Equal("https://api.coinbase.com", coinbase.ExchangeUrl);
             Assert.Equal(_apiKey, coinbase.ApiKey);
             Assert.Equal(_secretKey, coinbase.SecretKey);
             Assert.Equal(_passPhrase, coinbase.PassPhrase);
@@ -425,8 +425,7 @@ namespace CCXT.Simple.Tests.Exchanges
         {
             // Assert
             Assert.Equal("coinbase", _coinbase.ExchangeName);
-            Assert.Equal("https://api.exchange.coinbase.com", _coinbase.ExchangeUrl);
-            Assert.Equal("https://api.pro.coinbase.com", _coinbase.ExchangeUrlPro);
+            Assert.Equal("https://api.coinbase.com", _coinbase.ExchangeUrl);
             Assert.NotNull(_coinbase.mainXchg);
             Assert.Same(_exchange, _coinbase.mainXchg);
         }
@@ -504,7 +503,7 @@ namespace CCXT.Simple.Tests.Exchanges
                     _output.WriteLine("VerifyStates returned false (API may be unavailable)");
                 }
             }
-            catch (JsonSerializationException jsonEx)
+            catch (JsonException jsonEx)
             {
                 // This is the error we're looking for - network_confirmations deserialization issue
                 _output.WriteLine($"JSON Serialization Error (network_confirmations issue): {jsonEx.Message}");
@@ -562,7 +561,7 @@ namespace CCXT.Simple.Tests.Exchanges
         public void ScientificNotation_ShouldBeParsedCorrectly()
         {
             // Test that scientific notation values like "8.9e-7" are parsed correctly
-            // This test verifies the XDecimalNullConverter handles scientific notation
+            // This test verifies the StjDecimalConverter handles scientific notation
             
             var testJson = @"{
                 ""min_size"": ""8.9e-7"",
@@ -573,10 +572,10 @@ namespace CCXT.Simple.Tests.Exchanges
             
             try
             {
-                var testObject = JsonConvert.DeserializeObject<TestDecimalObject>(testJson);
-                
+                var testObject = JsonSerializer.Deserialize<TestDecimalObject>(testJson, _exchange.StjOptions);
+
                 Assert.NotNull(testObject);
-                Assert.Equal(0.00000089m, testObject.min_size);
+                Assert.Equal(0.00000089m, testObject!.min_size);
                 Assert.Equal(0.000000000123m, testObject.max_precision);
                 Assert.Equal(550m, testObject.min_withdrawal_amount);
                 Assert.Equal(1000000m, testObject.max_withdrawal_amount);
@@ -597,16 +596,16 @@ namespace CCXT.Simple.Tests.Exchanges
         // Test class for scientific notation parsing
         private class TestDecimalObject
         {
-            [JsonConverter(typeof(XDecimalNullConverter))]
+            [JsonConverter(typeof(StjDecimalConverter))]
             public decimal min_size { get; set; }
             
-            [JsonConverter(typeof(XDecimalNullConverter))]
+            [JsonConverter(typeof(StjDecimalConverter))]
             public decimal max_precision { get; set; }
             
-            [JsonConverter(typeof(XDecimalNullConverter))]
+            [JsonConverter(typeof(StjDecimalConverter))]
             public decimal min_withdrawal_amount { get; set; }
             
-            [JsonConverter(typeof(XDecimalNullConverter))]
+            [JsonConverter(typeof(StjDecimalConverter))]
             public decimal max_withdrawal_amount { get; set; }
         }
 
@@ -638,10 +637,10 @@ namespace CCXT.Simple.Tests.Exchanges
             
             try
             {
-                var tickerData = JsonConvert.DeserializeObject<CoinbaseTickerData>(tickerJson);
+                var tickerData = JsonSerializer.Deserialize<CoinbaseTickerData>(tickerJson, _exchange.StjOptions);
                 
                 Assert.NotNull(tickerData);
-                Assert.Equal("ticker", tickerData.type);
+                Assert.Equal("ticker", tickerData!.type);
                 Assert.Equal("MATIC-USDT", tickerData.product_id);
                 Assert.Equal(0.237m, tickerData.price);
                 Assert.Equal(0.229m, tickerData.open_24h);
@@ -678,41 +677,41 @@ namespace CCXT.Simple.Tests.Exchanges
             public long sequence { get; set; }
             public string product_id { get; set; } = "";
             
-            [JsonConverter(typeof(XDecimalNullConverter))]
+            [JsonConverter(typeof(StjDecimalConverter))]
             public decimal price { get; set; }
             
-            [JsonConverter(typeof(XDecimalNullConverter))]
+            [JsonConverter(typeof(StjDecimalConverter))]
             public decimal open_24h { get; set; }
             
-            [JsonConverter(typeof(XDecimalNullConverter))]
+            [JsonConverter(typeof(StjDecimalConverter))]
             public decimal volume_24h { get; set; }
             
-            [JsonConverter(typeof(XDecimalNullConverter))]
+            [JsonConverter(typeof(StjDecimalConverter))]
             public decimal low_24h { get; set; }
             
-            [JsonConverter(typeof(XDecimalNullConverter))]
+            [JsonConverter(typeof(StjDecimalConverter))]
             public decimal high_24h { get; set; }
             
-            [JsonConverter(typeof(XDecimalNullConverter))]
+            [JsonConverter(typeof(StjDecimalConverter))]
             public decimal volume_30d { get; set; }
             
-            [JsonConverter(typeof(XDecimalNullConverter))]
+            [JsonConverter(typeof(StjDecimalConverter))]
             public decimal best_bid { get; set; }
             
-            [JsonConverter(typeof(XDecimalNullConverter))]
+            [JsonConverter(typeof(StjDecimalConverter))]
             public decimal best_bid_size { get; set; }
             
-            [JsonConverter(typeof(XDecimalNullConverter))]
+            [JsonConverter(typeof(StjDecimalConverter))]
             public decimal best_ask { get; set; }
             
-            [JsonConverter(typeof(XDecimalNullConverter))]
+            [JsonConverter(typeof(StjDecimalConverter))]
             public decimal best_ask_size { get; set; }
 
             public string side { get; set; } = "";
             public string time { get; set; } = "";
             public int trade_id { get; set; }
             
-            [JsonConverter(typeof(XDecimalNullConverter))]
+            [JsonConverter(typeof(StjDecimalConverter))]
             public decimal last_size { get; set; }
         }
 
@@ -739,10 +738,10 @@ namespace CCXT.Simple.Tests.Exchanges
             
             try
             {
-                var tickerData = JsonConvert.DeserializeObject<CoinbaseTickerData>(tickerJson);
+                var tickerData = JsonSerializer.Deserialize<CoinbaseTickerData>(tickerJson, _exchange.StjOptions);
                 
                 Assert.NotNull(tickerData);
-                Assert.Equal("ticker", tickerData.type);
+                Assert.Equal("ticker", tickerData!.type);
                 Assert.Equal("GRT-BTC", tickerData.product_id);
                 
                 // Test scientific notation parsing

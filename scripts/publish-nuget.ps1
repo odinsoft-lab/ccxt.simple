@@ -97,43 +97,53 @@ Write-InfoMsg "========================================="
 Write-Host ""
 
 # Check if API key is provided or exists in environment
+# In DryRun mode, API key is not required
 if ([string]::IsNullOrEmpty($ApiKey)) {
     $ApiKey = $env:NUGET_API_KEY
     if ([string]::IsNullOrEmpty($ApiKey)) {
-        Write-ErrorMsg "Error: NuGet API key not provided!"
-        Write-Host ""
-        Write-Host "Please provide API key using one of these methods:"
-        Write-Host "  1. Pass as parameter: .\publish-nuget.ps1 -ApiKey YOUR_KEY"
-        Write-Host "  2. Set environment variable: `$env:NUGET_API_KEY = 'YOUR_KEY'"
-        Write-Host ""
-        Write-Host "Get your API key from: https://www.nuget.org/account/apikeys"
-        exit 1
+        if ($DryRun) {
+            Write-WarningMsg "No API key provided (not required for DryRun mode)"
+        } else {
+            Write-ErrorMsg "Error: NuGet API key not provided!"
+            Write-Host ""
+            Write-Host "Please provide API key using one of these methods:"
+            Write-Host "  1. Pass as parameter: .\publish-nuget.ps1 -ApiKey YOUR_KEY"
+            Write-Host "  2. Set environment variable: `$env:NUGET_API_KEY = 'YOUR_KEY'"
+            Write-Host ""
+            Write-Host "Get your API key from: https://www.nuget.org/account/apikeys"
+            exit 1
+        }
     } else {
         Write-InfoMsg "Using API key from environment variable NUGET_API_KEY"
     }
 }
 
-# Check if dotnet CLI is available
+# Step 1/6: Check prerequisites
+Write-Host ""
+Write-InfoMsg "[Step 1/6] Checking prerequisites..."
 try {
     $dotnetVersion = dotnet --version
-    Write-InfoMsg "Found .NET SDK version: $dotnetVersion"
+    Write-SuccessMsg "  Found .NET SDK version: $dotnetVersion"
 } catch {
     Write-ErrorMsg "Error: .NET SDK not found! Please install from https://dotnet.microsoft.com/download"
     exit 1
 }
 
-# Clean previous packages
+# Step 2/6: Clean previous packages
 Write-Host ""
-Write-InfoMsg "Cleaning previous packages..."
+Write-InfoMsg "[Step 2/6] Cleaning previous packages..."
 if (Test-Path $OutputDirectory) {
     Remove-Item "$OutputDirectory\*.nupkg" -Force -ErrorAction SilentlyContinue
     Remove-Item "$OutputDirectory\*.snupkg" -Force -ErrorAction SilentlyContinue
+    Write-SuccessMsg "  Previous packages cleaned"
+} else {
+    Write-SuccessMsg "  No previous packages to clean"
 }
 
-# Build the project
+# Step 3/6: Build the project
 if (-not $SkipBuild) {
     Write-Host ""
-    Write-InfoMsg "Building project in $Configuration mode..."
+    Write-InfoMsg "[Step 3/6] Building project in $Configuration mode..."
 
     $buildCommand = "dotnet build `"$ProjectPath`" --configuration $Configuration"
     Write-Host "  Command: $buildCommand"
@@ -143,15 +153,16 @@ if (-not $SkipBuild) {
         Write-ErrorMsg "Build failed! Please fix build errors and try again."
         exit 1
     }
-    Write-SuccessMsg "Build completed successfully!"
+    Write-SuccessMsg "  Build completed successfully!"
 } else {
-    Write-WarningMsg "Skipping build step (using existing build)"
+    Write-Host ""
+    Write-WarningMsg "[Step 3/6] Skipping build step (using existing build)"
 }
 
-# Run tests (optional)
+# Step 4/6: Run tests (optional)
 if (-not $SkipTests) {
     Write-Host ""
-    Write-InfoMsg "Running tests..."
+    Write-InfoMsg "[Step 4/6] Running tests..."
     $TestPath = Join-Path $RootDir "tests\CCXT.Simple.Tests.csproj"
 
     # Build test project first
@@ -173,18 +184,19 @@ if (-not $SkipTests) {
                 exit 1
             }
         } else {
-            Write-SuccessMsg "All tests passed!"
+            Write-SuccessMsg "  All tests passed!"
         }
     } else {
         Write-WarningMsg "Test build failed. Skipping tests."
     }
 } else {
-    Write-WarningMsg "Skipping tests (use -SkipTests flag to suppress this warning)"
+    Write-Host ""
+    Write-WarningMsg "[Step 4/6] Skipping tests (use -SkipTests flag to suppress this warning)"
 }
 
-# Create NuGet package
+# Step 5/6: Create NuGet package
 Write-Host ""
-Write-InfoMsg "Creating NuGet package..."
+Write-InfoMsg "[Step 5/6] Creating NuGet package..."
 
 $packCommand = "dotnet pack `"$ProjectPath`" --configuration $Configuration --no-build --include-symbols --include-source -p:SymbolPackageFormat=snupkg"
 Write-Host "  Command: $packCommand"
@@ -194,7 +206,7 @@ if ($LASTEXITCODE -ne 0) {
     Write-ErrorMsg "Package creation failed!"
     exit 1
 }
-Write-SuccessMsg "Package created successfully!"
+Write-SuccessMsg "  Package created successfully!"
 
 # Find the created package (search recursively for multi-target builds)
 $packageFile = Get-ChildItem -Path $OutputDirectory -Filter "*.nupkg" -Recurse |
@@ -236,13 +248,15 @@ if ($null -ne $symbolPackageFile) {
     Write-Host "  Symbol Size: $([math]::Round($symbolPackageFile.Length / 1KB, 2)) KB"
 }
 
-# Publish to NuGet
+# Step 6/6: Publish to NuGet
 if ($DryRun) {
     Write-Host ""
-    Write-WarningMsg "DRY RUN MODE - Package will NOT be published"
-    Write-InfoMsg "To publish, run without -DryRun flag"
+    Write-InfoMsg "[Step 6/6] Publishing to NuGet.org..."
+    Write-WarningMsg "  DRY RUN MODE - Package will NOT be published"
+    Write-InfoMsg "  To publish, run without -DryRun flag"
 } else {
     Write-Host ""
+    Write-InfoMsg "[Step 6/6] Publishing to NuGet.org..."
     Write-WarningMsg "About to publish package to NuGet.org"
     Write-Host "  Package: $packageName"
     Write-Host "  Version: $packageVersion"

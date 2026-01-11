@@ -1,273 +1,273 @@
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace CCXT.Simple.Exchanges.Bitstamp
 {
     // Trading pair information
     internal class BitstampTradingPair
     {
-        [JsonProperty("name")]
+        [JsonPropertyName("name")]
         public string Name { get; set; }
 
-        [JsonProperty("url_symbol")]
+        [JsonPropertyName("url_symbol")]
         public string UrlSymbol { get; set; }
 
-        [JsonProperty("base_decimals")]
+        [JsonPropertyName("base_decimals")]
         public int BaseDecimals { get; set; }
 
-        [JsonProperty("counter_decimals")]
+        [JsonPropertyName("counter_decimals")]
         public int CounterDecimals { get; set; }
 
-        [JsonProperty("instant_order_counter_decimals")]
+        [JsonPropertyName("instant_order_counter_decimals")]
         public int InstantOrderCounterDecimals { get; set; }
 
-        [JsonProperty("minimum_order")]
+        [JsonPropertyName("minimum_order")]
         public string MinimumOrder { get; set; }
 
-        [JsonProperty("trading")]
+        [JsonPropertyName("trading")]
         public string Trading { get; set; }
 
-        [JsonProperty("instant_and_market_orders")]
+        [JsonPropertyName("instant_and_market_orders")]
         public string InstantAndMarketOrders { get; set; }
 
-        [JsonProperty("description")]
+        [JsonPropertyName("description")]
         public string Description { get; set; }
     }
 
     // Ticker data
     internal class BitstampTicker
     {
-        [JsonProperty("last")]
+        [JsonPropertyName("last")]
         public decimal Last { get; set; }
 
-        [JsonProperty("high")]
+        [JsonPropertyName("high")]
         public decimal High { get; set; }
 
-        [JsonProperty("low")]
+        [JsonPropertyName("low")]
         public decimal Low { get; set; }
 
-        [JsonProperty("vwap")]
+        [JsonPropertyName("vwap")]
         public decimal Vwap { get; set; }
 
-        [JsonProperty("volume")]
+        [JsonPropertyName("volume")]
         public decimal Volume { get; set; }
 
-        [JsonProperty("bid")]
+        [JsonPropertyName("bid")]
         public decimal Bid { get; set; }
 
-        [JsonProperty("ask")]
+        [JsonPropertyName("ask")]
         public decimal Ask { get; set; }
 
-        [JsonProperty("timestamp")]
+        [JsonPropertyName("timestamp")]
         public long Timestamp { get; set; }
 
-        [JsonProperty("open")]
+        [JsonPropertyName("open")]
         public decimal Open { get; set; }
     }
 
     // Order book data
     internal class BitstampOrderbook
     {
-        [JsonProperty("timestamp")]
+        [JsonPropertyName("timestamp")]
         public long Timestamp { get; set; }
 
-        [JsonProperty("microtimestamp")]
+        [JsonPropertyName("microtimestamp")]
         public long MicroTimestamp { get; set; }
 
-        [JsonProperty("bids")]
+        [JsonPropertyName("bids")]
         public List<List<decimal>> Bids { get; set; }
 
-        [JsonProperty("asks")]
+        [JsonPropertyName("asks")]
         public List<List<decimal>> Asks { get; set; }
     }
 
     // OHLC data
     internal class BitstampOHLC
     {
-        [JsonProperty("data")]
+        [JsonPropertyName("data")]
         public BitstampOHLCData Data { get; set; }
     }
 
     internal class BitstampOHLCData
     {
-        [JsonProperty("ohlc")]
+        [JsonPropertyName("ohlc")]
         public List<BitstampCandle> Ohlc { get; set; }
 
-        [JsonProperty("pair")]
+        [JsonPropertyName("pair")]
         public string Pair { get; set; }
     }
 
     internal class BitstampCandle
     {
-        [JsonProperty("high")]
+        [JsonPropertyName("high")]
         public string High { get; set; }
 
-        [JsonProperty("timestamp")]
+        [JsonPropertyName("timestamp")]
         public string Timestamp { get; set; }
 
-        [JsonProperty("volume")]
+        [JsonPropertyName("volume")]
         public string Volume { get; set; }
 
-        [JsonProperty("low")]
+        [JsonPropertyName("low")]
         public string Low { get; set; }
 
-        [JsonProperty("close")]
+        [JsonPropertyName("close")]
         public string Close { get; set; }
 
-        [JsonProperty("open")]
+        [JsonPropertyName("open")]
         public string Open { get; set; }
     }
 
     // Transactions/Trades
     internal class BitstampTransaction
     {
-        [JsonProperty("date")]
+        [JsonPropertyName("date")]
         public long Date { get; set; }
 
-        [JsonProperty("tid")]
+        [JsonPropertyName("tid")]
         public long Tid { get; set; }
 
-        [JsonProperty("amount")]
+        [JsonPropertyName("amount")]
         public decimal Amount { get; set; }
 
-        [JsonProperty("type")]
+        [JsonPropertyName("type")]
         public int Type { get; set; }
 
-        [JsonProperty("price")]
+        [JsonPropertyName("price")]
         public decimal Price { get; set; }
     }
 
     // Account balance
     internal class BitstampBalance
     {
-        [JsonProperty("usd_balance")]
+        [JsonPropertyName("usd_balance")]
         public decimal UsdBalance { get; set; }
 
-        [JsonProperty("btc_balance")]
+        [JsonPropertyName("btc_balance")]
         public decimal BtcBalance { get; set; }
 
-        [JsonProperty("eur_balance")]
+        [JsonPropertyName("eur_balance")]
         public decimal EurBalance { get; set; }
 
-        [JsonProperty("xrp_balance")]
+        [JsonPropertyName("xrp_balance")]
         public decimal XrpBalance { get; set; }
 
-        [JsonProperty("ltc_balance")]
+        [JsonPropertyName("ltc_balance")]
         public decimal LtcBalance { get; set; }
 
-        [JsonProperty("eth_balance")]
+        [JsonPropertyName("eth_balance")]
         public decimal EthBalance { get; set; }
 
-        [JsonProperty("bch_balance")]
+        [JsonPropertyName("bch_balance")]
         public decimal BchBalance { get; set; }
 
-        [JsonProperty("usd_available")]
+        [JsonPropertyName("usd_available")]
         public decimal UsdAvailable { get; set; }
 
-        [JsonProperty("btc_available")]
+        [JsonPropertyName("btc_available")]
         public decimal BtcAvailable { get; set; }
 
-        [JsonProperty("eur_available")]
+        [JsonPropertyName("eur_available")]
         public decimal EurAvailable { get; set; }
 
-        [JsonProperty("xrp_available")]
+        [JsonPropertyName("xrp_available")]
         public decimal XrpAvailable { get; set; }
 
-        [JsonProperty("ltc_available")]
+        [JsonPropertyName("ltc_available")]
         public decimal LtcAvailable { get; set; }
 
-        [JsonProperty("eth_available")]
+        [JsonPropertyName("eth_available")]
         public decimal EthAvailable { get; set; }
 
-        [JsonProperty("bch_available")]
+        [JsonPropertyName("bch_available")]
         public decimal BchAvailable { get; set; }
 
-        [JsonProperty("usd_reserved")]
+        [JsonPropertyName("usd_reserved")]
         public decimal UsdReserved { get; set; }
 
-        [JsonProperty("btc_reserved")]
+        [JsonPropertyName("btc_reserved")]
         public decimal BtcReserved { get; set; }
 
-        [JsonProperty("eur_reserved")]
+        [JsonPropertyName("eur_reserved")]
         public decimal EurReserved { get; set; }
 
-        [JsonProperty("xrp_reserved")]
+        [JsonPropertyName("xrp_reserved")]
         public decimal XrpReserved { get; set; }
 
-        [JsonProperty("ltc_reserved")]
+        [JsonPropertyName("ltc_reserved")]
         public decimal LtcReserved { get; set; }
 
-        [JsonProperty("eth_reserved")]
+        [JsonPropertyName("eth_reserved")]
         public decimal EthReserved { get; set; }
 
-        [JsonProperty("bch_reserved")]
+        [JsonPropertyName("bch_reserved")]
         public decimal BchReserved { get; set; }
 
-        [JsonProperty("fee")]
+        [JsonPropertyName("fee")]
         public decimal Fee { get; set; }
     }
 
     // Order information
     internal class BitstampOrder
     {
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public long Id { get; set; }
 
-        [JsonProperty("datetime")]
+        [JsonPropertyName("datetime")]
         public string DateTime { get; set; }
 
-        [JsonProperty("type")]
+        [JsonPropertyName("type")]
         public string Type { get; set; }
 
-        [JsonProperty("price")]
+        [JsonPropertyName("price")]
         public decimal Price { get; set; }
 
-        [JsonProperty("amount")]
+        [JsonPropertyName("amount")]
         public decimal Amount { get; set; }
 
-        [JsonProperty("market")]
+        [JsonPropertyName("market")]
         public string Market { get; set; }
 
-        [JsonProperty("client_order_id")]
+        [JsonPropertyName("client_order_id")]
         public string ClientOrderId { get; set; }
     }
 
     // Order status
     internal class BitstampOrderStatus
     {
-        [JsonProperty("status")]
+        [JsonPropertyName("status")]
         public string Status { get; set; }
 
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public long Id { get; set; }
 
-        [JsonProperty("amount_remaining")]
+        [JsonPropertyName("amount_remaining")]
         public decimal AmountRemaining { get; set; }
 
-        [JsonProperty("transactions")]
+        [JsonPropertyName("transactions")]
         public List<BitstampOrderTransaction> Transactions { get; set; }
     }
 
     internal class BitstampOrderTransaction
     {
-        [JsonProperty("fee")]
+        [JsonPropertyName("fee")]
         public decimal Fee { get; set; }
 
-        [JsonProperty("price")]
+        [JsonPropertyName("price")]
         public decimal Price { get; set; }
 
-        [JsonProperty("datetime")]
+        [JsonPropertyName("datetime")]
         public string DateTime { get; set; }
 
-        [JsonProperty("usd")]
+        [JsonPropertyName("usd")]
         public decimal Usd { get; set; }
 
-        [JsonProperty("btc")]
+        [JsonPropertyName("btc")]
         public decimal Btc { get; set; }
 
-        [JsonProperty("tid")]
+        [JsonPropertyName("tid")]
         public long Tid { get; set; }
 
-        [JsonProperty("type")]
+        [JsonPropertyName("type")]
         public string Type { get; set; }
     }
 }

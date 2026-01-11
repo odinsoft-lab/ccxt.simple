@@ -9,7 +9,7 @@
 
 using CCXT.Simple.Core.Services;
 using CCXT.Simple.Core.Converters;
-using Newtonsoft.Json;
+using System.Text.Json;
 using CCXT.Simple.Core.Extensions;
 using CCXT.Simple.Core.Interfaces;
 using CCXT.Simple.Core;
@@ -70,7 +70,7 @@ namespace CCXT.Simple.Exchanges.GateIO
 
                 var _response = await _client.GetAsync("/api/v4/spot/currency_pairs");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JsonConvert.DeserializeObject<List<CoinInfor>>(_jstring);
+                var _jarray = JsonSerializer.Deserialize<List<CoinInfor>>(_jstring, mainXchg.StjOptions);
 
                 var _queue_info = mainXchg.GetXInfors(ExchangeName);
 
@@ -117,7 +117,7 @@ namespace CCXT.Simple.Exchanges.GateIO
 
                 var _response = await _client.GetAsync("/api/v4/spot/currencies");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JsonConvert.DeserializeObject<List<CoinState>>(_jstring);
+                var _jarray = JsonSerializer.Deserialize<List<CoinState>>(_jstring, mainXchg.StjOptions);
 
                 foreach (var c in _jarray)
                 {
@@ -211,7 +211,7 @@ namespace CCXT.Simple.Exchanges.GateIO
 
                 var _response = await _client.GetAsync("/api/v4/spot/tickers");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JsonConvert.DeserializeObject<List<RaTicker>>(_jstring, mainXchg.JsonSettings);
+                var _jarray = JsonSerializer.Deserialize<List<RaTicker>>(_jstring, mainXchg.StjOptions);
 
                 for (var i = 0; i < tickers.items.Count; i++)
                 {

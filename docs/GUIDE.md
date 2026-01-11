@@ -69,7 +69,8 @@ public class XBitstamp : IExchange
     {
         // API calls return exchange-specific format
         var response = await CallAPI("/order/" + id);
-        return JsonConvert.DeserializeObject<BitstampOrderResponse>(response);
+        using var doc = JsonDocument.Parse(response);
+        return ParseBitstampOrder(doc.RootElement);
     }
     
     // 2. Interface methods return standard models
@@ -181,12 +182,12 @@ namespace CCXT.Simple.Exchanges.{ExchangeName}
     // Exchange-specific response model (internal use)
     internal class {ExchangeName}OrderResponse
     {
-        [JsonProperty("order_id")]
+        [JsonPropertyName("order_id")]
         public string OrderId { get; set; }
-        
-        [JsonProperty("status")]
+
+        [JsonPropertyName("status")]
         public string Status { get; set; }
-        
+
         // ... exchange-specific fields
     }
 }
@@ -203,19 +204,20 @@ public async ValueTask<OrderInfo> PlaceOrder(string symbol, SideType side, strin
         Side = ConvertSideToExchangeFormat(side),
         // ... map to exchange format
     };
-    
+
     // 2. Call exchange API
     var response = await PostAuthenticatedRequest("/order", exchangeRequest);
-    var exchangeOrder = JsonConvert.DeserializeObject<ExchangeOrderResponse>(response);
-    
-    // 3. Important: Return standard model
+    using var doc = JsonDocument.Parse(response);
+    var root = doc.RootElement;
+
+    // 3. Important: Return standard model using JsonExtensions
     return new OrderInfo  // Use src/models/trading/OrderInfo.cs
     {
-        id = exchangeOrder.OrderId,
+        id = root.GetStringSafe("order_id"),
         symbol = symbol,
         side = side,
         type = orderType,
-        status = MapExchangeStatus(exchangeOrder.Status),
+        status = MapExchangeStatus(root.GetStringSafe("status")),
         amount = amount,
         price = price,
         timestamp = TimeExtensions.UnixTime
@@ -296,11 +298,14 @@ public async ValueTask<OrderInfo> GetOrder(string orderId, string symbol = null,
     {
         // API call and transformation
         var response = await CallAPI($"/order/{orderId}");
-        var exchangeOrder = JsonConvert.DeserializeObject<ExchangeOrder>(response);
-        
-        // Transform to standard model
+        using var doc = JsonDocument.Parse(response);
+        var root = doc.RootElement;
+
+        // Transform to standard model using JsonExtensions
         return new OrderInfo
         {
+            id = root.GetStringSafe("order_id"),
+            status = root.GetStringSafe("status"),
             // ... mapping
         };
     }
@@ -308,7 +313,7 @@ public async ValueTask<OrderInfo> GetOrder(string orderId, string symbol = null,
     {
         // Error logging
         mainXchg.OnMessageEvent(ExchangeName, ex.Message, 9999);
-        
+
         // Return default value (not null)
         return new OrderInfo();
     }
@@ -578,9 +583,9 @@ foreach (var f in files) {
 #### 2. Version Update
 Edit `src/ccxt.simple.csproj`:
 ```xml
-<Version>1.1.11</Version>
-<AssemblyVersion>1.1.11.0</AssemblyVersion>
-<FileVersion>1.1.11.0</FileVersion>
+<Version>1.1.12</Version>
+<AssemblyVersion>1.1.12.0</AssemblyVersion>
+<FileVersion>1.1.12.0</FileVersion>
 <PackageReleaseNotes>...</PackageReleaseNotes>
 ```
 
@@ -657,4 +662,4 @@ For questions or support regarding exchange implementations:
 
 ---
 
-*Last Updated: 2025-12-01*
+*Last Updated: 2026-01-12*

@@ -7,10 +7,9 @@
 // LAST_REVIEWED: 2025-08-13
 // == CCXT-SIMPLE-META-END ==
 
+using System.Text.Json;
 using CCXT.Simple.Core.Services;
 using CCXT.Simple.Core.Converters;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using CCXT.Simple.Core.Extensions;
 using CCXT.Simple.Core.Interfaces;
 using CCXT.Simple.Core;
@@ -86,7 +85,7 @@ namespace CCXT.Simple.Exchanges.Bittrex
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync("/v3/markets");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JsonConvert.DeserializeObject<List<CoinInfor>>(_jstring);
+                var _jarray = System.Text.Json.JsonSerializer.Deserialize<List<CoinInfor>>(_jstring, mainXchg.StjOptions);
 
                 var _queue_info = mainXchg.GetXInfors(ExchangeName);
 
@@ -130,7 +129,7 @@ namespace CCXT.Simple.Exchanges.Bittrex
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync("/v3/currencies");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JsonConvert.DeserializeObject<List<CoinState>>(_jstring);
+                var _jarray = System.Text.Json.JsonSerializer.Deserialize<List<CoinState>>(_jstring, mainXchg.StjOptions);
 
                 foreach (var c in _jarray)
                 {
@@ -221,7 +220,17 @@ namespace CCXT.Simple.Exchanges.Bittrex
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync("/v3/markets/tickers");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JArray.Parse(_jstring);
+
+                using var _doc = JsonDocument.Parse(_jstring);
+
+                // Build lookup dictionary for fast access
+                var _tickerData = new Dictionary<string, JsonElement>();
+                foreach (var item in _doc.RootElement.EnumerateArray())
+                {
+                    var symbol = item.GetProperty("symbol").GetString();
+                    if (symbol != null)
+                        _tickerData[symbol] = item;
+                }
 
                 for (var i = 0; i < tickers.items.Count; i++)
                 {
@@ -229,13 +238,12 @@ namespace CCXT.Simple.Exchanges.Bittrex
                     if (_ticker.symbol == "X")
                         continue;
 
-                    var _jitem = _jdata.SingleOrDefault(x => x["symbol"].ToString() == _ticker.symbol);
-                    if (_jitem != null)
+                    if (_tickerData.TryGetValue(_ticker.symbol, out var _jitem))
                     {
-                        var _last_price = _jitem.Value<decimal>("lastTradeRate");
+                        var _last_price = _jitem.GetDecimalSafe("lastTradeRate");
                         {
-                            var _ask_price = _jitem.Value<decimal>("askRate");
-                            var _bid_price = _jitem.Value<decimal>("bidRate");
+                            var _ask_price = _jitem.GetDecimalSafe("askRate");
+                            var _bid_price = _jitem.GetDecimalSafe("bidRate");
 
                             if (_ticker.quoteName == "USDT" || _ticker.quoteName == "USDC" || _ticker.quoteName == "USD")
                             {
@@ -278,7 +286,17 @@ namespace CCXT.Simple.Exchanges.Bittrex
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync("/v3/markets/summaries");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JArray.Parse(_jstring);
+
+                using var _doc = JsonDocument.Parse(_jstring);
+
+                // Build lookup dictionary for fast access
+                var _volumeData = new Dictionary<string, JsonElement>();
+                foreach (var item in _doc.RootElement.EnumerateArray())
+                {
+                    var symbol = item.GetProperty("symbol").GetString();
+                    if (symbol != null)
+                        _volumeData[symbol] = item;
+                }
 
                 for (var i = 0; i < tickers.items.Count; i++)
                 {
@@ -286,10 +304,9 @@ namespace CCXT.Simple.Exchanges.Bittrex
                     if (_ticker.symbol == "X")
                         continue;
 
-                    var _jitem = _jdata.SingleOrDefault(x => x["symbol"].ToString() == _ticker.symbol);
-                    if (_jitem != null)
+                    if (_volumeData.TryGetValue(_ticker.symbol, out var _jitem))
                     {
-                        var _volume = _jitem.Value<decimal>("quoteVolume");
+                        var _volume = _jitem.GetDecimalSafe("quoteVolume");
                         {
                             var _prev_volume24h = _ticker.previous24h;
                             var _next_timestamp = _ticker.timestamp + 60 * 1000;
@@ -301,7 +318,8 @@ namespace CCXT.Simple.Exchanges.Bittrex
 
                             _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
 
-                            var _curr_timestamp = TimeExtensions.ConvertToUnixTimeMilli(_jitem.Value<DateTime>("updatedAt"));
+                            var _updatedAt = _jitem.GetStringSafe("updatedAt");
+                            var _curr_timestamp = !string.IsNullOrEmpty(_updatedAt) ? TimeExtensions.ConvertToUnixTimeMilli(DateTime.Parse(_updatedAt)) : 0;
                             if (_curr_timestamp > _next_timestamp)
                             {
                                 _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);

@@ -15,8 +15,8 @@ using CCXT.Simple.Models.Account;
 using CCXT.Simple.Models.Funding;
 using CCXT.Simple.Models.Market;
 using CCXT.Simple.Models.Trading;
-using Newtonsoft.Json;
 using System.Globalization;
+using System.Text.Json;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -133,7 +133,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
                 _response.EnsureSuccessStatusCode();
                 
                 var _content = await _response.Content.ReadAsStringAsync();
-                var _pairs = JsonConvert.DeserializeObject<List<BitstampTradingPair>>(_content);
+                var _pairs = JsonSerializer.Deserialize<List<BitstampTradingPair>>(_content, mainXchg.StjOptions);
                 
                 _result = _pairs?.Any() == true;
                 if (_result)
@@ -189,7 +189,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
                 _response.EnsureSuccessStatusCode();
                 
                 var _content = await _response.Content.ReadAsStringAsync();
-                var _ticker = JsonConvert.DeserializeObject<BitstampTicker>(_content);
+                var _ticker = JsonSerializer.Deserialize<BitstampTicker>(_content, mainXchg.StjOptions);
                 
                 return _ticker?.Last ?? 0m;
             }
@@ -226,7 +226,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
                 _response.EnsureSuccessStatusCode();
                 
                 var _content = await _response.Content.ReadAsStringAsync();
-                var _orderbook = JsonConvert.DeserializeObject<BitstampOrderbook>(_content);
+                var _orderbook = JsonSerializer.Deserialize<BitstampOrderbook>(_content, mainXchg.StjOptions);
                 
                 if (_orderbook != null)
                 {
@@ -268,7 +268,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
                 _response.EnsureSuccessStatusCode();
                 
                 var _content = await _response.Content.ReadAsStringAsync();
-                var _ohlc = JsonConvert.DeserializeObject<BitstampOHLC>(_content);
+                var _ohlc = JsonSerializer.Deserialize<BitstampOHLC>(_content, mainXchg.StjOptions);
                 
                 var _result = new List<decimal[]>();
                 if (_ohlc?.Data?.Ohlc != null)
@@ -327,7 +327,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
                 _response.EnsureSuccessStatusCode();
                 
                 var _content = await _response.Content.ReadAsStringAsync();
-                var _transactions = JsonConvert.DeserializeObject<List<BitstampTransaction>>(_content);
+                var _transactions = JsonSerializer.Deserialize<List<BitstampTransaction>>(_content, mainXchg.StjOptions);
                 
                 var _result = new List<TradeData>();
                 if (_transactions != null)
@@ -360,7 +360,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
             try
             {
                 var _content = await PostAuthenticatedRequest("/v2/balance/");
-                var _balance = JsonConvert.DeserializeObject<BitstampBalance>(_content);
+                var _balance = JsonSerializer.Deserialize<BitstampBalance>(_content, mainXchg.StjOptions);
                 
                 var _result = new Dictionary<string, BalanceInfo>();
                 if (_balance != null)
@@ -403,7 +403,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
             try
             {
                 var _content = await PostAuthenticatedRequest("/v2/balance/");
-                var _balance = JsonConvert.DeserializeObject<BitstampBalance>(_content);
+                var _balance = JsonSerializer.Deserialize<BitstampBalance>(_content, mainXchg.StjOptions);
                 
                 if (_balance != null)
                 {
@@ -457,7 +457,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
                 }
                 
                 var _content = await PostAuthenticatedRequest(_endpoint, _parameters);
-                var _order = JsonConvert.DeserializeObject<BitstampOrder>(_content);
+                var _order = JsonSerializer.Deserialize<BitstampOrder>(_content, mainXchg.StjOptions);
                 
                 if (_order != null)
                 {
@@ -495,7 +495,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
                 };
                 
                 var _content = await PostAuthenticatedRequest("/v2/cancel_order/", _parameters);
-                var _response = JsonConvert.DeserializeObject<BitstampOrder>(_content);
+                var _response = JsonSerializer.Deserialize<BitstampOrder>(_content, mainXchg.StjOptions);
                 
                 // If we get a valid response with the order ID, cancellation was successful
                 return _response?.Id.ToString() == orderId;
@@ -518,7 +518,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
                 };
                 
                 var _content = await PostAuthenticatedRequest("/v2/order_status/", _parameters);
-                var _orderStatus = JsonConvert.DeserializeObject<BitstampOrderStatus>(_content);
+                var _orderStatus = JsonSerializer.Deserialize<BitstampOrderStatus>(_content, mainXchg.StjOptions);
                 
                 if (_orderStatus != null)
                 {
@@ -577,7 +577,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
                 }
                 
                 var _content = await PostAuthenticatedRequest("/v2/open_orders/all/", _parameters);
-                var _orders = JsonConvert.DeserializeObject<List<BitstampOrder>>(_content);
+                var _orders = JsonSerializer.Deserialize<List<BitstampOrder>>(_content, mainXchg.StjOptions);
                 
                 var _result = new List<OrderInfo>();
                 if (_orders != null)
@@ -631,7 +631,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
                 }
                 
                 var _content = await PostAuthenticatedRequest("/v2/user_transactions/", _parameters);
-                var _transactions = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(_content);
+                var _transactions = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(_content, mainXchg.StjOptions);
                 
                 var _result = new List<OrderInfo>();
                 if (_transactions != null)
@@ -687,7 +687,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
                 }
                 
                 var _content = await PostAuthenticatedRequest("/v2/user_transactions/", _parameters);
-                var _transactions = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(_content);
+                var _transactions = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(_content, mainXchg.StjOptions);
                 
                 var _result = new List<TradeInfo>();
                 if (_transactions != null)
@@ -735,7 +735,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
                 var _endpoint = $"/v2/{_currencyLower}_address/";
                 
                 var _content = await PostAuthenticatedRequest(_endpoint);
-                var _response = JsonConvert.DeserializeObject<Dictionary<string, object>>(_content);
+                var _response = JsonSerializer.Deserialize<Dictionary<string, object>>(_content, mainXchg.StjOptions);
                 
                 if (_response != null && _response.ContainsKey("address"))
                 {
@@ -781,7 +781,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
                 }
                 
                 var _content = await PostAuthenticatedRequest(_endpoint, _parameters);
-                var _response = JsonConvert.DeserializeObject<Dictionary<string, object>>(_content);
+                var _response = JsonSerializer.Deserialize<Dictionary<string, object>>(_content, mainXchg.StjOptions);
                 
                 if (_response != null)
                 {
@@ -820,7 +820,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
                 };
                 
                 var _content = await PostAuthenticatedRequest("/v2/user_transactions/", _parameters);
-                var _transactions = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(_content);
+                var _transactions = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(_content, mainXchg.StjOptions);
                 
                 var _result = new List<DepositInfo>();
                 if (_transactions != null)
@@ -871,7 +871,7 @@ namespace CCXT.Simple.Exchanges.Bitstamp
                 };
                 
                 var _content = await PostAuthenticatedRequest("/v2/user_transactions/", _parameters);
-                var _transactions = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(_content);
+                var _transactions = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(_content, mainXchg.StjOptions);
                 
                 var _result = new List<WithdrawalInfo>();
                 if (_transactions != null)

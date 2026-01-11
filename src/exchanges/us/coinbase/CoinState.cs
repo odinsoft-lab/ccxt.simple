@@ -1,5 +1,4 @@
 ﻿using CCXT.Simple.Core.Converters;
-using Newtonsoft.Json;
 
 namespace CCXT.Simple.Exchanges.Coinbase
 {
@@ -120,14 +119,12 @@ namespace CCXT.Simple.Exchanges.Coinbase
         /// <summary>
         /// Minimum withdrawal amount on this network.
         /// </summary>
-        [JsonConverter(typeof(XDecimalNullConverter))]
         public decimal min_withdrawal_amount { get; set; }
 
 
         /// <summary>
         /// Maximum withdrawal amount on this network.
         /// </summary>
-        [JsonConverter(typeof(XDecimalNullConverter))]
         public decimal max_withdrawal_amount { get; set; }
     }
 
@@ -171,14 +168,12 @@ namespace CCXT.Simple.Exchanges.Coinbase
         /// <summary>
         /// Minimum withdrawal amount on this network.
         /// </summary>
-        [JsonConverter(typeof(XDecimalNullConverter))]
         public decimal min_withdrawal_amount { get; set; }
 
 
         /// <summary>
         /// Maximum withdrawal amount on this network.
         /// </summary>
-        [JsonConverter(typeof(XDecimalNullConverter))]
         public decimal max_withdrawal_amount { get; set; }
 
         /// <summary>

@@ -10,9 +10,9 @@
 		<RootNamespace>CCXT.Simple</RootNamespace>
 
 		<!-- Versioning -->
-		<Version>1.1.12</Version>
-		<AssemblyVersion>1.1.12.0</AssemblyVersion>
-		<FileVersion>1.1.12.0</FileVersion>
+		<Version>1.1.13</Version>
+		<AssemblyVersion>1.1.13.0</AssemblyVersion>
+		<FileVersion>1.1.13.0</FileVersion>
 
 		<!-- Package Information -->
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
@@ -22,7 +22,7 @@
 		<Company>ODINSOFT</Company>
 		<Title>CryptoCurrency eXchange Trading Library for .NET</Title>
 		<Description>CCXT.SIMPLE: CryptoCurrency eXchange Trading Library for .NET</Description>
-		<Copyright>Copyright OdinSoft Co., Ltd. 2015~2025</Copyright>
+		<Copyright>Copyright OdinSoft Co., Ltd. 2015~2026</Copyright>
 
 		<!-- Package Settings -->
 		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
@@ -30,12 +30,14 @@
 		<PackageIcon>ccxt.simple.api.png</PackageIcon>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageTags>bitcoin;cryptocurrency;exchange;trading;market-data;ccxt;exchange-markets;altcoin;api;arbitrage;bot;crypto;e-commerce;invest;library;strategy;trade;merchant;cryptocoin</PackageTags>
-		<PackageReleaseNotes>v1.1.12 - Fix: Clear Authorization header in HttpClientService to prevent accumulation bug
-Fix: Resolved InvalidOperationException on consecutive authenticated API calls
-HttpClientService: Reset Authorization header before returning cached HttpClient
-Samples: Added Upbit sample for testing GetOpenOrders and trading APIs
-Samples: Added environment variables support for API key configuration
-Samples: Added README.md with usage instructions</PackageReleaseNotes>
+		<PackageReleaseNotes>v1.1.13 - System.Text.Json Migration and Exchange Expansion
+- Complete migration from Newtonsoft.Json to System.Text.Json
+- New JsonExtensions class with safe parsing methods (GetStringSafe, GetDecimalSafe, etc.)
+- Fixed GetStringSafe method overload ambiguity for Object types
+- 5 New FULL exchanges: BinanceUs, Bitget (v2 API), Huobi, Korbit, Kucoin
+- Total 14 FULL exchanges (was 9), 0 PARTIAL (was 3), 96 SKELETON
+- Test coverage expanded from 90 to 452 tests (8.79% line coverage)
+- Fixed Authorization header accumulation bug in HttpClientService</PackageReleaseNotes>
 
 		<!-- Repository Information -->
 		<RepositoryUrl>https://github.com/odinsoft-lab/ccxt.simple</RepositoryUrl>
@@ -88,10 +90,11 @@ Samples: Added README.md with usage instructions</PackageReleaseNotes>
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />		
 		<PackageReference Include="GraphQL.Client" Version="6.1.0" />
 		<PackageReference Include="GraphQL.Client.Serializer.SystemTextJson" Version="6.1.0" />
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
+		<!-- System.Text.Json for netstandard2.0 compatibility (net8.0+ has it built-in) -->
+		<PackageReference Include="System.Text.Json" Version="9.0.2" Condition="'$(TargetFramework)' == 'netstandard2.0' OR '$(TargetFramework)' == 'netstandard2.1'" />
 	</ItemGroup>
 
 </Project>

@@ -1,8 +1,10 @@
-﻿using CCXT.Simple.Core.Services;
+﻿using CCXT.Simple.Core.Converters;
+using CCXT.Simple.Core.Services;
 using CCXT.Simple.Core.Utilities;
-using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using CCXT.Simple.Models.Market;
 
 namespace CCXT.Simple.Core
@@ -304,10 +306,21 @@ namespace CCXT.Simple.Core
                 return this.FiatVSCoinRate;
         }
 
-        public JsonSerializerSettings JsonSettings = new JsonSerializerSettings
+        /// <summary>
+        /// System.Text.Json serializer options with custom converters.
+        /// Handles scientific notation, null values, and string-to-number conversion.
+        /// </summary>
+        public JsonSerializerOptions StjOptions = new JsonSerializerOptions
         {
-            NullValueHandling = NullValueHandling.Ignore,
-            MissingMemberHandling = MissingMemberHandling.Ignore
+            PropertyNameCaseInsensitive = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            NumberHandling = JsonNumberHandling.AllowReadingFromString,
+            Converters =
+            {
+                new StjDecimalConverter(),
+                new StjNullableDecimalConverter(),
+                new StjLongConverter()
+            }
         };
         
         public void Dispose()

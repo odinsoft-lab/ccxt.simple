@@ -1,6 +1,6 @@
-using CCXT.Simple.Core;
-using Newtonsoft.Json;
+﻿using CCXT.Simple.Core;
 using System.Diagnostics;
+using System.Text.Json;
 using CCXT.Simple.Models.Trading;
 
 namespace CCXT.Simple.Exchanges.Bitget.Trade
@@ -52,7 +52,7 @@ namespace CCXT.Simple.Exchanges.Bitget.Trade
                     if (_response.IsSuccessStatusCode)
                     {
                         var _jstring = await _response.Content.ReadAsStringAsync();
-                        _result = JsonConvert.DeserializeObject<PlaceOrder>(_jstring, JsonSettings);
+                        _result = System.Text.Json.JsonSerializer.Deserialize<PlaceOrder>(_jstring, mainXchg.StjOptions);
 #if DEBUG
                         _result.json = _jstring;
 #endif
@@ -85,7 +85,7 @@ namespace CCXT.Simple.Exchanges.Bitget.Trade
                 var _args = new Dictionary<string, string>();
                 {
                     _args.Add("symbol", symbol);
-                    _args.Add("orderList", JsonConvert.SerializeObject(orderList));
+                    _args.Add("orderList", JsonSerializer.Serialize(orderList, mainXchg.StjOptions));
                 }
 
                 var _content = this.PostContent(_client, _endpoint, _args);
@@ -94,7 +94,7 @@ namespace CCXT.Simple.Exchanges.Bitget.Trade
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<BatchOrder>(_jstring, JsonSettings);
+                    _result = System.Text.Json.JsonSerializer.Deserialize<BatchOrder>(_jstring, mainXchg.StjOptions);
 #if DEBUG
                     _result.json = _jstring;
 #endif
@@ -136,7 +136,7 @@ namespace CCXT.Simple.Exchanges.Bitget.Trade
                     if (_response.IsSuccessStatusCode)
                     {
                         var _jstring = await _response.Content.ReadAsStringAsync();
-                        _result = JsonConvert.DeserializeObject<RResult<string>>(_jstring, JsonSettings);
+                        _result = System.Text.Json.JsonSerializer.Deserialize<RResult<string>>(_jstring, mainXchg.StjOptions);
 #if DEBUG
                         _result.json = _jstring;
 #endif
@@ -170,7 +170,7 @@ namespace CCXT.Simple.Exchanges.Bitget.Trade
                     var _args = new Dictionary<string, string>();
                     {
                         _args.Add("symbol", symbol);
-                        _args.Add("order_ids", JsonConvert.SerializeObject(orderIds));
+                        _args.Add("order_ids", JsonSerializer.Serialize(orderIds, mainXchg.StjOptions));
                     }
 
                     var _content = this.PostContent(_client, _endpoint, _args);
@@ -179,7 +179,7 @@ namespace CCXT.Simple.Exchanges.Bitget.Trade
                     if (_response.IsSuccessStatusCode)
                     {
                         var _jstring = await _response.Content.ReadAsStringAsync();
-                        _result = JsonConvert.DeserializeObject<RResult<string>>(_jstring, JsonSettings);
+                        _result = System.Text.Json.JsonSerializer.Deserialize<RResult<string>>(_jstring, mainXchg.StjOptions);
 #if DEBUG
                         _result.json = _jstring;
 #endif
@@ -221,7 +221,7 @@ namespace CCXT.Simple.Exchanges.Bitget.Trade
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<OrderInfo>(_jstring, JsonSettings);
+                    _result = System.Text.Json.JsonSerializer.Deserialize<OrderInfo>(_jstring, mainXchg.StjOptions);
 #if DEBUG
                     _result.json = _jstring;
 #endif
@@ -260,7 +260,7 @@ namespace CCXT.Simple.Exchanges.Bitget.Trade
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<OrderInfo>(_jstring, JsonSettings);
+                    _result = System.Text.Json.JsonSerializer.Deserialize<OrderInfo>(_jstring, mainXchg.StjOptions);
 #if DEBUG
                     _result.json = _jstring;
 #endif
@@ -305,7 +305,7 @@ namespace CCXT.Simple.Exchanges.Bitget.Trade
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<OrderInfo>(_jstring, JsonSettings);
+                    _result = System.Text.Json.JsonSerializer.Deserialize<OrderInfo>(_jstring, mainXchg.StjOptions);
 #if DEBUG
                     _result.json = _jstring;
 #endif
@@ -353,7 +353,7 @@ namespace CCXT.Simple.Exchanges.Bitget.Trade
                     if (_response.IsSuccessStatusCode)
                     {
                         var _jstring = await _response.Content.ReadAsStringAsync();
-                        _result = JsonConvert.DeserializeObject<FillOrder>(_jstring, JsonSettings);
+                        _result = System.Text.Json.JsonSerializer.Deserialize<FillOrder>(_jstring, mainXchg.StjOptions);
 #if DEBUG
                         _result.json = _jstring;
 #endif
@@ -409,7 +409,7 @@ namespace CCXT.Simple.Exchanges.Bitget.Trade
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<PlaceOrder>(_jstring, JsonSettings);
+                    _result = System.Text.Json.JsonSerializer.Deserialize<PlaceOrder>(_jstring, mainXchg.StjOptions);
 #if DEBUG
                     _result.json = _jstring;
 #endif
@@ -456,7 +456,7 @@ namespace CCXT.Simple.Exchanges.Bitget.Trade
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<PlaceOrder>(_jstring, JsonSettings);
+                    _result = System.Text.Json.JsonSerializer.Deserialize<PlaceOrder>(_jstring, mainXchg.StjOptions);
 #if DEBUG
                     _result.json = _jstring;
 #endif
@@ -495,7 +495,7 @@ namespace CCXT.Simple.Exchanges.Bitget.Trade
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<RResult<string>>(_jstring, JsonSettings);
+                    _result = System.Text.Json.JsonSerializer.Deserialize<RResult<string>>(_jstring, mainXchg.StjOptions);
 #if DEBUG
                     _result.json = _jstring;
 #endif
@@ -537,7 +537,7 @@ namespace CCXT.Simple.Exchanges.Bitget.Trade
                     if (_response.IsSuccessStatusCode)
                     {
                         var _jstring = await _response.Content.ReadAsStringAsync();
-                        _result = JsonConvert.DeserializeObject<PlanOrder>(_jstring, JsonSettings);
+                        _result = System.Text.Json.JsonSerializer.Deserialize<PlanOrder>(_jstring, mainXchg.StjOptions);
 #if DEBUG
                         _result.json = _jstring;
 #endif
@@ -583,7 +583,7 @@ namespace CCXT.Simple.Exchanges.Bitget.Trade
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<PlanOrder>(_jstring, JsonSettings);
+                    _result = System.Text.Json.JsonSerializer.Deserialize<PlanOrder>(_jstring, mainXchg.StjOptions);
 #if DEBUG
                     _result.json = _jstring;
 #endif

@@ -1,4 +1,4 @@
-// == CCXT-SIMPLE-META-BEGIN ==
+﻿// == CCXT-SIMPLE-META-BEGIN ==
 // EXCHANGE: coinone
 // IMPLEMENTATION_STATUS: FULL
 // PROGRESS_STATUS: DONE
@@ -8,8 +8,7 @@
 // == CCXT-SIMPLE-META-END ==
 
 using CCXT.Simple.Core.Converters;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
@@ -81,7 +80,7 @@ namespace CCXT.Simple.Exchanges.Coinone
 
                 var _response = await _client.GetAsync($"{ExchangeUrlTb}/api/v1/tradepair/");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JsonConvert.DeserializeObject<CoinInfor>(_jstring);
+                var _jarray = System.Text.Json.JsonSerializer.Deserialize<CoinInfor>(_jstring, mainXchg.StjOptions);
 
                 var _queue_info = mainXchg.GetXInfors(ExchangeName);
 
@@ -130,7 +129,7 @@ namespace CCXT.Simple.Exchanges.Coinone
                 {
                     var _response = await _client.GetAsync($"{ExchangeUrlTb}/api/v1/coin/");
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jarray = JsonConvert.DeserializeObject<CoinState>(_jstring);
+                    var _jarray = System.Text.Json.JsonSerializer.Deserialize<CoinState>(_jstring, mainXchg.StjOptions);
 
                     foreach (var c in _jarray.coins)
                     {
@@ -214,9 +213,10 @@ namespace CCXT.Simple.Exchanges.Coinone
 
                 var _response = await _client.GetAsync("/ticker?currency=" + symbol);
                 var _tstring = await _response.Content.ReadAsStringAsync();
-                var _jobject = JObject.Parse(_tstring);
+                using var _doc = JsonDocument.Parse(_tstring);
+                var _root = _doc.RootElement;
 
-                _result = _jobject.Value<decimal>("last");
+                _result = _root.GetDecimalSafe("last");
 
                 Debug.Assert(_result != 0.0m);
             }
@@ -243,19 +243,32 @@ namespace CCXT.Simple.Exchanges.Coinone
                 {
                     var _response = await _client.GetAsync("/orderbook?currency=" + symbol);
                     var _tstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JObject.Parse(_tstring);
+                    using var _doc = JsonDocument.Parse(_tstring);
+                    var _root = _doc.RootElement;
 
-                    if (_jobject.Value<string>("result") == "success")
+                    if (_root.GetStringSafe("result") == "success")
                     {
-                        var _asks = _jobject["ask"].ToObject<List<BestOrder>>();
+                        var _asks = new List<BestOrder>();
+                        foreach (var ask in _root.GetProperty("ask").EnumerateArray())
                         {
-                            _result.best_ask = _asks.OrderBy(x => x.price).First();
+                            _asks.Add(new BestOrder
+                            {
+                                price = ask.GetDecimalSafe("price"),
+                                qty = ask.GetDecimalSafe("qty")
+                            });
                         }
+                        _result.best_ask = _asks.OrderBy(x => x.price).First();
 
-                        var _bids = _jobject["bid"].ToObject<List<BestOrder>>();
+                        var _bids = new List<BestOrder>();
+                        foreach (var bid in _root.GetProperty("bid").EnumerateArray())
                         {
-                            _result.best_bid = _bids.OrderBy(x => x.price).Last();
+                            _bids.Add(new BestOrder
+                            {
+                                price = bid.GetDecimalSafe("price"),
+                                qty = bid.GetDecimalSafe("qty")
+                            });
                         }
+                        _result.best_bid = _bids.OrderBy(x => x.price).Last();
                     }
                 }
             }
@@ -282,7 +295,7 @@ namespace CCXT.Simple.Exchanges.Coinone
 
                 var _response = await _client.GetAsync("/public/v2/ticker_new/KRW");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JsonConvert.DeserializeObject<RaTickers>(_jstring);
+                var _jarray = System.Text.Json.JsonSerializer.Deserialize<RaTickers>(_jstring, mainXchg.StjOptions);
 
                 for (var i = 0; i < tickers.items.Count; i++)
                 {
@@ -357,15 +370,16 @@ namespace CCXT.Simple.Exchanges.Coinone
             // Generate UUID v4 nonce
             var nonce = Guid.NewGuid().ToString();
 
-            // Add nonce to request body
-            var bodyWithNonce = JObject.FromObject(requestBody);
-            bodyWithNonce["nonce"] = nonce;
+            // Convert requestBody to dictionary and add nonce
+            var jsonString = JsonSerializer.Serialize(requestBody, mainXchg.StjOptions);
+            var bodyDict = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonString, mainXchg.StjOptions) ?? new Dictionary<string, object>();
+            bodyDict["nonce"] = nonce;
 
-            // Convert to JSON string
-            var jsonString = JsonConvert.SerializeObject(bodyWithNonce);
+            // Convert back to JSON string
+            var finalJsonString = JsonSerializer.Serialize(bodyDict, mainXchg.StjOptions);
 
             // Base64 encode for payload
-            var payload = Convert.ToBase64String(Encoding.UTF8.GetBytes(jsonString));
+            var payload = Convert.ToBase64String(Encoding.UTF8.GetBytes(finalJsonString));
 
             // Generate HMAC-SHA512 signature
             using (var hmac = new HMACSHA512(Encoding.UTF8.GetBytes(SecretKey)))
@@ -379,7 +393,7 @@ namespace CCXT.Simple.Exchanges.Coinone
         /// <summary>
         /// Make authenticated POST request to private API
         /// </summary>
-        private async Task<JObject> MakePrivateRequest(string endpoint, object requestBody)
+        private async Task<JsonDocument> MakePrivateRequest(string endpoint, object requestBody)
         {
             var client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
             var (payload, signature) = GenerateAuthHeaders(requestBody);
@@ -387,13 +401,13 @@ namespace CCXT.Simple.Exchanges.Coinone
             client.DefaultRequestHeaders.Add("X-COINONE-PAYLOAD", payload);
             client.DefaultRequestHeaders.Add("X-COINONE-SIGNATURE", signature);
 
-            var jsonContent = JsonConvert.SerializeObject(requestBody);
+            var jsonContent = JsonSerializer.Serialize(requestBody, mainXchg.StjOptions);
             var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
             var response = await client.PostAsync("/v2.1{endpoint}", content);
             var responseString = await response.Content.ReadAsStringAsync();
 
-            return JObject.Parse(responseString);
+            return JsonDocument.Parse(responseString);
         }
 
         /// <summary>
@@ -425,33 +439,32 @@ namespace CCXT.Simple.Exchanges.Coinone
                 {
                     var _response = await _client.GetAsync("/public/v2/orderbook/KRW/{targetCurrency}?size={limit}");
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JObject.Parse(_jstring);
+                    using var _doc = JsonDocument.Parse(_jstring);
+                    var _root = _doc.RootElement;
 
-                    if (_jobject["result"]?.ToString() == "success")
+                    if (_root.GetStringSafe("result") == "success")
                     {
-                        var asks = _jobject["ask_orderbook"];
-                        if (asks != null)
+                        if (_root.TryGetProperty("ask_orderbook", out var asks))
                         {
-                            foreach (var ask in asks)
+                            foreach (var ask in asks.EnumerateArray())
                             {
                                 _result.asks.Add(new OrderbookItem
                                 {
-                                    price = ask["price"].Value<decimal>(),
-                                    quantity = ask["qty"].Value<decimal>(),
+                                    price = ask.GetDecimalSafe("price"),
+                                    quantity = ask.GetDecimalSafe("qty"),
                                     total = 0
                                 });
                             }
                         }
 
-                        var bids = _jobject["bid_orderbook"];
-                        if (bids != null)
+                        if (_root.TryGetProperty("bid_orderbook", out var bids))
                         {
-                            foreach (var bid in bids)
+                            foreach (var bid in bids.EnumerateArray())
                             {
                                 _result.bids.Add(new OrderbookItem
                                 {
-                                    price = bid["price"].Value<decimal>(),
-                                    quantity = bid["qty"].Value<decimal>(),
+                                    price = bid.GetDecimalSafe("price"),
+                                    quantity = bid.GetDecimalSafe("qty"),
                                     total = 0
                                 });
                             }
@@ -500,24 +513,27 @@ namespace CCXT.Simple.Exchanges.Coinone
 
                     var _response = await _client.GetAsync(url);
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JObject.Parse(_jstring);
+                    using var _doc = JsonDocument.Parse(_jstring);
+                    var _root = _doc.RootElement;
 
-                    if (_jobject["result"]?.ToString() == "success")
+                    if (_root.GetStringSafe("result") == "success")
                     {
-                        var candles = _jobject["chart"];
-                        if (candles != null)
+                        if (_root.TryGetProperty("chart", out var candles))
                         {
-                            foreach (var candle in candles.Take(limit))
+                            var count = 0;
+                            foreach (var candle in candles.EnumerateArray())
                             {
+                                if (count >= limit) break;
                                 _result.Add(new decimal[]
                                 {
-                                    candle["timestamp"].Value<long>(),     // timestamp
-                                    candle["open"].Value<decimal>(),        // open
-                                    candle["high"].Value<decimal>(),        // high
-                                    candle["low"].Value<decimal>(),         // low
-                                    candle["close"].Value<decimal>(),       // close
-                                    candle["target_volume"].Value<decimal>() // volume
+                                    candle.GetInt64Safe("timestamp"),        // timestamp
+                                    candle.GetDecimalSafe("open"),           // open
+                                    candle.GetDecimalSafe("high"),           // high
+                                    candle.GetDecimalSafe("low"),            // low
+                                    candle.GetDecimalSafe("close"),          // close
+                                    candle.GetDecimalSafe("target_volume")   // volume
                                 });
+                                count++;
                             }
                         }
                     }
@@ -571,22 +587,22 @@ namespace CCXT.Simple.Exchanges.Coinone
                 {
                     var _response = await _client.GetAsync("/public/v2/trades/KRW/{targetCurrency}?limit={limit}");
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JObject.Parse(_jstring);
+                    using var _doc = JsonDocument.Parse(_jstring);
+                    var _root = _doc.RootElement;
 
-                    if (_jobject["result"]?.ToString() == "success")
+                    if (_root.GetStringSafe("result") == "success")
                     {
-                        var trades = _jobject["trades"];
-                        if (trades != null)
+                        if (_root.TryGetProperty("trades", out var trades))
                         {
-                            foreach (var trade in trades)
+                            foreach (var trade in trades.EnumerateArray())
                             {
                                 _result.Add(new TradeData
                                 {
-                                    id = trade["id"]?.ToString() ?? "",
-                                    timestamp = trade["timestamp"].Value<long>(),
-                                    price = trade["price"].Value<decimal>(),
-                                    amount = trade["qty"].Value<decimal>(),
-                                    side = trade["is_seller_maker"].Value<bool>() ? SideType.Ask : SideType.Bid
+                                    id = trade.GetStringSafe("id") ?? "",
+                                    timestamp = trade.GetInt64Safe("timestamp"),
+                                    price = trade.GetDecimalSafe("price"),
+                                    amount = trade.GetDecimalSafe("qty"),
+                                    side = trade.GetBooleanSafe("is_seller_maker") ? SideType.Ask : SideType.Bid
                                 });
                             }
                         }
@@ -617,30 +633,27 @@ namespace CCXT.Simple.Exchanges.Coinone
                 }
 
                 var requestBody = new { };
-                var response = await MakePrivateRequest("/balance", requestBody);
+                using var response = await MakePrivateRequest("/balance", requestBody);
+                var _root = response.RootElement;
 
-                if (response["result"]?.ToString() == "success")
+                if (_root.GetStringSafe("result") == "success")
                 {
-                    var balances = response["balances"] as JObject;
-                    if (balances != null)
+                    if (_root.TryGetProperty("balances", out var balances))
                     {
-                        foreach (var prop in balances.Properties())
+                        foreach (var prop in balances.EnumerateObject())
                         {
                             var currency = prop.Name.ToUpper();
-                            var balance = prop.Value as JObject;
+                            var balance = prop.Value;
 
-                            if (balance != null)
+                            var available = balance.GetDecimalSafe("available");
+                            var locked = balance.GetDecimalSafe("locked");
+
+                            _result[currency] = new BalanceInfo
                             {
-                                var available = balance["available"]?.Value<decimal>() ?? 0;
-                                var locked = balance["locked"]?.Value<decimal>() ?? 0;
-
-                                _result[currency] = new BalanceInfo
-                                {
-                                    free = available,
-                                    used = locked,
-                                    total = available + locked
-                                };
-                            }
+                                free = available,
+                                used = locked,
+                                total = available + locked
+                            };
                         }
                     }
                 }
@@ -725,27 +738,27 @@ namespace CCXT.Simple.Exchanges.Coinone
                     client_order_id = clientOrderId
                 };
 
-                var response = await MakePrivateRequest("/order", requestBody);
+                using var response = await MakePrivateRequest("/order", requestBody);
+                var _root = response.RootElement;
 
-                if (response["result"]?.ToString() == "success")
+                if (_root.GetStringSafe("result") == "success")
                 {
-                    var order = response["order"];
-                    if (order != null)
+                    if (_root.TryGetProperty("order", out var order))
                     {
                         _result = new OrderInfo
                         {
-                            id = order["order_id"]?.ToString() ?? "",
-                            clientOrderId = order["client_order_id"]?.ToString() ?? clientOrderId ?? "",
+                            id = order.GetStringSafe("order_id") ?? "",
+                            clientOrderId = order.GetStringSafe("client_order_id") ?? clientOrderId ?? "",
                             symbol = symbol,
                             side = side,
                             type = orderType,
-                            status = order["status"]?.ToString() ?? "new",
+                            status = order.GetStringSafe("status") ?? "new",
                             amount = amount,
                             price = price,
-                            filled = order["filled_qty"]?.Value<decimal>() ?? 0,
-                            remaining = order["remain_qty"]?.Value<decimal>() ?? amount,
-                            timestamp = order["created_at"]?.Value<long>() ?? TimeExtensions.UnixTime,
-                            fee = order["fee"]?.Value<decimal>(),
+                            filled = order.GetDecimalSafe("filled_qty"),
+                            remaining = order.TryGetProperty("remain_qty", out var remainQty) ? remainQty.GetDecimalSafe() : amount,
+                            timestamp = order.TryGetProperty("created_at", out var createdAt) ? createdAt.GetInt64Safe() : TimeExtensions.UnixTime,
+                            fee = order.TryGetProperty("fee", out var fee) ? fee.GetDecimalSafe() : (decimal?)null,
                             feeAsset = parts[1]
                         };
                     }
@@ -788,9 +801,10 @@ namespace CCXT.Simple.Exchanges.Coinone
                     throw new ArgumentException("Either orderId or clientOrderId must be provided");
                 }
 
-                var response = await MakePrivateRequest("/order/cancel", requestBody);
+                using var response = await MakePrivateRequest("/order/cancel", requestBody);
+                var _root = response.RootElement;
 
-                _result = response["result"]?.ToString() == "success";
+                _result = _root.GetStringSafe("result") == "success";
             }
             catch (Exception ex)
             {
@@ -829,30 +843,30 @@ namespace CCXT.Simple.Exchanges.Coinone
                     throw new ArgumentException("Either orderId or clientOrderId must be provided");
                 }
 
-                var response = await MakePrivateRequest("/order/info", requestBody);
+                using var response = await MakePrivateRequest("/order/info", requestBody);
+                var _root = response.RootElement;
 
-                if (response["result"]?.ToString() == "success")
+                if (_root.GetStringSafe("result") == "success")
                 {
-                    var order = response["order"];
-                    if (order != null)
+                    if (_root.TryGetProperty("order", out var order))
                     {
-                        var targetCurrency = order["target_currency"]?.ToString()?.ToUpper() ?? "";
-                        var quoteCurrency = order["quote_currency"]?.ToString()?.ToUpper() ?? "";
+                        var targetCurrency = order.GetStringSafe("target_currency")?.ToUpper() ?? "";
+                        var quoteCurrency = order.GetStringSafe("quote_currency")?.ToUpper() ?? "";
 
                         _result = new OrderInfo
                         {
-                            id = order["order_id"]?.ToString() ?? "",
-                            clientOrderId = order["client_order_id"]?.ToString() ?? "",
+                            id = order.GetStringSafe("order_id") ?? "",
+                            clientOrderId = order.GetStringSafe("client_order_id") ?? "",
                             symbol = $"{targetCurrency}-{quoteCurrency}",
-                            side = order["side"]?.ToString() == "buy" ? SideType.Bid : SideType.Ask,
-                            type = order["type"]?.ToString() ?? "",
-                            status = order["status"]?.ToString() ?? "",
-                            amount = order["qty"]?.Value<decimal>() ?? 0,
-                            price = order["price"]?.Value<decimal>(),
-                            filled = order["filled_qty"]?.Value<decimal>() ?? 0,
-                            remaining = order["remain_qty"]?.Value<decimal>() ?? 0,
-                            timestamp = order["created_at"]?.Value<long>() ?? 0,
-                            fee = order["fee"]?.Value<decimal>(),
+                            side = order.GetStringSafe("side") == "buy" ? SideType.Bid : SideType.Ask,
+                            type = order.GetStringSafe("type") ?? "",
+                            status = order.GetStringSafe("status") ?? "",
+                            amount = order.GetDecimalSafe("qty"),
+                            price = order.TryGetProperty("price", out var priceEl) ? priceEl.GetDecimalSafe() : (decimal?)null,
+                            filled = order.GetDecimalSafe("filled_qty"),
+                            remaining = order.GetDecimalSafe("remain_qty"),
+                            timestamp = order.GetInt64Safe("created_at"),
+                            fee = order.TryGetProperty("fee", out var feeEl) ? feeEl.GetDecimalSafe() : (decimal?)null,
                             feeAsset = quoteCurrency
                         };
                     }
@@ -895,32 +909,32 @@ namespace CCXT.Simple.Exchanges.Coinone
                     }
                 }
 
-                var response = await MakePrivateRequest("/order/active_orders", requestBody);
+                using var response = await MakePrivateRequest("/order/active_orders", requestBody);
+                var _root = response.RootElement;
 
-                if (response["result"]?.ToString() == "success")
+                if (_root.GetStringSafe("result") == "success")
                 {
-                    var orders = response["active_orders"] as JArray;
-                    if (orders != null)
+                    if (_root.TryGetProperty("active_orders", out var orders))
                     {
-                        foreach (var order in orders)
+                        foreach (var order in orders.EnumerateArray())
                         {
-                            var targetCurrency = order["target_currency"]?.ToString()?.ToUpper() ?? "";
-                            var quoteCurrency = order["quote_currency"]?.ToString()?.ToUpper() ?? "";
+                            var targetCurrency = order.GetStringSafe("target_currency")?.ToUpper() ?? "";
+                            var quoteCurrency = order.GetStringSafe("quote_currency")?.ToUpper() ?? "";
 
                             _result.Add(new OrderInfo
                             {
-                                id = order["order_id"]?.ToString() ?? "",
-                                clientOrderId = order["client_order_id"]?.ToString() ?? "",
+                                id = order.GetStringSafe("order_id") ?? "",
+                                clientOrderId = order.GetStringSafe("client_order_id") ?? "",
                                 symbol = $"{targetCurrency}-{quoteCurrency}",
-                                side = order["side"]?.ToString() == "buy" ? SideType.Bid : SideType.Ask,
-                                type = order["type"]?.ToString() ?? "",
+                                side = order.GetStringSafe("side") == "buy" ? SideType.Bid : SideType.Ask,
+                                type = order.GetStringSafe("type") ?? "",
                                 status = "open",
-                                amount = order["qty"]?.Value<decimal>() ?? 0,
-                                price = order["price"]?.Value<decimal>(),
-                                filled = order["filled_qty"]?.Value<decimal>() ?? 0,
-                                remaining = order["remain_qty"]?.Value<decimal>() ?? 0,
-                                timestamp = order["created_at"]?.Value<long>() ?? 0,
-                                fee = order["fee"]?.Value<decimal>(),
+                                amount = order.GetDecimalSafe("qty"),
+                                price = order.TryGetProperty("price", out var priceEl) ? priceEl.GetDecimalSafe() : (decimal?)null,
+                                filled = order.GetDecimalSafe("filled_qty"),
+                                remaining = order.GetDecimalSafe("remain_qty"),
+                                timestamp = order.GetInt64Safe("created_at"),
+                                fee = order.TryGetProperty("fee", out var feeEl) ? feeEl.GetDecimalSafe() : (decimal?)null,
                                 feeAsset = quoteCurrency
                             });
                         }
@@ -965,34 +979,37 @@ namespace CCXT.Simple.Exchanges.Coinone
                     }
                 }
 
-                var response = await MakePrivateRequest("/order/completed_orders", requestBody);
+                using var response = await MakePrivateRequest("/order/completed_orders", requestBody);
+                var _root = response.RootElement;
 
-                if (response["result"]?.ToString() == "success")
+                if (_root.GetStringSafe("result") == "success")
                 {
-                    var orders = response["completed_orders"] as JArray;
-                    if (orders != null)
+                    if (_root.TryGetProperty("completed_orders", out var orders))
                     {
-                        foreach (var order in orders.Take(limit))
+                        var count = 0;
+                        foreach (var order in orders.EnumerateArray())
                         {
-                            var targetCurrency = order["target_currency"]?.ToString()?.ToUpper() ?? "";
-                            var quoteCurrency = order["quote_currency"]?.ToString()?.ToUpper() ?? "";
+                            if (count >= limit) break;
+                            var targetCurrency = order.GetStringSafe("target_currency")?.ToUpper() ?? "";
+                            var quoteCurrency = order.GetStringSafe("quote_currency")?.ToUpper() ?? "";
 
                             _result.Add(new OrderInfo
                             {
-                                id = order["order_id"]?.ToString() ?? "",
-                                clientOrderId = order["client_order_id"]?.ToString() ?? "",
+                                id = order.GetStringSafe("order_id") ?? "",
+                                clientOrderId = order.GetStringSafe("client_order_id") ?? "",
                                 symbol = $"{targetCurrency}-{quoteCurrency}",
-                                side = order["side"]?.ToString() == "buy" ? SideType.Bid : SideType.Ask,
-                                type = order["type"]?.ToString() ?? "",
-                                status = order["status"]?.ToString() ?? "filled",
-                                amount = order["qty"]?.Value<decimal>() ?? 0,
-                                price = order["price"]?.Value<decimal>(),
-                                filled = order["filled_qty"]?.Value<decimal>() ?? 0,
+                                side = order.GetStringSafe("side") == "buy" ? SideType.Bid : SideType.Ask,
+                                type = order.GetStringSafe("type") ?? "",
+                                status = order.GetStringSafe("status") ?? "filled",
+                                amount = order.GetDecimalSafe("qty"),
+                                price = order.TryGetProperty("price", out var priceEl) ? priceEl.GetDecimalSafe() : (decimal?)null,
+                                filled = order.GetDecimalSafe("filled_qty"),
                                 remaining = 0,
-                                timestamp = order["created_at"]?.Value<long>() ?? 0,
-                                fee = order["fee"]?.Value<decimal>(),
-                                feeAsset = order["fee_currency"]?.ToString()?.ToUpper() ?? quoteCurrency
+                                timestamp = order.GetInt64Safe("created_at"),
+                                fee = order.TryGetProperty("fee", out var feeEl) ? feeEl.GetDecimalSafe() : (decimal?)null,
+                                feeAsset = order.GetStringSafe("fee_currency")?.ToUpper() ?? quoteCurrency
                             });
+                            count++;
                         }
                     }
                 }
@@ -1065,18 +1082,18 @@ namespace CCXT.Simple.Exchanges.Coinone
                     currency = currency.ToLower()
                 };
 
-                var response = await MakePrivateRequest("/wallet/deposit_address", requestBody);
+                using var response = await MakePrivateRequest("/wallet/deposit_address", requestBody);
+                var _root = response.RootElement;
 
-                if (response["result"]?.ToString() == "success")
+                if (_root.GetStringSafe("result") == "success")
                 {
-                    var addressInfo = response["deposit_address"];
-                    if (addressInfo != null)
+                    if (_root.TryGetProperty("deposit_address", out var addressInfo))
                     {
                         _result = new DepositAddress
                         {
-                            address = addressInfo["address"]?.ToString() ?? "",
-                            tag = addressInfo["tag"]?.ToString() ?? "",
-                            network = network ?? addressInfo["network"]?.ToString() ?? "",
+                            address = addressInfo.GetStringSafe("address") ?? "",
+                            tag = addressInfo.GetStringSafe("tag") ?? "",
+                            network = network ?? addressInfo.GetStringSafe("network") ?? "",
                             currency = currency.ToUpper()
                         };
                     }
@@ -1113,24 +1130,24 @@ namespace CCXT.Simple.Exchanges.Coinone
                     network = network
                 };
 
-                var response = await MakePrivateRequest("/wallet/withdraw", requestBody);
+                using var response = await MakePrivateRequest("/wallet/withdraw", requestBody);
+                var _root = response.RootElement;
 
-                if (response["result"]?.ToString() == "success")
+                if (_root.GetStringSafe("result") == "success")
                 {
-                    var withdrawal = response["withdrawal"];
-                    if (withdrawal != null)
+                    if (_root.TryGetProperty("withdrawal", out var withdrawal))
                     {
                         _result = new WithdrawalInfo
                         {
-                            id = withdrawal["withdrawal_id"]?.ToString() ?? "",
+                            id = withdrawal.GetStringSafe("withdrawal_id") ?? "",
                             currency = currency.ToUpper(),
                             amount = amount,
                             address = address,
                             tag = tag ?? "",
                             network = network ?? "",
-                            status = withdrawal["status"]?.ToString() ?? "pending",
-                            timestamp = withdrawal["created_at"]?.Value<long>() ?? TimeExtensions.UnixTime,
-                            fee = withdrawal["fee"]?.Value<decimal>() ?? 0
+                            status = withdrawal.GetStringSafe("status") ?? "pending",
+                            timestamp = withdrawal.TryGetProperty("created_at", out var createdAt) ? createdAt.GetInt64Safe() : TimeExtensions.UnixTime,
+                            fee = withdrawal.GetDecimalSafe("fee")
                         };
                     }
                 }
@@ -1163,27 +1180,30 @@ namespace CCXT.Simple.Exchanges.Coinone
                     limit = limit
                 };
 
-                var response = await MakePrivateRequest("/wallet/deposit_history", requestBody);
+                using var response = await MakePrivateRequest("/wallet/deposit_history", requestBody);
+                var _root = response.RootElement;
 
-                if (response["result"]?.ToString() == "success")
+                if (_root.GetStringSafe("result") == "success")
                 {
-                    var deposits = response["deposits"] as JArray;
-                    if (deposits != null)
+                    if (_root.TryGetProperty("deposits", out var deposits))
                     {
-                        foreach (var deposit in deposits.Take(limit))
+                        var count = 0;
+                        foreach (var deposit in deposits.EnumerateArray())
                         {
+                            if (count >= limit) break;
                             _result.Add(new DepositInfo
                             {
-                                id = deposit["deposit_id"]?.ToString() ?? "",
-                                currency = deposit["currency"]?.ToString()?.ToUpper() ?? "",
-                                amount = deposit["amount"]?.Value<decimal>() ?? 0,
-                                address = deposit["address"]?.ToString() ?? "",
-                                tag = deposit["tag"]?.ToString() ?? "",
-                                network = deposit["network"]?.ToString() ?? "",
-                                status = deposit["status"]?.ToString() ?? "",
-                                timestamp = deposit["created_at"]?.Value<long>() ?? 0,
-                                txid = deposit["tx_id"]?.ToString() ?? ""
+                                id = deposit.GetStringSafe("deposit_id") ?? "",
+                                currency = deposit.GetStringSafe("currency")?.ToUpper() ?? "",
+                                amount = deposit.GetDecimalSafe("amount"),
+                                address = deposit.GetStringSafe("address") ?? "",
+                                tag = deposit.GetStringSafe("tag") ?? "",
+                                network = deposit.GetStringSafe("network") ?? "",
+                                status = deposit.GetStringSafe("status") ?? "",
+                                timestamp = deposit.GetInt64Safe("created_at"),
+                                txid = deposit.GetStringSafe("tx_id") ?? ""
                             });
+                            count++;
                         }
                     }
                 }
@@ -1216,27 +1236,30 @@ namespace CCXT.Simple.Exchanges.Coinone
                     limit = limit
                 };
 
-                var response = await MakePrivateRequest("/wallet/withdrawal_history", requestBody);
+                using var response = await MakePrivateRequest("/wallet/withdrawal_history", requestBody);
+                var _root = response.RootElement;
 
-                if (response["result"]?.ToString() == "success")
+                if (_root.GetStringSafe("result") == "success")
                 {
-                    var withdrawals = response["withdrawals"] as JArray;
-                    if (withdrawals != null)
+                    if (_root.TryGetProperty("withdrawals", out var withdrawals))
                     {
-                        foreach (var withdrawal in withdrawals.Take(limit))
+                        var count = 0;
+                        foreach (var withdrawal in withdrawals.EnumerateArray())
                         {
+                            if (count >= limit) break;
                             _result.Add(new WithdrawalInfo
                             {
-                                id = withdrawal["withdrawal_id"]?.ToString() ?? "",
-                                currency = withdrawal["currency"]?.ToString()?.ToUpper() ?? "",
-                                amount = withdrawal["amount"]?.Value<decimal>() ?? 0,
-                                address = withdrawal["address"]?.ToString() ?? "",
-                                tag = withdrawal["tag"]?.ToString() ?? "",
-                                network = withdrawal["network"]?.ToString() ?? "",
-                                status = withdrawal["status"]?.ToString() ?? "",
-                                timestamp = withdrawal["created_at"]?.Value<long>() ?? 0,
-                                fee = withdrawal["fee"]?.Value<decimal>() ?? 0
+                                id = withdrawal.GetStringSafe("withdrawal_id") ?? "",
+                                currency = withdrawal.GetStringSafe("currency")?.ToUpper() ?? "",
+                                amount = withdrawal.GetDecimalSafe("amount"),
+                                address = withdrawal.GetStringSafe("address") ?? "",
+                                tag = withdrawal.GetStringSafe("tag") ?? "",
+                                network = withdrawal.GetStringSafe("network") ?? "",
+                                status = withdrawal.GetStringSafe("status") ?? "",
+                                timestamp = withdrawal.GetInt64Safe("created_at"),
+                                fee = withdrawal.GetDecimalSafe("fee")
                             });
+                            count++;
                         }
                     }
                 }

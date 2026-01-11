@@ -2,7 +2,6 @@ using CCXT.Simple.Core;
 using CCXT.Simple.Core.Converters;
 using CCXT.Simple.Exchanges.Bitstamp;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using Xunit;
 using Xunit.Abstractions;
 using CCXT.Simple.Models.Funding;

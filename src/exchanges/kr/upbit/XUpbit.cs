@@ -1,4 +1,4 @@
-// == CCXT-SIMPLE-META-BEGIN ==
+﻿// == CCXT-SIMPLE-META-BEGIN ==
 // EXCHANGE: upbit
 // IMPLEMENTATION_STATUS: FULL
 // PROGRESS_STATUS: DONE
@@ -11,8 +11,8 @@
 // == CCXT-SIMPLE-META-END ==
 
 using CCXT.Simple.Core.Converters;
-using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
+using System.Text.Json;
 using System.Security.Cryptography;
 using System.Text;
 using CCXT.Simple.Core.Interfaces;
@@ -122,7 +122,7 @@ namespace CCXT.Simple.Exchanges.Upbit
                 {
                     var _b_response = await _client.GetAsync("/v1/market/all?isDetails=true");
                     var _jstring = await _b_response.Content.ReadAsStringAsync();
-                    var _jarray = JsonConvert.DeserializeObject<List<CoinInfor>>(_jstring);
+                    var _jarray = System.Text.Json.JsonSerializer.Deserialize<List<CoinInfor>>(_jstring, mainXchg.StjOptions);
 
                     var _queue_info = mainXchg.GetXInfors(ExchangeName);
 
@@ -250,13 +250,13 @@ namespace CCXT.Simple.Exchanges.Upbit
                 var _basePath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
                 var _jsonPath = Path.Combine(_basePath, "Exchanges", "KR", "Upbit", "CoinState.json");
                 var _cstring = File.ReadAllText(_jsonPath);
-                var _carray = JsonConvert.DeserializeObject<CoinState>(_cstring);
+                var _carray = System.Text.Json.JsonSerializer.Deserialize<CoinState>(_cstring, mainXchg.StjOptions);
 
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 {
                     var _b_response = await _client.GetAsync($"{ExchangeUrlCc}/api/v1/status/wallet");
                     var _jstring = await _b_response.Content.ReadAsStringAsync();
-                    var _jarray = JsonConvert.DeserializeObject<List<WalletState>>(_jstring);
+                    var _jarray = System.Text.Json.JsonSerializer.Deserialize<List<WalletState>>(_jstring, mainXchg.StjOptions);
 
                     foreach (var c in _carray.currencies)
                     {
@@ -353,7 +353,7 @@ namespace CCXT.Simple.Exchanges.Upbit
                 {
                     var _response = await _client.GetAsync("/v1/ticker?markets=" + symbol);
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jarray = JsonConvert.DeserializeObject<List<RaTicker>>(_jstring);
+                    var _jarray = System.Text.Json.JsonSerializer.Deserialize<List<RaTicker>>(_jstring, mainXchg.StjOptions);
 
                     if (_jarray.Count > 0)
                         _result = _jarray[0].trade_price;
@@ -389,7 +389,7 @@ namespace CCXT.Simple.Exchanges.Upbit
 
                     var _response = await _client.GetAsync("/v1/ticker?markets=" + _request);
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jmarkets = JsonConvert.DeserializeObject<List<RaTicker>>(_jstring);
+                    var _jmarkets = System.Text.Json.JsonSerializer.Deserialize<List<RaTicker>>(_jstring, mainXchg.StjOptions);
 
                     for (var i = 0; i < tickers.items.Count; i++)
                     {
@@ -446,7 +446,7 @@ namespace CCXT.Simple.Exchanges.Upbit
 
                 var _response = await _client.GetAsync("/v1/ticker?markets=" + _request);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jmarkets = JsonConvert.DeserializeObject<List<RaTicker>>(_jstring);
+                var _jmarkets = System.Text.Json.JsonSerializer.Deserialize<List<RaTicker>>(_jstring, mainXchg.StjOptions);
 
                 for (var i = 0; i < tickers.items.Count; i++)
                 {
@@ -511,7 +511,7 @@ namespace CCXT.Simple.Exchanges.Upbit
 
                 var _response = await _client.GetAsync("/v1/ticker?markets=" + _request);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JsonConvert.DeserializeObject<List<RaTicker>>(_jstring);
+                var _jarray = System.Text.Json.JsonSerializer.Deserialize<List<RaTicker>>(_jstring, mainXchg.StjOptions);
 
                 foreach (var m in _jarray)
                 {
@@ -585,7 +585,7 @@ namespace CCXT.Simple.Exchanges.Upbit
 
                 var _response = await _client.GetAsync("/v1/ticker?markets=" + _request);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JsonConvert.DeserializeObject<List<UOrderbook>>(_jstring);
+                var _jarray = System.Text.Json.JsonSerializer.Deserialize<List<UOrderbook>>(_jstring, mainXchg.StjOptions);
 
                 foreach (var o in _jarray)
                 {
@@ -640,7 +640,7 @@ namespace CCXT.Simple.Exchanges.Upbit
 
                 var _response = await _client.GetAsync("/v1/orderbook?markets=" + _request);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JsonConvert.DeserializeObject<List<UOrderbook>>(_jstring);
+                var _jarray = System.Text.Json.JsonSerializer.Deserialize<List<UOrderbook>>(_jstring, mainXchg.StjOptions);
 
                 foreach (var o in _jarray)
                 {
@@ -704,7 +704,7 @@ namespace CCXT.Simple.Exchanges.Upbit
                 var _response = await _client.GetAsync($"/v1/orders/chance?{queryString}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
 
-                _result = JsonConvert.DeserializeObject<OrderChance>(_jstring);
+                _result = System.Text.Json.JsonSerializer.Deserialize<OrderChance>(_jstring, mainXchg.StjOptions);
             }
             catch (Exception ex)
             {
@@ -724,7 +724,7 @@ namespace CCXT.Simple.Exchanges.Upbit
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync($"/v1/orderbook?markets={symbol}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JsonConvert.DeserializeObject<List<UOrderbook>>(_jstring);
+                var _jarray = System.Text.Json.JsonSerializer.Deserialize<List<UOrderbook>>(_jstring, mainXchg.StjOptions);
 
                 if (_jarray != null && _jarray.Count > 0)
                 {
@@ -784,18 +784,18 @@ namespace CCXT.Simple.Exchanges.Upbit
 
                 var _response = await _client.GetAsync(_url);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = Newtonsoft.Json.Linq.JArray.Parse(_jstring);
 
-                foreach (var candle in _jarray)
+                using var _doc = JsonDocument.Parse(_jstring);
+                foreach (var candle in _doc.RootElement.EnumerateArray())
                 {
                     _result.Add(new decimal[]
                     {
-                        candle.Value<long>("timestamp"),
-                        candle.Value<decimal>("opening_price"),
-                        candle.Value<decimal>("high_price"),
-                        candle.Value<decimal>("low_price"),
-                        candle.Value<decimal>("trade_price"),
-                        candle.Value<decimal>("candle_acc_trade_volume")
+                        candle.GetInt64Safe("timestamp"),
+                        candle.GetDecimalSafe("opening_price"),
+                        candle.GetDecimalSafe("high_price"),
+                        candle.GetDecimalSafe("low_price"),
+                        candle.GetDecimalSafe("trade_price"),
+                        candle.GetDecimalSafe("candle_acc_trade_volume")
                     });
                 }
             }
@@ -836,17 +836,17 @@ namespace CCXT.Simple.Exchanges.Upbit
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync($"/v1/trades/ticks?market={symbol}&count={limit}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = Newtonsoft.Json.Linq.JArray.Parse(_jstring);
 
-                foreach (var trade in _jarray)
+                using var _doc = JsonDocument.Parse(_jstring);
+                foreach (var trade in _doc.RootElement.EnumerateArray())
                 {
                     _result.Add(new TradeData
                     {
-                        id = trade.Value<string>("sequential_id"),
-                        timestamp = trade.Value<long>("timestamp"),
-                        side = trade.Value<string>("ask_bid") == "ASK" ? SideType.Ask : SideType.Bid,
-                        price = trade.Value<decimal>("trade_price"),
-                        amount = trade.Value<decimal>("trade_volume")
+                        id = trade.GetStringSafe("sequential_id"),
+                        timestamp = trade.GetInt64Safe("timestamp"),
+                        side = trade.GetStringSafe("ask_bid") == "ASK" ? SideType.Ask : SideType.Bid,
+                        price = trade.GetDecimalSafe("trade_price"),
+                        amount = trade.GetDecimalSafe("trade_volume")
                     });
                 }
             }
@@ -873,14 +873,14 @@ namespace CCXT.Simple.Exchanges.Upbit
 
                 var _response = await _client.GetAsync("/v1/accounts");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = Newtonsoft.Json.Linq.JArray.Parse(_jstring);
 
-                foreach (var balance in _jarray)
+                using var _doc = JsonDocument.Parse(_jstring);
+                foreach (var balance in _doc.RootElement.EnumerateArray())
                 {
-                    var currency = balance.Value<string>("currency");
-                    var free = balance.Value<decimal>("balance");
-                    var used = balance.Value<decimal>("locked");
-                    var average = balance.Value<decimal>("avg_buy_price");
+                    var currency = balance.GetStringSafe("currency");
+                    var free = balance.GetDecimalSafe("balance");
+                    var used = balance.GetDecimalSafe("locked");
+                    var average = balance.GetDecimalSafe("avg_buy_price");
                     var total = free + used;
 
                     if (total > 0)
@@ -918,7 +918,6 @@ namespace CCXT.Simple.Exchanges.Upbit
 
                 var _response = await _client.GetAsync("/v1/accounts");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = Newtonsoft.Json.Linq.JArray.Parse(_jstring);
 
                 _result.id = "upbit_account";
                 _result.type = "spot";
@@ -927,11 +926,12 @@ namespace CCXT.Simple.Exchanges.Upbit
                 _result.canDeposit = true;
                 _result.balances = new Dictionary<string, BalanceInfo>();
 
-                foreach (var balance in _jarray)
+                using var _doc = JsonDocument.Parse(_jstring);
+                foreach (var balance in _doc.RootElement.EnumerateArray())
                 {
-                    var currency = balance.Value<string>("currency");
-                    var free = balance.Value<decimal>("balance");
-                    var locked = balance.Value<decimal>("locked");
+                    var currency = balance.GetStringSafe("currency");
+                    var free = balance.GetDecimalSafe("balance");
+                    var locked = balance.GetDecimalSafe("locked");
                     var total = free + locked;
 
                     if (total > 0)
@@ -1010,23 +1010,25 @@ namespace CCXT.Simple.Exchanges.Upbit
 
                 // Use JSON body (required since March 2022)
                 var jsonContent = new StringContent(
-                    JsonConvert.SerializeObject(_params),
+                    JsonSerializer.Serialize(_params, mainXchg.StjOptions),
                     Encoding.UTF8,
                     "application/json"
                 );
                 var _response = await _client.PostAsync("/v1/orders", jsonContent);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = Newtonsoft.Json.Linq.JObject.Parse(_jstring);
 
-                _result.id = _jdata.Value<string>("uuid");
-                _result.clientOrderId = _jdata.Value<string>("identifier");
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _jdata = _doc.RootElement;
+
+                _result.id = _jdata.GetStringSafe("uuid");
+                _result.clientOrderId = _jdata.GetStringSafe("identifier");
                 _result.symbol = symbol;
                 _result.side = side;
                 _result.type = orderType;
                 _result.amount = amount;
                 _result.price = price ?? 0;
-                _result.status = _jdata.Value<string>("state");
-                _result.timestamp = DateTimeOffset.Parse(_jdata.Value<string>("created_at")).ToUnixTimeMilliseconds();
+                _result.status = _jdata.GetStringSafe("state");
+                _result.timestamp = DateTimeOffset.Parse(_jdata.GetStringSafe("created_at")).ToUnixTimeMilliseconds();
             }
             catch (Exception ex)
             {
@@ -1099,18 +1101,20 @@ namespace CCXT.Simple.Exchanges.Upbit
 
                 var _response = await _client.GetAsync($"/v1/order?{queryString}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = Newtonsoft.Json.Linq.JObject.Parse(_jstring);
 
-                _result.id = _jdata.Value<string>("uuid");
-                _result.clientOrderId = _jdata.Value<string>("identifier");
-                _result.symbol = _jdata.Value<string>("market");
-                _result.side = _jdata.Value<string>("side") == "bid" ? SideType.Bid : SideType.Ask;
-                _result.type = _jdata.Value<string>("ord_type") == "limit" ? "limit" : "market";
-                _result.amount = _jdata.Value<decimal>("volume");
-                _result.price = _jdata.Value<decimal>("price");
-                _result.filled = _jdata.Value<decimal>("executed_volume");
-                _result.status = _jdata.Value<string>("state");
-                _result.timestamp = DateTimeOffset.Parse(_jdata.Value<string>("created_at")).ToUnixTimeMilliseconds();
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _jdata = _doc.RootElement;
+
+                _result.id = _jdata.GetStringSafe("uuid");
+                _result.clientOrderId = _jdata.GetStringSafe("identifier");
+                _result.symbol = _jdata.GetStringSafe("market");
+                _result.side = _jdata.GetStringSafe("side") == "bid" ? SideType.Bid : SideType.Ask;
+                _result.type = _jdata.GetStringSafe("ord_type") == "limit" ? "limit" : "market";
+                _result.amount = _jdata.GetDecimalSafe("volume");
+                _result.price = _jdata.GetDecimalSafe("price");
+                _result.filled = _jdata.GetDecimalSafe("executed_volume");
+                _result.status = _jdata.GetStringSafe("state");
+                _result.timestamp = DateTimeOffset.Parse(_jdata.GetStringSafe("created_at")).ToUnixTimeMilliseconds();
             }
             catch (Exception ex)
             {
@@ -1157,22 +1161,22 @@ namespace CCXT.Simple.Exchanges.Upbit
 
                 var _response = await _client.GetAsync(_url);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = Newtonsoft.Json.Linq.JArray.Parse(_jstring);
 
-                foreach (var order in _jarray)
+                using var _doc = JsonDocument.Parse(_jstring);
+                foreach (var order in _doc.RootElement.EnumerateArray())
                 {
                     _result.Add(new OrderInfo
                     {
-                        id = order.Value<string>("uuid"),
-                        clientOrderId = order.Value<string>("identifier"),
-                        symbol = order.Value<string>("market"),
-                        side = order.Value<string>("side") == "bid" ? SideType.Bid : SideType.Ask,
-                        type = order.Value<string>("ord_type") == "limit" ? "limit" : "market",
-                        amount = order.Value<decimal>("volume"),
-                        price = order.Value<decimal>("price"),
-                        filled = order.Value<decimal>("executed_volume"),
-                        status = order.Value<string>("state"),
-                        timestamp = DateTimeOffset.Parse(order.Value<string>("created_at")).ToUnixTimeMilliseconds()
+                        id = order.GetStringSafe("uuid"),
+                        clientOrderId = order.GetStringSafe("identifier"),
+                        symbol = order.GetStringSafe("market"),
+                        side = order.GetStringSafe("side") == "bid" ? SideType.Bid : SideType.Ask,
+                        type = order.GetStringSafe("ord_type") == "limit" ? "limit" : "market",
+                        amount = order.GetDecimalSafe("volume"),
+                        price = order.GetDecimalSafe("price"),
+                        filled = order.GetDecimalSafe("executed_volume"),
+                        status = order.GetStringSafe("state"),
+                        timestamp = DateTimeOffset.Parse(order.GetStringSafe("created_at")).ToUnixTimeMilliseconds()
                     });
                 }
             }
@@ -1211,22 +1215,22 @@ namespace CCXT.Simple.Exchanges.Upbit
                 // Use new /v1/orders/closed endpoint
                 var _response = await _client.GetAsync($"/v1/orders/closed?{queryString}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = Newtonsoft.Json.Linq.JArray.Parse(_jstring);
 
-                foreach (var order in _jarray)
+                using var _doc = JsonDocument.Parse(_jstring);
+                foreach (var order in _doc.RootElement.EnumerateArray())
                 {
                     _result.Add(new OrderInfo
                     {
-                        id = order.Value<string>("uuid"),
-                        clientOrderId = order.Value<string>("identifier"),
-                        symbol = order.Value<string>("market"),
-                        side = order.Value<string>("side") == "bid" ? SideType.Bid : SideType.Ask,
-                        type = order.Value<string>("ord_type") == "limit" ? "limit" : "market",
-                        amount = order.Value<decimal>("volume"),
-                        price = order.Value<decimal>("price"),
-                        filled = order.Value<decimal>("executed_volume"),
-                        status = order.Value<string>("state"),
-                        timestamp = DateTimeOffset.Parse(order.Value<string>("created_at")).ToUnixTimeMilliseconds()
+                        id = order.GetStringSafe("uuid"),
+                        clientOrderId = order.GetStringSafe("identifier"),
+                        symbol = order.GetStringSafe("market"),
+                        side = order.GetStringSafe("side") == "bid" ? SideType.Bid : SideType.Ask,
+                        type = order.GetStringSafe("ord_type") == "limit" ? "limit" : "market",
+                        amount = order.GetDecimalSafe("volume"),
+                        price = order.GetDecimalSafe("price"),
+                        filled = order.GetDecimalSafe("executed_volume"),
+                        status = order.GetStringSafe("state"),
+                        timestamp = DateTimeOffset.Parse(order.GetStringSafe("created_at")).ToUnixTimeMilliseconds()
                     });
                 }
             }
@@ -1269,26 +1273,25 @@ namespace CCXT.Simple.Exchanges.Upbit
 
                 var _response = await _client.GetAsync($"/v1/orders?{queryString}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = Newtonsoft.Json.Linq.JArray.Parse(_jstring);
 
-                foreach (var order in _jarray)
+                using var _doc = JsonDocument.Parse(_jstring);
+                foreach (var order in _doc.RootElement.EnumerateArray())
                 {
-                    var trades = order["trades"] as Newtonsoft.Json.Linq.JArray;
-                    if (trades != null)
+                    if (order.TryGetProperty("trades", out var tradesElement) && tradesElement.ValueKind == JsonValueKind.Array)
                     {
-                        foreach (var trade in trades)
+                        foreach (var trade in tradesElement.EnumerateArray())
                         {
                             _result.Add(new TradeInfo
                             {
-                                id = trade.Value<string>("uuid"),
-                                orderId = order.Value<string>("uuid"),
-                                symbol = trade.Value<string>("market"),
-                                side = trade.Value<string>("side") == "bid" ? SideType.Bid : SideType.Ask,
-                                price = trade.Value<decimal>("price"),
-                                amount = trade.Value<decimal>("volume"),
-                                fee = trade.Value<decimal>("fee"),
-                                feeAsset = trade.Value<string>("fee_currency"),
-                                timestamp = DateTimeOffset.Parse(trade.Value<string>("created_at")).ToUnixTimeMilliseconds()
+                                id = trade.GetStringSafe("uuid"),
+                                orderId = order.GetStringSafe("uuid"),
+                                symbol = trade.GetStringSafe("market"),
+                                side = trade.GetStringSafe("side") == "bid" ? SideType.Bid : SideType.Ask,
+                                price = trade.GetDecimalSafe("price"),
+                                amount = trade.GetDecimalSafe("volume"),
+                                fee = trade.GetDecimalSafe("fee"),
+                                feeAsset = trade.GetStringSafe("fee_currency"),
+                                timestamp = DateTimeOffset.Parse(trade.GetStringSafe("created_at")).ToUnixTimeMilliseconds()
                             });
                         }
                     }
@@ -1328,18 +1331,20 @@ namespace CCXT.Simple.Exchanges.Upbit
 
                 // Use JSON body (required since March 2022)
                 var jsonContent = new StringContent(
-                    JsonConvert.SerializeObject(_params),
+                    JsonSerializer.Serialize(_params, mainXchg.StjOptions),
                     Encoding.UTF8,
                     "application/json"
                 );
                 var _response = await _client.PostAsync("/v1/deposits/generate_coin_address", jsonContent);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = Newtonsoft.Json.Linq.JObject.Parse(_jstring);
+
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _jdata = _doc.RootElement;
 
                 _result.currency = currency;
-                _result.address = _jdata.Value<string>("deposit_address");
-                _result.tag = _jdata.Value<string>("secondary_address");
-                _result.network = network ?? _jdata.Value<string>("net_type");
+                _result.address = _jdata.GetStringSafe("deposit_address");
+                _result.tag = _jdata.GetStringSafe("secondary_address");
+                _result.network = network ?? _jdata.GetStringSafe("net_type");
             }
             catch (Exception ex)
             {
@@ -1381,23 +1386,25 @@ namespace CCXT.Simple.Exchanges.Upbit
 
                 // Use JSON body (required since March 2022)
                 var jsonContent = new StringContent(
-                    JsonConvert.SerializeObject(_params),
+                    JsonSerializer.Serialize(_params, mainXchg.StjOptions),
                     Encoding.UTF8,
                     "application/json"
                 );
                 var _response = await _client.PostAsync("/v1/withdraws/coin", jsonContent);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = Newtonsoft.Json.Linq.JObject.Parse(_jstring);
 
-                _result.id = _jdata.Value<string>("uuid");
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _jdata = _doc.RootElement;
+
+                _result.id = _jdata.GetStringSafe("uuid");
                 _result.currency = currency;
                 _result.amount = amount;
                 _result.address = address;
                 _result.tag = tag;
-                _result.network = network ?? _jdata.Value<string>("net_type");
-                _result.status = _jdata.Value<string>("state");
-                _result.fee = _jdata.Value<decimal>("fee");
-                _result.timestamp = DateTimeOffset.Parse(_jdata.Value<string>("created_at")).ToUnixTimeMilliseconds();
+                _result.network = network ?? _jdata.GetStringSafe("net_type");
+                _result.status = _jdata.GetStringSafe("state");
+                _result.fee = _jdata.GetDecimalSafe("fee");
+                _result.timestamp = DateTimeOffset.Parse(_jdata.GetStringSafe("created_at")).ToUnixTimeMilliseconds();
             }
             catch (Exception ex)
             {
@@ -1434,20 +1441,20 @@ namespace CCXT.Simple.Exchanges.Upbit
 
                 var _response = await _client.GetAsync($"/v1/deposits?{queryString}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = Newtonsoft.Json.Linq.JArray.Parse(_jstring);
 
-                foreach (var deposit in _jarray)
+                using var _doc = JsonDocument.Parse(_jstring);
+                foreach (var deposit in _doc.RootElement.EnumerateArray())
                 {
                     _result.Add(new DepositInfo
                     {
-                        id = deposit.Value<string>("uuid"),
-                        txid = deposit.Value<string>("txid"),
-                        currency = deposit.Value<string>("currency"),
-                        amount = deposit.Value<decimal>("amount"),
-                        address = deposit.Value<string>("address"),
-                        tag = deposit.Value<string>("secondary_address"),
-                        status = deposit.Value<string>("state"),
-                        timestamp = DateTimeOffset.Parse(deposit.Value<string>("created_at")).ToUnixTimeMilliseconds()
+                        id = deposit.GetStringSafe("uuid"),
+                        txid = deposit.GetStringSafe("txid"),
+                        currency = deposit.GetStringSafe("currency"),
+                        amount = deposit.GetDecimalSafe("amount"),
+                        address = deposit.GetStringSafe("address"),
+                        tag = deposit.GetStringSafe("secondary_address"),
+                        status = deposit.GetStringSafe("state"),
+                        timestamp = DateTimeOffset.Parse(deposit.GetStringSafe("created_at")).ToUnixTimeMilliseconds()
                     });
                 }
             }
@@ -1486,21 +1493,21 @@ namespace CCXT.Simple.Exchanges.Upbit
 
                 var _response = await _client.GetAsync($"/v1/withdraws?{queryString}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = Newtonsoft.Json.Linq.JArray.Parse(_jstring);
 
-                foreach (var withdrawal in _jarray)
+                using var _doc = JsonDocument.Parse(_jstring);
+                foreach (var withdrawal in _doc.RootElement.EnumerateArray())
                 {
                     _result.Add(new WithdrawalInfo
                     {
-                        id = withdrawal.Value<string>("uuid"),
-                        currency = withdrawal.Value<string>("currency"),
-                        amount = withdrawal.Value<decimal>("amount"),
-                        address = withdrawal.Value<string>("address"),
-                        tag = withdrawal.Value<string>("secondary_address"),
-                        network = withdrawal.Value<string>("net_type"),
-                        status = withdrawal.Value<string>("state"),
-                        fee = withdrawal.Value<decimal>("fee"),
-                        timestamp = DateTimeOffset.Parse(withdrawal.Value<string>("created_at")).ToUnixTimeMilliseconds()
+                        id = withdrawal.GetStringSafe("uuid"),
+                        currency = withdrawal.GetStringSafe("currency"),
+                        amount = withdrawal.GetDecimalSafe("amount"),
+                        address = withdrawal.GetStringSafe("address"),
+                        tag = withdrawal.GetStringSafe("secondary_address"),
+                        network = withdrawal.GetStringSafe("net_type"),
+                        status = withdrawal.GetStringSafe("state"),
+                        fee = withdrawal.GetDecimalSafe("fee"),
+                        timestamp = DateTimeOffset.Parse(withdrawal.GetStringSafe("created_at")).ToUnixTimeMilliseconds()
                     });
                 }
             }

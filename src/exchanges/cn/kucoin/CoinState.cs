@@ -1,5 +1,4 @@
 ﻿using CCXT.Simple.Core.Converters;
-using Newtonsoft.Json;
 
 namespace CCXT.Simple.Exchanges.Kucoin
 {
@@ -26,10 +25,7 @@ namespace CCXT.Simple.Exchanges.Kucoin
         public int walletPrecision { get; set; }
         public string chainFullName { get; set; }
         public string orgAddress { get; set; }
-        public bool isDepositEnabled { get; set; }
-
-        [JsonConverter(typeof(XDecimalNullConverter))]
-        public decimal withdrawMinSize { get; set; }
+        public bool isDepositEnabled { get; set; }        public decimal withdrawMinSize { get; set; }
 
         public string depositDisabledTip { get; set; }
         public string userAddressName { get; set; }
@@ -37,10 +33,7 @@ namespace CCXT.Simple.Exchanges.Kucoin
         public bool preWithdrawTipEnabled { get; set; }
         public decimal withdrawFeeRate { get; set; }
         public int confirmationCount { get; set; }
-        public string currency { get; set; }
-
-        [JsonConverter(typeof(XDecimalNullConverter))]
-        public decimal depositMinSize { get; set; }
+        public string currency { get; set; }        public decimal depositMinSize { get; set; }
 
         public bool isWithdrawEnabled { get; set; }
 

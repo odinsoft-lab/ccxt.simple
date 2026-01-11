@@ -1,5 +1,5 @@
 ﻿using CCXT.Simple.Core;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace CCXT.Simple.Exchanges.Bithumb
 {
@@ -11,7 +11,7 @@ namespace CCXT.Simple.Exchanges.Bithumb
     /// <summary>
     /// Result status code (success: 0000, otherwise see error code reference)
     /// </summary>
-        [JsonProperty(PropertyName = "status")]
+        [JsonPropertyName("status")]
         public override int statusCode
         {
             get => base.statusCode;
@@ -30,7 +30,7 @@ namespace CCXT.Simple.Exchanges.Bithumb
     /// <summary>
     /// Order identifier
     /// </summary>
-        [JsonProperty(PropertyName = "order_id")]
+        [JsonPropertyName("order_id")]
         public string orderId
         {
             get;

@@ -1,5 +1,4 @@
 using CCXT.Simple.Core;
-using Newtonsoft.Json;
 using System.Diagnostics;
 
 namespace CCXT.Simple.Exchanges.Bitget.Private
@@ -45,7 +44,7 @@ namespace CCXT.Simple.Exchanges.Bitget.Private
                     if (_response.IsSuccessStatusCode)
                     {
                         var _jstring = await _response.Content.ReadAsStringAsync();
-                        _result = JsonConvert.DeserializeObject<RResult<string>>(_jstring, JsonSettings);
+                        _result = System.Text.Json.JsonSerializer.Deserialize<RResult<string>>(_jstring, mainXchg.StjOptions);
 #if DEBUG
                         _result.json = _jstring;
 #endif
@@ -98,7 +97,7 @@ namespace CCXT.Simple.Exchanges.Bitget.Private
                     if (_response.IsSuccessStatusCode)
                     {
                         var _jstring = await _response.Content.ReadAsStringAsync();
-                        _result = JsonConvert.DeserializeObject<RResult<string>>(_jstring, JsonSettings);
+                        _result = System.Text.Json.JsonSerializer.Deserialize<RResult<string>>(_jstring, mainXchg.StjOptions);
 #if DEBUG
                         _result.json = _jstring;
 #endif
@@ -136,7 +135,7 @@ namespace CCXT.Simple.Exchanges.Bitget.Private
                     if (_response.IsSuccessStatusCode)
                     {
                         var _jstring = await _response.Content.ReadAsStringAsync();
-                        _result = JsonConvert.DeserializeObject<Address>(_jstring, JsonSettings);
+                        _result = System.Text.Json.JsonSerializer.Deserialize<Address>(_jstring, mainXchg.StjOptions);
 #if DEBUG
                         _result.json = _jstring;
 #endif
@@ -186,7 +185,7 @@ namespace CCXT.Simple.Exchanges.Bitget.Private
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<RResult<string>>(_jstring, JsonSettings);
+                    _result = System.Text.Json.JsonSerializer.Deserialize<RResult<string>>(_jstring, mainXchg.StjOptions);
 #if DEBUG
                     _result.json = _jstring;
 #endif
@@ -230,7 +229,7 @@ namespace CCXT.Simple.Exchanges.Bitget.Private
                     if (_response.IsSuccessStatusCode)
                     {
                         var _jstring = await _response.Content.ReadAsStringAsync();
-                        _result = JsonConvert.DeserializeObject<RResult<string>>(_jstring, JsonSettings);
+                        _result = System.Text.Json.JsonSerializer.Deserialize<RResult<string>>(_jstring, mainXchg.StjOptions);
 #if DEBUG
                         _result.json = _jstring;
 #endif
@@ -270,7 +269,7 @@ namespace CCXT.Simple.Exchanges.Bitget.Private
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<WithdrawList>(_jstring, JsonSettings);
+                    _result = System.Text.Json.JsonSerializer.Deserialize<WithdrawList>(_jstring, mainXchg.StjOptions);
 #if DEBUG
                     _result.json = _jstring;
 #endif
@@ -309,7 +308,7 @@ namespace CCXT.Simple.Exchanges.Bitget.Private
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<DepositList>(_jstring, JsonSettings);
+                    _result = System.Text.Json.JsonSerializer.Deserialize<DepositList>(_jstring, mainXchg.StjOptions);
 #if DEBUG
                     _result.json = _jstring;
 #endif
@@ -347,7 +346,7 @@ namespace CCXT.Simple.Exchanges.Bitget.Private
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<ApiKey>(_jstring, JsonSettings);
+                    _result = System.Text.Json.JsonSerializer.Deserialize<ApiKey>(_jstring, mainXchg.StjOptions);
 #if DEBUG
                     _result.json = _jstring;
 #endif
@@ -382,7 +381,7 @@ namespace CCXT.Simple.Exchanges.Bitget.Private
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<Asset>(_jstring, JsonSettings);
+                    _result = System.Text.Json.JsonSerializer.Deserialize<Asset>(_jstring, mainXchg.StjOptions);
 #if DEBUG
                     _result.json = _jstring;
 #endif
@@ -419,7 +418,7 @@ namespace CCXT.Simple.Exchanges.Bitget.Private
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<SAsset>(_jstring, JsonSettings);
+                    _result = System.Text.Json.JsonSerializer.Deserialize<SAsset>(_jstring, mainXchg.StjOptions);
 #if DEBUG
                     _result.json = _jstring;
 #endif
@@ -468,7 +467,7 @@ namespace CCXT.Simple.Exchanges.Bitget.Private
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<Bill>(_jstring, JsonSettings);
+                    _result = System.Text.Json.JsonSerializer.Deserialize<Bill>(_jstring, mainXchg.StjOptions);
 #if DEBUG
                     _result.json = _jstring;
 #endif
@@ -507,7 +506,7 @@ namespace CCXT.Simple.Exchanges.Bitget.Private
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    _result = JsonConvert.DeserializeObject<TransferList>(_jstring, JsonSettings);
+                    _result = System.Text.Json.JsonSerializer.Deserialize<TransferList>(_jstring, mainXchg.StjOptions);
 #if DEBUG
                     _result.json = _jstring;
 #endif

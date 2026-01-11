@@ -2,18 +2,26 @@
 
 Release notes are organized by major version.
 
-- [v1.x Releases](./v1.md) — All v1.0.0 through v1.1.11 release notes
+- [v1.x Releases](./v1.md) — All v1.0.0 through v1.1.13 release notes
 
-## Current Status (2025-12-01)
+## Current Status (2026-01-12)
 
-- **Version**: 1.1.11
-- **FULL Implementations**: 9 (Binance, Bitstamp, Bithumb, Bybit, Coinbase, Coinone, Kraken, OKX, Upbit)
-- **PARTIAL Implementations**: 3 (Huobi, Korbit, Kucoin)
-- **SKELETON Implementations**: 98
+- **Version**: 1.1.13
+- **FULL Implementations**: 14 (Binance, BinanceUs, Bitget, Bitstamp, Bithumb, Bybit, Coinbase, Coinone, Huobi, Korbit, Kraken, Kucoin, OKX, Upbit)
+- **PARTIAL Implementations**: 0
+- **SKELETON Implementations**: 96
 - **Total Exchanges**: 110
-- **Test Coverage**: 90 tests across 7 test files
+- **Test Coverage**: 452 tests (8.79% line coverage)
+- **JSON Library**: System.Text.Json (migrated from Newtonsoft.Json)
 
 ## Recent Updates
+
+### v1.1.13 (2026-01-12)
+- **System.Text.Json Migration**: Complete migration from Newtonsoft.Json
+- **JsonExtensions**: New extension methods for safe JSON parsing (GetStringSafe, GetDecimalSafe, etc.)
+- **5 New FULL Exchanges**: BinanceUs, Bitget, Huobi, Korbit, Kucoin upgraded from PARTIAL/SKELETON
+- **Test Coverage**: Expanded from 90 to 452 tests (8.79% line coverage)
+- **GetStringSafe Fix**: Fixed method overload ambiguity bug for Object types
 
 ### v1.1.11 (2025-12-01)
 - Upbit: Fixed JWT authentication with SHA512 query hash

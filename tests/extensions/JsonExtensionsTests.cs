@@ -1,183 +1,533 @@
+using System.Text.Json;
 using CCXT.Simple.Core.Extensions;
-using Newtonsoft.Json.Linq;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace CCXT.Simple.Tests.Extensions
 {
     public class JsonExtensionsTests
     {
-        private readonly ITestOutputHelper _output;
-
-        public JsonExtensionsTests(ITestOutputHelper output)
-        {
-            _output = output;
-        }
+        #region GetStringSafe Tests
 
         [Fact]
-        public void GetDecimalValue_ShouldParseScientificNotation()
+        public void GetStringSafe_StringValue_ReturnsString()
         {
             // Arrange
-            var json = @"{
-                ""price"": ""7.9e-7"",
-                ""volume"": ""1.23e+6"",
-                ""regular"": ""123.456"",
-                ""integer"": 789,
-                ""null_value"": null,
-                ""empty_string"": """"
-            }";
+            var json = "{\"value\":\"hello\"}";
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement.GetProperty("value");
 
-            var jobject = JObject.Parse(json);
+            // Act
+            var result = element.GetStringSafe();
 
-            // Act & Assert
-            Assert.Equal(0.00000079m, jobject.GetDecimalValue("price"));
-            Assert.Equal(1230000m, jobject.GetDecimalValue("volume"));
-            Assert.Equal(123.456m, jobject.GetDecimalValue("regular"));
-            Assert.Equal(789m, jobject.GetDecimalValue("integer"));
-            Assert.Equal(0m, jobject.GetDecimalValue("null_value"));
-            Assert.Equal(0m, jobject.GetDecimalValue("empty_string"));
-            Assert.Equal(0m, jobject.GetDecimalValue("non_existent"));
-            Assert.Equal(999m, jobject.GetDecimalValue("non_existent", 999m));
-
-            _output.WriteLine("Scientific notation parsing tests passed:");
-            _output.WriteLine($"  7.9e-7 = {jobject.GetDecimalValue("price")}");
-            _output.WriteLine($"  1.23e+6 = {jobject.GetDecimalValue("volume")}");
+            // Assert
+            Assert.Equal("hello", result);
         }
 
         [Fact]
-        public void ParseCoinbaseTickerData_ShouldHandleAllFormats()
+        public void GetStringSafe_NullValue_ReturnsDefault()
         {
-            // Test with actual Coinbase ticker data
-            var tickerJson = @"{
-                ""type"": ""ticker"",
-                ""product_id"": ""GRT-BTC"",
-                ""price"": ""7.9e-7"",
-                ""open_24h"": ""8e-7"",
-                ""volume_24h"": ""53533.9"",
-                ""low_24h"": ""7.9e-7"",
-                ""high_24h"": ""8.2e-7"",
-                ""volume_30d"": ""3514205.11"",
-                ""best_bid"": ""0.00000080"",
-                ""best_bid_size"": ""52380.57"",
-                ""best_ask"": ""0.00000081"",
-                ""best_ask_size"": ""4627.45"",
-                ""time"": ""2025-08-07T23:02:23.884247Z"",
-                ""trade_id"": 1105517,
-                ""last_size"": ""175.93""
-            }";
+            // Arrange
+            var json = "{\"value\":null}";
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement.GetProperty("value");
 
-            var jobject = JObject.Parse(tickerJson);
+            // Act
+            var result = element.GetStringSafe("default");
 
-            // Test all decimal fields
-            Assert.Equal(0.00000079m, jobject.GetDecimalValue("price"));
-            Assert.Equal(0.0000008m, jobject.GetDecimalValue("open_24h"));
-            Assert.Equal(53533.9m, jobject.GetDecimalValue("volume_24h"));
-            Assert.Equal(0.00000079m, jobject.GetDecimalValue("low_24h"));
-            Assert.Equal(0.00000082m, jobject.GetDecimalValue("high_24h"));
-            Assert.Equal(3514205.11m, jobject.GetDecimalValue("volume_30d"));
-            Assert.Equal(0.00000080m, jobject.GetDecimalValue("best_bid"));
-            Assert.Equal(52380.57m, jobject.GetDecimalValue("best_bid_size"));
-            Assert.Equal(0.00000081m, jobject.GetDecimalValue("best_ask"));
-            Assert.Equal(4627.45m, jobject.GetDecimalValue("best_ask_size"));
-            Assert.Equal(175.93m, jobject.GetDecimalValue("last_size"));
-
-            // Test string fields
-            Assert.Equal("ticker", jobject.GetStringValue("type"));
-            Assert.Equal("GRT-BTC", jobject.GetStringValue("product_id"));
-
-            // Test int fields
-            Assert.Equal(1105517, jobject.GetIntValue("trade_id"));
-
-            _output.WriteLine("Coinbase ticker parsing successful!");
-            _output.WriteLine($"  Product: {jobject.GetStringValue("product_id")}");
-            _output.WriteLine($"  Price (7.9e-7): {jobject.GetDecimalValue("price"):F10}");
-            _output.WriteLine($"  Best Bid: {jobject.GetDecimalValue("best_bid"):F10}");
-            _output.WriteLine($"  Volume: {jobject.GetDecimalValue("volume_24h")}");
+            // Assert
+            Assert.Equal("default", result);
         }
 
         [Fact]
-        public void EdgeCases_ShouldHandleGracefully()
+        public void GetStringSafe_WithPropertyName_ReturnsString()
         {
-            // Test edge cases
-            var json = @"{
-                ""very_small"": ""1e-10"",
-                ""very_large"": ""9.9e+20"",
-                ""negative_sci"": ""-3.14e-5"",
-                ""positive_sci"": ""+2.5e+3"",
-                ""invalid"": ""not_a_number"",
-                ""object"": { ""nested"": 123 },
-                ""array"": [1, 2, 3]
-            }";
+            // Arrange
+            var json = "{\"name\":\"test\"}";
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement;
 
-            var jobject = JObject.Parse(json);
+            // Act - explicitly pass null for defaultValue to use the property accessor overload
+            var result = element.GetStringSafe("name", null);
 
-            // Very small number
-            Assert.Equal(0.0000000001m, jobject.GetDecimalValue("very_small"));
-
-            // Very large number (within decimal range)
-            Assert.Equal(990000000000000000000m, jobject.GetDecimalValue("very_large"));
-
-            // Negative scientific notation
-            Assert.Equal(-0.0000314m, jobject.GetDecimalValue("negative_sci"));
-
-            // Positive with explicit + sign
-            Assert.Equal(2500m, jobject.GetDecimalValue("positive_sci"));
-
-            // Invalid values should return default
-            Assert.Equal(0m, jobject.GetDecimalValue("invalid"));
-            Assert.Equal(0m, jobject.GetDecimalValue("object"));
-            Assert.Equal(0m, jobject.GetDecimalValue("array"));
-
-            _output.WriteLine("Edge case tests passed:");
-            _output.WriteLine($"  1e-10 = {jobject.GetDecimalValue("very_small"):F10}");
-            _output.WriteLine($"  9.9e+20 = {jobject.GetDecimalValue("very_large")}");
-            _output.WriteLine($"  -3.14e-5 = {jobject.GetDecimalValue("negative_sci"):F10}");
+            // Assert
+            Assert.Equal("test", result);
         }
 
         [Fact]
-        public void GetStringValue_ShouldHandleNullAndEmpty()
+        public void GetStringSafe_MissingProperty_ReturnsDefault()
         {
-            var json = @"{
-                ""text"": ""hello"",
-                ""empty"": """",
-                ""null_value"": null,
-                ""number"": 123
-            }";
+            // Arrange
+            var json = "{\"other\":\"value\"}";
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement;
 
-            var jobject = JObject.Parse(json);
+            // Act
+            var result = element.GetStringSafe("name", "default");
 
-            Assert.Equal("hello", jobject.GetStringValue("text"));
-            Assert.Equal("", jobject.GetStringValue("empty"));
-            Assert.Null(jobject.GetStringValue("null_value"));
-            Assert.Null(jobject.GetStringValue("non_existent"));
-            Assert.Equal("default", jobject.GetStringValue("non_existent", "default"));
-            Assert.Equal("123", jobject.GetStringValue("number"));
+            // Assert
+            Assert.Equal("default", result);
+        }
+
+        #endregion
+
+        #region GetDecimalSafe Tests
+
+        [Theory]
+        [InlineData("{\"value\":123.45}", 123.45)]
+        [InlineData("{\"value\":0}", 0)]
+        [InlineData("{\"value\":-100.5}", -100.5)]
+        public void GetDecimalSafe_NumberValue_ReturnsDecimal(string json, decimal expected)
+        {
+            // Arrange
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement.GetProperty("value");
+
+            // Act
+            var result = element.GetDecimalSafe();
+
+            // Assert
+            Assert.Equal(expected, result);
+        }
+
+        [Theory]
+        [InlineData("{\"value\":\"123.45\"}", 123.45)]
+        [InlineData("{\"value\":\"0\"}", 0)]
+        [InlineData("{\"value\":\"-100.5\"}", -100.5)]
+        public void GetDecimalSafe_StringValue_ReturnsDecimal(string json, decimal expected)
+        {
+            // Arrange
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement.GetProperty("value");
+
+            // Act
+            var result = element.GetDecimalSafe();
+
+            // Assert
+            Assert.Equal(expected, result);
+        }
+
+        [Theory]
+        [InlineData("{\"value\":\"8.9e-7\"}", 0.00000089)]
+        [InlineData("{\"value\":\"1.23e+10\"}", 12300000000)]
+        [InlineData("{\"value\":\"5E-5\"}", 0.00005)]
+        public void GetDecimalSafe_ScientificNotation_ReturnsDecimal(string json, decimal expected)
+        {
+            // Arrange
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement.GetProperty("value");
+
+            // Act
+            var result = element.GetDecimalSafe();
+
+            // Assert
+            Assert.Equal(expected, result);
         }
 
         [Fact]
-        public void GetDateTimeValue_ShouldParseISODates()
+        public void GetDecimalSafe_NullValue_ReturnsDefault()
         {
-            var json = @"{
-                ""iso_date"": ""2025-08-07T23:02:23.884247Z"",
-                ""null_date"": null,
-                ""invalid_date"": ""not_a_date""
-            }";
+            // Arrange
+            var json = "{\"value\":null}";
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement.GetProperty("value");
 
-            var jobject = JObject.Parse(json);
+            // Act
+            var result = element.GetDecimalSafe(99m);
 
-            var expectedDate = new DateTime(2025, 8, 7, 23, 2, 23, 884, DateTimeKind.Utc).AddTicks(2470);
-            var actualDate = jobject.GetDateTimeValue("iso_date");
-            
-            Assert.Equal(expectedDate.Year, actualDate.Year);
-            Assert.Equal(expectedDate.Month, actualDate.Month);
-            Assert.Equal(expectedDate.Day, actualDate.Day);
-            Assert.Equal(expectedDate.Hour, actualDate.Hour);
-            Assert.Equal(expectedDate.Minute, actualDate.Minute);
-            Assert.Equal(expectedDate.Second, actualDate.Second);
-            
-            Assert.Equal(default(DateTime), jobject.GetDateTimeValue("null_date"));
-            Assert.Equal(default(DateTime), jobject.GetDateTimeValue("invalid_date"));
-            Assert.Equal(default(DateTime), jobject.GetDateTimeValue("non_existent"));
+            // Assert
+            Assert.Equal(99m, result);
         }
+
+        [Fact]
+        public void GetDecimalSafe_EmptyString_ReturnsDefault()
+        {
+            // Arrange
+            var json = "{\"value\":\"\"}";
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement.GetProperty("value");
+
+            // Act
+            var result = element.GetDecimalSafe(99m);
+
+            // Assert
+            Assert.Equal(99m, result);
+        }
+
+        [Fact]
+        public void GetDecimalSafe_WithPropertyName_ReturnsDecimal()
+        {
+            // Arrange
+            var json = "{\"price\":123.45}";
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement;
+
+            // Act
+            var result = element.GetDecimalSafe("price");
+
+            // Assert
+            Assert.Equal(123.45m, result);
+        }
+
+        #endregion
+
+        #region GetInt64Safe Tests
+
+        [Theory]
+        [InlineData("{\"value\":12345}", 12345L)]
+        [InlineData("{\"value\":0}", 0L)]
+        [InlineData("{\"value\":9223372036854775807}", 9223372036854775807L)]
+        public void GetInt64Safe_NumberValue_ReturnsLong(string json, long expected)
+        {
+            // Arrange
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement.GetProperty("value");
+
+            // Act
+            var result = element.GetInt64Safe();
+
+            // Assert
+            Assert.Equal(expected, result);
+        }
+
+        [Theory]
+        [InlineData("{\"value\":\"12345\"}", 12345L)]
+        [InlineData("{\"value\":\"0\"}", 0L)]
+        public void GetInt64Safe_StringValue_ReturnsLong(string json, long expected)
+        {
+            // Arrange
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement.GetProperty("value");
+
+            // Act
+            var result = element.GetInt64Safe();
+
+            // Assert
+            Assert.Equal(expected, result);
+        }
+
+        [Fact]
+        public void GetInt64Safe_NullValue_ReturnsDefault()
+        {
+            // Arrange
+            var json = "{\"value\":null}";
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement.GetProperty("value");
+
+            // Act
+            var result = element.GetInt64Safe(99L);
+
+            // Assert
+            Assert.Equal(99L, result);
+        }
+
+        [Fact]
+        public void GetInt64Safe_WithPropertyName_ReturnsLong()
+        {
+            // Arrange
+            var json = "{\"timestamp\":1609459200000}";
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement;
+
+            // Act
+            var result = element.GetInt64Safe("timestamp");
+
+            // Assert
+            Assert.Equal(1609459200000L, result);
+        }
+
+        #endregion
+
+        #region GetInt32Safe Tests
+
+        [Theory]
+        [InlineData("{\"value\":12345}", 12345)]
+        [InlineData("{\"value\":0}", 0)]
+        [InlineData("{\"value\":-100}", -100)]
+        public void GetInt32Safe_NumberValue_ReturnsInt(string json, int expected)
+        {
+            // Arrange
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement.GetProperty("value");
+
+            // Act
+            var result = element.GetInt32Safe();
+
+            // Assert
+            Assert.Equal(expected, result);
+        }
+
+        [Theory]
+        [InlineData("{\"value\":\"12345\"}", 12345)]
+        [InlineData("{\"value\":\"0\"}", 0)]
+        public void GetInt32Safe_StringValue_ReturnsInt(string json, int expected)
+        {
+            // Arrange
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement.GetProperty("value");
+
+            // Act
+            var result = element.GetInt32Safe();
+
+            // Assert
+            Assert.Equal(expected, result);
+        }
+
+        [Fact]
+        public void GetInt32Safe_NullValue_ReturnsDefault()
+        {
+            // Arrange
+            var json = "{\"value\":null}";
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement.GetProperty("value");
+
+            // Act
+            var result = element.GetInt32Safe(99);
+
+            // Assert
+            Assert.Equal(99, result);
+        }
+
+        #endregion
+
+        #region GetBooleanSafe Tests
+
+        [Theory]
+        [InlineData("{\"value\":true}", true)]
+        [InlineData("{\"value\":false}", false)]
+        public void GetBooleanSafe_BoolValue_ReturnsBoolean(string json, bool expected)
+        {
+            // Arrange
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement.GetProperty("value");
+
+            // Act
+            var result = element.GetBooleanSafe();
+
+            // Assert
+            Assert.Equal(expected, result);
+        }
+
+        [Theory]
+        [InlineData("{\"value\":\"true\"}", true)]
+        [InlineData("{\"value\":\"false\"}", false)]
+        [InlineData("{\"value\":\"True\"}", true)]
+        [InlineData("{\"value\":\"False\"}", false)]
+        public void GetBooleanSafe_StringValue_ReturnsBoolean(string json, bool expected)
+        {
+            // Arrange
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement.GetProperty("value");
+
+            // Act
+            var result = element.GetBooleanSafe();
+
+            // Assert
+            Assert.Equal(expected, result);
+        }
+
+        [Fact]
+        public void GetBooleanSafe_NullValue_ReturnsDefault()
+        {
+            // Arrange
+            var json = "{\"value\":null}";
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement.GetProperty("value");
+
+            // Act
+            var result = element.GetBooleanSafe(true);
+
+            // Assert
+            Assert.True(result);
+        }
+
+        #endregion
+
+        #region GetPropertyOrDefault Tests
+
+        [Fact]
+        public void GetPropertyOrDefault_ExistingProperty_ReturnsProperty()
+        {
+            // Arrange
+            var json = "{\"name\":\"test\"}";
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement;
+
+            // Act
+            var result = element.GetPropertyOrDefault("name");
+
+            // Assert
+            Assert.Equal(JsonValueKind.String, result.ValueKind);
+            Assert.Equal("test", result.GetString());
+        }
+
+        [Fact]
+        public void GetPropertyOrDefault_MissingProperty_ReturnsDefault()
+        {
+            // Arrange
+            var json = "{\"other\":\"value\"}";
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement;
+
+            // Act
+            var result = element.GetPropertyOrDefault("name");
+
+            // Assert
+            Assert.Equal(JsonValueKind.Undefined, result.ValueKind);
+        }
+
+        #endregion
+
+        #region HasProperty Tests
+
+        [Fact]
+        public void HasProperty_ExistingNonNullProperty_ReturnsTrue()
+        {
+            // Arrange
+            var json = "{\"name\":\"test\"}";
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement;
+
+            // Act
+            var result = element.HasProperty("name");
+
+            // Assert
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void HasProperty_ExistingNullProperty_ReturnsFalse()
+        {
+            // Arrange
+            var json = "{\"name\":null}";
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement;
+
+            // Act
+            var result = element.HasProperty("name");
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void HasProperty_MissingProperty_ReturnsFalse()
+        {
+            // Arrange
+            var json = "{\"other\":\"value\"}";
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement;
+
+            // Act
+            var result = element.HasProperty("name");
+
+            // Assert
+            Assert.False(result);
+        }
+
+        #endregion
+
+        #region Array Extension Tests
+
+        [Fact]
+        public void GetArrayLengthSafe_ArrayElement_ReturnsLength()
+        {
+            // Arrange
+            var json = "{\"items\":[1,2,3,4,5]}";
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement.GetProperty("items");
+
+            // Act
+            var result = element.GetArrayLengthSafe();
+
+            // Assert
+            Assert.Equal(5, result);
+        }
+
+        [Fact]
+        public void GetArrayLengthSafe_NonArrayElement_ReturnsZero()
+        {
+            // Arrange
+            var json = "{\"items\":\"not an array\"}";
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement.GetProperty("items");
+
+            // Act
+            var result = element.GetArrayLengthSafe();
+
+            // Assert
+            Assert.Equal(0, result);
+        }
+
+        [Fact]
+        public void EnumerateArraySafe_ArrayElement_ReturnsElements()
+        {
+            // Arrange
+            var json = "{\"items\":[1,2,3]}";
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement.GetProperty("items");
+
+            // Act
+            var result = element.EnumerateArraySafe().ToList();
+
+            // Assert
+            Assert.Equal(3, result.Count);
+            Assert.Equal(1, result[0].GetInt32());
+            Assert.Equal(2, result[1].GetInt32());
+            Assert.Equal(3, result[2].GetInt32());
+        }
+
+        [Fact]
+        public void EnumerateArraySafe_NonArrayElement_ReturnsEmpty()
+        {
+            // Arrange
+            var json = "{\"items\":\"not an array\"}";
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement.GetProperty("items");
+
+            // Act
+            var result = element.EnumerateArraySafe().ToList();
+
+            // Assert
+            Assert.Empty(result);
+        }
+
+        #endregion
+
+        #region Object Extension Tests
+
+        [Fact]
+        public void EnumerateObjectSafe_ObjectElement_ReturnsProperties()
+        {
+            // Arrange
+            var json = "{\"a\":1,\"b\":2,\"c\":3}";
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement;
+
+            // Act
+            var result = element.EnumerateObjectSafe().ToList();
+
+            // Assert
+            Assert.Equal(3, result.Count);
+            Assert.Contains(result, p => p.Name == "a");
+            Assert.Contains(result, p => p.Name == "b");
+            Assert.Contains(result, p => p.Name == "c");
+        }
+
+        [Fact]
+        public void EnumerateObjectSafe_NonObjectElement_ReturnsEmpty()
+        {
+            // Arrange
+            var json = "[1,2,3]";
+            using var doc = JsonDocument.Parse(json);
+            var element = doc.RootElement;
+
+            // Act
+            var result = element.EnumerateObjectSafe().ToList();
+
+            // Assert
+            Assert.Empty(result);
+        }
+
+        #endregion
     }
 }

@@ -1,10 +1,8 @@
-﻿using CCXT.Simple.Core.Converters;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace CCXT.Simple.Exchanges.Crypto
@@ -46,7 +44,6 @@ namespace CCXT.Simple.Exchanges.Crypto
         /// <summary>
         /// Withdrawal fee.
         /// </summary>
-        [JsonConverter(typeof(XDecimalNullConverter))]
         public decimal withdrawal_fee { get; set; }
 
 
@@ -59,7 +56,6 @@ namespace CCXT.Simple.Exchanges.Crypto
         /// <summary>
         /// Minimum withdrawal amount.
         /// </summary>
-        [JsonConverter(typeof(XDecimalNullConverter))]
         public decimal min_withdrawal_amount { get; set; }
 
 
@@ -89,7 +85,8 @@ namespace CCXT.Simple.Exchanges.Crypto
         /// <summary>
         /// Per-currency detailed map data.
         /// </summary>
-        public JObject currency_map { get; set; }
+        [JsonPropertyName("currency_map")]
+        public Dictionary<string, CurrencyMap> currency_map { get; set; }
     }
 
     /// <summary>

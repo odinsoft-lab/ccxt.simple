@@ -1,5 +1,4 @@
-using Newtonsoft.Json;
-using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace CCXT.Simple.Exchanges.Bybit.Funding
 {
@@ -8,46 +7,46 @@ namespace CCXT.Simple.Exchanges.Bybit.Funding
     /// </summary>
     public class V5DepositRecord
     {
-        [JsonProperty("coin")]
+        [JsonPropertyName("coin")]
         public string Coin { get; set; }
 
-        [JsonProperty("chain")]
+        [JsonPropertyName("chain")]
         public string Chain { get; set; }
 
-        [JsonProperty("amount")]
+        [JsonPropertyName("amount")]
         public string Amount { get; set; }
 
-        [JsonProperty("txID")]
+        [JsonPropertyName("txID")]
         public string TxID { get; set; }
 
-        [JsonProperty("status")]
+        [JsonPropertyName("status")]
         public int Status { get; set; }
 
-        [JsonProperty("toAddress")]
+        [JsonPropertyName("toAddress")]
         public string ToAddress { get; set; }
 
-        [JsonProperty("tag")]
+        [JsonPropertyName("tag")]
         public string Tag { get; set; }
 
-        [JsonProperty("depositFee")]
+        [JsonPropertyName("depositFee")]
         public string DepositFee { get; set; }
 
-        [JsonProperty("successAt")]
+        [JsonPropertyName("successAt")]
         public string SuccessAt { get; set; }
 
-        [JsonProperty("confirmations")]
+        [JsonPropertyName("confirmations")]
         public string Confirmations { get; set; }
 
-        [JsonProperty("txIndex")]
+        [JsonPropertyName("txIndex")]
         public string TxIndex { get; set; }
 
-        [JsonProperty("blockHash")]
+        [JsonPropertyName("blockHash")]
         public string BlockHash { get; set; }
 
-        [JsonProperty("batchReleaseLimit")]
+        [JsonPropertyName("batchReleaseLimit")]
         public string BatchReleaseLimit { get; set; }
 
-        [JsonProperty("depositType")]
+        [JsonPropertyName("depositType")]
         public int DepositType { get; set; }
     }
 
@@ -56,40 +55,40 @@ namespace CCXT.Simple.Exchanges.Bybit.Funding
     /// </summary>
     public class V5WithdrawalRecord
     {
-        [JsonProperty("withdrawId")]
+        [JsonPropertyName("withdrawId")]
         public string WithdrawId { get; set; }
 
-        [JsonProperty("txID")]
+        [JsonPropertyName("txID")]
         public string TxID { get; set; }
 
-        [JsonProperty("withdrawType")]
+        [JsonPropertyName("withdrawType")]
         public int WithdrawType { get; set; }
 
-        [JsonProperty("coin")]
+        [JsonPropertyName("coin")]
         public string Coin { get; set; }
 
-        [JsonProperty("chain")]
+        [JsonPropertyName("chain")]
         public string Chain { get; set; }
 
-        [JsonProperty("amount")]
+        [JsonPropertyName("amount")]
         public string Amount { get; set; }
 
-        [JsonProperty("withdrawFee")]
+        [JsonPropertyName("withdrawFee")]
         public string WithdrawFee { get; set; }
 
-        [JsonProperty("status")]
+        [JsonPropertyName("status")]
         public string Status { get; set; }
 
-        [JsonProperty("toAddress")]
+        [JsonPropertyName("toAddress")]
         public string ToAddress { get; set; }
 
-        [JsonProperty("tag")]
+        [JsonPropertyName("tag")]
         public string Tag { get; set; }
 
-        [JsonProperty("createTime")]
+        [JsonPropertyName("createTime")]
         public string CreateTime { get; set; }
 
-        [JsonProperty("updateTime")]
+        [JsonPropertyName("updateTime")]
         public string UpdateTime { get; set; }
     }
 
@@ -98,28 +97,28 @@ namespace CCXT.Simple.Exchanges.Bybit.Funding
     /// </summary>
     public class V5DepositAddress
     {
-        [JsonProperty("coin")]
+        [JsonPropertyName("coin")]
         public string Coin { get; set; }
 
-        [JsonProperty("chains")]
+        [JsonPropertyName("chains")]
         public List<V5DepositChain> Chains { get; set; }
     }
 
     public class V5DepositChain
     {
-        [JsonProperty("chainType")]
+        [JsonPropertyName("chainType")]
         public string ChainType { get; set; }
 
-        [JsonProperty("addressDeposit")]
+        [JsonPropertyName("addressDeposit")]
         public string AddressDeposit { get; set; }
 
-        [JsonProperty("tagDeposit")]
+        [JsonPropertyName("tagDeposit")]
         public string TagDeposit { get; set; }
 
-        [JsonProperty("chain")]
+        [JsonPropertyName("chain")]
         public string Chain { get; set; }
 
-        [JsonProperty("batchReleaseLimit")]
+        [JsonPropertyName("batchReleaseLimit")]
         public string BatchReleaseLimit { get; set; }
     }
 
@@ -128,34 +127,34 @@ namespace CCXT.Simple.Exchanges.Bybit.Funding
     /// </summary>
     public class V5WithdrawRequest
     {
-        [JsonProperty("coin")]
+        [JsonPropertyName("coin")]
         public string Coin { get; set; }
 
-        [JsonProperty("chain")]
+        [JsonPropertyName("chain")]
         public string Chain { get; set; }
 
-        [JsonProperty("address")]
+        [JsonPropertyName("address")]
         public string Address { get; set; }
 
-        [JsonProperty("tag")]
+        [JsonPropertyName("tag")]
         public string Tag { get; set; }
 
-        [JsonProperty("amount")]
+        [JsonPropertyName("amount")]
         public string Amount { get; set; }
 
-        [JsonProperty("timestamp")]
+        [JsonPropertyName("timestamp")]
         public long Timestamp { get; set; }
 
-        [JsonProperty("forceChain")]
+        [JsonPropertyName("forceChain")]
         public int? ForceChain { get; set; }
 
-        [JsonProperty("accountType")]
+        [JsonPropertyName("accountType")]
         public string AccountType { get; set; }
 
-        [JsonProperty("feeType")]
+        [JsonPropertyName("feeType")]
         public int? FeeType { get; set; }
 
-        [JsonProperty("requestId")]
+        [JsonPropertyName("requestId")]
         public string RequestId { get; set; }
     }
 
@@ -164,25 +163,25 @@ namespace CCXT.Simple.Exchanges.Bybit.Funding
     /// </summary>
     public class V5InternalTransfer
     {
-        [JsonProperty("transferId")]
+        [JsonPropertyName("transferId")]
         public string TransferId { get; set; }
 
-        [JsonProperty("coin")]
+        [JsonPropertyName("coin")]
         public string Coin { get; set; }
 
-        [JsonProperty("amount")]
+        [JsonPropertyName("amount")]
         public string Amount { get; set; }
 
-        [JsonProperty("fromAccountType")]
+        [JsonPropertyName("fromAccountType")]
         public string FromAccountType { get; set; }
 
-        [JsonProperty("toAccountType")]
+        [JsonPropertyName("toAccountType")]
         public string ToAccountType { get; set; }
 
-        [JsonProperty("timestamp")]
+        [JsonPropertyName("timestamp")]
         public string Timestamp { get; set; }
 
-        [JsonProperty("status")]
+        [JsonPropertyName("status")]
         public string Status { get; set; }
     }
 }

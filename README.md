@@ -5,14 +5,14 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
 [![Downloads](https://img.shields.io/nuget/dt/CCXT.Simple.svg)](https://www.nuget.org/packages/CCXT.Simple/)
 
-> 🚀 **Modern .NET cryptocurrency trading library** - Unified API access to 110 exchange adapters (9 FULL, 3 PARTIAL, 98 SKELETON) with a focus on simplicity and performance.
+> 🚀 **Modern .NET cryptocurrency trading library** - Unified API access to 110 exchange adapters (14 FULL, 96 SKELETON) with a focus on simplicity and performance.
 
 ## ✨ Key Features
 
 - **🎯 Unified Interface** - Same API across all exchanges
 - **⚡ High Performance** - `ValueTask<T>` async patterns, HTTP client pooling
 - **🔒 Type Safe** - Strong typing with comprehensive data models
-- **🌍 Global Coverage** - 110 exchange adapters (9 fully validated, 3 in progress)
+- **🌍 Global Coverage** - 110 exchange adapters (14 fully implemented)
 - **📊 Complete API** - Market data, trading, account management, funding operations
 
 ## 🚀 Quick Start
@@ -41,16 +41,13 @@ var order = await binance.PlaceOrder("BTCUSDT", SideType.Buy, "limit", 0.001m, 5
 
 ## 🏢 Exchange Support
 
-### ✅ Fully Functional (9 exchanges)
-**Binance** | **Bitstamp** | **Bithumb** | **Bybit** | **Coinbase** | **Coinone** | **Kraken** | **OKX** | **Upbit**
-
-### 🌓 Partial / In Progress (3)
-**Huobi** | **KuCoin** | **Korbit**
+### ✅ Fully Functional (14 exchanges)
+**Binance** | **BinanceUs** | **Bitget** | **Bitstamp** | **Bithumb** | **Bybit** | **Coinbase** | **Coinone** | **Huobi** | **Korbit** | **Kraken** | **Kucoin** | **OKX** | **Upbit**
 
 ### 🚧 Priority Development Queue
 **Bitfinex** • **Gemini** • **Poloniex** • **Mexc** • **Deribit** • **Bitmex**
 
-### 📋 Skeleton Ready (98 exchanges)
+### 📋 Skeleton Ready (96 exchanges)
 Remaining adapters are generated skeletons awaiting implementation.
 
 > 📖 **[View complete exchange list and status →](docs/EXCHANGES.md)**
@@ -113,14 +110,15 @@ We welcome contributions! **Need a specific exchange implemented?** [Create an i
 git clone https://github.com/odinsoft-lab/ccxt.simple.git
 cd ccxt.simple
 dotnet build              # Build solution
-dotnet test               # Run 90 tests
+dotnet test               # Run 452 tests
 ```
 
 ## 📊 Project Status
 
-- **Current Version**: 1.1.11 (.NET Standard 2.0/2.1, .NET 8.0, 9.0, 10.0)
+- **Current Version**: 1.1.13 (.NET Standard 2.0/2.1, .NET 8.0, 9.0, 10.0)
 - **Architecture**: Thread-safe, event-driven, REST API focused
-- **Test Coverage**: 90 tests passing across 7 test files
+- **JSON Library**: System.Text.Json (migrated from Newtonsoft.Json)
+- **Test Coverage**: 452 tests passing (8.79% line coverage)
 - **Active Development**: Monthly updates, community-driven priorities
 
 ## 👥 Team

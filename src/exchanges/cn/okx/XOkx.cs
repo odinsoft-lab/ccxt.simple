@@ -8,8 +8,8 @@
 // == CCXT-SIMPLE-META-END ==
 
 using CCXT.Simple.Core.Converters;
-using Newtonsoft.Json;
 using System.Security.Cryptography;
+using System.Text.Json;
 using System.Text;
 using CCXT.Simple.Core.Extensions;
 using CCXT.Simple.Core.Interfaces;
@@ -80,7 +80,7 @@ namespace CCXT.Simple.Exchanges.Okx
                 if (!_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jarray = JsonConvert.DeserializeObject<CoinInfor>(_jstring, mainXchg.JsonSettings);
+                    var _jarray = JsonSerializer.Deserialize<CoinInfor>(_jstring, mainXchg.StjOptions);
 
                     var _queue_info = mainXchg.GetXInfors(ExchangeName);
 
@@ -140,7 +140,7 @@ namespace CCXT.Simple.Exchanges.Okx
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jarray = JsonConvert.DeserializeObject<CoinState>(_jstring);
+                    var _jarray = JsonSerializer.Deserialize<CoinState>(_jstring, mainXchg.StjOptions);
 
                     foreach (var c in _jarray.data)
                     {
@@ -268,7 +268,7 @@ namespace CCXT.Simple.Exchanges.Okx
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync("/api/v5/market/ticker?instId=" + symbol);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jtickers = JsonConvert.DeserializeObject<RaTickers>(_jstring);
+                var _jtickers = JsonSerializer.Deserialize<RaTickers>(_jstring, mainXchg.StjOptions);
 
                 var _jitem = _jtickers.data.SingleOrDefault(x => x.instId == symbol);
                 if (_jitem != null)
@@ -297,7 +297,7 @@ namespace CCXT.Simple.Exchanges.Okx
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync("/api/v5/market/tickers?instType=SPOT");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jtickers = JsonConvert.DeserializeObject<RaTickers>(_jstring);
+                var _jtickers = JsonSerializer.Deserialize<RaTickers>(_jstring, mainXchg.StjOptions);
 
                 for (var i = 0; i < tickers.items.Count; i++)
                 {
@@ -352,7 +352,7 @@ namespace CCXT.Simple.Exchanges.Okx
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync("/api/v5/market/tickers?instType=SPOT");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jtickers = JsonConvert.DeserializeObject<RaTickers>(_jstring);
+                var _jtickers = JsonSerializer.Deserialize<RaTickers>(_jstring, mainXchg.StjOptions);
 
                 for (var i = 0; i < tickers.items.Count; i++)
                 {
@@ -419,7 +419,7 @@ namespace CCXT.Simple.Exchanges.Okx
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync("/api/v5/market/tickers?instType=SPOT");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jtickers = JsonConvert.DeserializeObject<RaTickers>(_jstring);
+                var _jtickers = JsonSerializer.Deserialize<RaTickers>(_jstring, mainXchg.StjOptions);
 
                 for (var i = 0; i < tickers.items.Count; i++)
                 {
@@ -483,7 +483,7 @@ namespace CCXT.Simple.Exchanges.Okx
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync("/api/v5/market/tickers?instType=SPOT");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jtickers = JsonConvert.DeserializeObject<RaTickers>(_jstring);
+                var _jtickers = JsonSerializer.Deserialize<RaTickers>(_jstring, mainXchg.StjOptions);
 
                 for (var i = 0; i < tickers.items.Count; i++)
                 {
@@ -576,7 +576,7 @@ namespace CCXT.Simple.Exchanges.Okx
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync("/api/v5/market/books?instId={symbol}&sz={limit}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+                var _jobject = JsonSerializer.Deserialize<dynamic>(_jstring, mainXchg.StjOptions);
 
                 if (_jobject.code == "0")
                 {
@@ -633,7 +633,7 @@ namespace CCXT.Simple.Exchanges.Okx
 
                 var _response = await _client.GetAsync(url);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+                var _jobject = JsonSerializer.Deserialize<dynamic>(_jstring, mainXchg.StjOptions);
 
                 if (_jobject.code == "0")
                 {
@@ -697,7 +697,7 @@ namespace CCXT.Simple.Exchanges.Okx
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync("/api/v5/market/trades?instId={symbol}&limit={limit}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+                var _jobject = JsonSerializer.Deserialize<dynamic>(_jstring, mainXchg.StjOptions);
 
                 if (_jobject.code == "0")
                 {
@@ -742,7 +742,7 @@ namespace CCXT.Simple.Exchanges.Okx
 
                 var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+                var _jobject = JsonSerializer.Deserialize<dynamic>(_jstring, mainXchg.StjOptions);
 
                 if (_jobject.code == "0")
                 {
@@ -797,7 +797,7 @@ namespace CCXT.Simple.Exchanges.Okx
 
                     var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+                    var _jobject = JsonSerializer.Deserialize<dynamic>(_jstring, mainXchg.StjOptions);
 
                     if (_jobject.code == "0" && _jobject.data.Count > 0)
                     {
@@ -843,7 +843,7 @@ namespace CCXT.Simple.Exchanges.Okx
                     clOrdId = clientOrderId
                 };
 
-                var jsonContent = JsonConvert.SerializeObject(orderData);
+                var jsonContent = JsonSerializer.Serialize(orderData, mainXchg.StjOptions);
                 var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
                 CreateSignature(_client, "POST", path, jsonContent);
@@ -851,7 +851,7 @@ namespace CCXT.Simple.Exchanges.Okx
 
                 var _response = await _client.PostAsync($"{ExchangeUrl}{path}", content);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+                var _jobject = JsonSerializer.Deserialize<dynamic>(_jstring, mainXchg.StjOptions);
 
                 if (_jobject.code == "0" && _jobject.data.Count > 0)
                 {
@@ -911,7 +911,7 @@ namespace CCXT.Simple.Exchanges.Okx
                     clOrdId = clientOrderId
                 };
 
-                var jsonContent = JsonConvert.SerializeObject(cancelData);
+                var jsonContent = JsonSerializer.Serialize(cancelData, mainXchg.StjOptions);
                 var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
                 CreateSignature(_client, "POST", path, jsonContent);
@@ -919,7 +919,7 @@ namespace CCXT.Simple.Exchanges.Okx
 
                 var _response = await _client.PostAsync($"{ExchangeUrl}{path}", content);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+                var _jobject = JsonSerializer.Deserialize<dynamic>(_jstring, mainXchg.StjOptions);
 
                 _result = _jobject.code == "0";
             }
@@ -961,7 +961,7 @@ namespace CCXT.Simple.Exchanges.Okx
 
                 var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+                var _jobject = JsonSerializer.Deserialize<dynamic>(_jstring, mainXchg.StjOptions);
 
                 if (_jobject.code == "0" && _jobject.data.Count > 0)
                 {
@@ -1017,7 +1017,7 @@ namespace CCXT.Simple.Exchanges.Okx
 
                 var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+                var _jobject = JsonSerializer.Deserialize<dynamic>(_jstring, mainXchg.StjOptions);
 
                 if (_jobject.code == "0")
                 {
@@ -1073,7 +1073,7 @@ namespace CCXT.Simple.Exchanges.Okx
 
                 var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+                var _jobject = JsonSerializer.Deserialize<dynamic>(_jstring, mainXchg.StjOptions);
 
                 if (_jobject.code == "0")
                 {
@@ -1129,7 +1129,7 @@ namespace CCXT.Simple.Exchanges.Okx
 
                 var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+                var _jobject = JsonSerializer.Deserialize<dynamic>(_jstring, mainXchg.StjOptions);
 
                 if (_jobject.code == "0")
                 {
@@ -1178,7 +1178,7 @@ namespace CCXT.Simple.Exchanges.Okx
 
                 var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+                var _jobject = JsonSerializer.Deserialize<dynamic>(_jstring, mainXchg.StjOptions);
 
                 if (_jobject.code == "0" && _jobject.data.Count > 0)
                 {
@@ -1228,7 +1228,7 @@ namespace CCXT.Simple.Exchanges.Okx
                     tag = tag
                 };
 
-                var jsonContent = JsonConvert.SerializeObject(withdrawData);
+                var jsonContent = JsonSerializer.Serialize(withdrawData, mainXchg.StjOptions);
                 var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
                 CreateSignature(_client, "POST", path, jsonContent);
@@ -1236,7 +1236,7 @@ namespace CCXT.Simple.Exchanges.Okx
 
                 var _response = await _client.PostAsync($"{ExchangeUrl}{path}", content);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+                var _jobject = JsonSerializer.Deserialize<dynamic>(_jstring, mainXchg.StjOptions);
 
                 if (_jobject.code == "0" && _jobject.data.Count > 0)
                 {
@@ -1286,7 +1286,7 @@ namespace CCXT.Simple.Exchanges.Okx
 
                 var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+                var _jobject = JsonSerializer.Deserialize<dynamic>(_jstring, mainXchg.StjOptions);
 
                 if (_jobject.code == "0")
                 {
@@ -1338,7 +1338,7 @@ namespace CCXT.Simple.Exchanges.Okx
 
                 var _response = await _client.GetAsync($"{ExchangeUrl}{path}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobject = JsonConvert.DeserializeObject<dynamic>(_jstring);
+                var _jobject = JsonSerializer.Deserialize<dynamic>(_jstring, mainXchg.StjOptions);
 
                 if (_jobject.code == "0")
                 {

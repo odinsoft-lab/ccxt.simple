@@ -10,9 +10,9 @@
 // == CCXT-SIMPLE-META-END ==
 
 using CCXT.Simple.Core.Converters;
-using Newtonsoft.Json.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using CCXT.Simple.Core.Interfaces;
 using CCXT.Simple.Core;
 using CCXT.Simple.Core.Extensions;
@@ -32,20 +32,20 @@ namespace CCXT.Simple.Exchanges.Kraken
     {
         /*
          * Kraken Exchange Implementation
-         * 
+         *
          * API Documentation:
          *     https://docs.kraken.com/rest/
          *     https://support.kraken.com/hc/en-us/articles/360000920306-Frequently-Asked-Questions-API
-         * 
+         *
          * Fees:
          *     https://www.kraken.com/features/fee-schedule
          *     https://support.kraken.com/hc/en-us/articles/201893608-What-are-the-withdrawal-fees-
-         * 
+         *
          * Rate Limits:
          *     Public endpoints: No rate limit
          *     Private endpoints: Rate limit based on API tier
          *     - Starter: 15/second, 60 counter decrease
-         *     - Intermediate: 20/second, 40 counter decrease  
+         *     - Intermediate: 20/second, 40 counter decrease
          *     - Pro: 20/second, 20 counter decrease
          */
 
@@ -135,26 +135,26 @@ namespace CCXT.Simple.Exchanges.Kraken
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync("/0/public/AssetPairs");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jdata["error"] != null && _jdata["error"].HasValues)
+                if (_root.TryGetProperty("error", out var errorElement) && errorElement.GetArrayLength() > 0)
                 {
-                    var error = _jdata["error"].ToString();
+                    var error = errorElement.GetRawText();
                     mainXchg.OnMessageEvent(ExchangeName, $"VerifySymbols error: {error}", 3010);
                     return _result;
                 }
 
-                var result = _jdata["result"] as JObject;
-                if (result != null)
+                if (_root.TryGetProperty("result", out var result))
                 {
                     var _queue_info = mainXchg.GetXInfors(ExchangeName);
 
-                    foreach (var pair in result.Properties())
+                    foreach (var pair in result.EnumerateObject())
                     {
-                        var pairInfo = pair.Value as JObject;
-                        if (pairInfo == null) continue;
+                        var pairInfo = pair.Value;
+                        if (pairInfo.ValueKind != JsonValueKind.Object) continue;
 
-                        var wsname = pairInfo["wsname"]?.ToString();
+                        var wsname = pairInfo.GetStringSafe("wsname");
                         if (string.IsNullOrEmpty(wsname)) continue;
 
                         // Parse wsname format: "XBT/USD" or "ETH/USD"
@@ -202,29 +202,29 @@ namespace CCXT.Simple.Exchanges.Kraken
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync("/0/public/Assets");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jdata["error"] != null && _jdata["error"].HasValues)
+                if (_root.TryGetProperty("error", out var errorElement) && errorElement.GetArrayLength() > 0)
                 {
-                    var error = _jdata["error"].ToString();
+                    var error = errorElement.GetRawText();
                     mainXchg.OnMessageEvent(ExchangeName, $"VerifyStates error: {error}", 3012);
                     return _result;
                 }
 
-                var result = _jdata["result"] as JObject;
-                if (result != null)
+                if (_root.TryGetProperty("result", out var result))
                 {
-                    foreach (var asset in result.Properties())
+                    foreach (var asset in result.EnumerateObject())
                     {
-                        var assetInfo = asset.Value as JObject;
-                        if (assetInfo == null) continue;
+                        var assetInfo = asset.Value;
+                        if (assetInfo.ValueKind != JsonValueKind.Object) continue;
 
                         var assetName = asset.Name;
                         // Convert XBT to BTC
                         if (assetName == "XBT")
                             assetName = "BTC";
 
-                        var status = assetInfo["status"]?.ToString();
+                        var status = assetInfo.GetStringSafe("status");
                         var active = status == "enabled";
 
                         var _state = tickers.states.SingleOrDefault(x => x.baseName == assetName);
@@ -298,18 +298,25 @@ namespace CCXT.Simple.Exchanges.Kraken
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync($"/0/public/Ticker?pair={pairs}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jdata["error"] != null && _jdata["error"].HasValues)
+                if (_root.TryGetProperty("error", out var errorElement) && errorElement.GetArrayLength() > 0)
                 {
-                    var error = _jdata["error"].ToString();
+                    var error = errorElement.GetRawText();
                     mainXchg.OnMessageEvent(ExchangeName, $"GetBookTickers error: {error}", 3015);
                     return _result;
                 }
 
-                var result = _jdata["result"] as JObject;
-                if (result != null)
+                if (_root.TryGetProperty("result", out var result))
                 {
+                    // Build dictionary for faster lookup
+                    var resultDict = new Dictionary<string, JsonElement>();
+                    foreach (var prop in result.EnumerateObject())
+                    {
+                        resultDict[prop.Name] = prop.Value;
+                    }
+
                     foreach (var ticker in tickers.items)
                     {
                         if (ticker.symbol == "X")
@@ -318,28 +325,34 @@ namespace CCXT.Simple.Exchanges.Kraken
                         var krakenSymbol = ConvertToKrakenSymbol($"{ticker.baseName}/{ticker.quoteName}");
 
                         // Find matching pair in result
-                        var pairData = result.Properties().FirstOrDefault(p =>
-                            p.Name.Contains(krakenSymbol) ||
-                            p.Name.Replace("X", "").Replace("Z", "").Contains(ticker.baseName + ticker.quoteName));
+                        JsonElement tickerData = default;
+                        bool found = false;
 
-                        if (pairData != null)
+                        foreach (var kvp in resultDict)
                         {
-                            var tickerData = pairData.Value;
-
-                            // a = ask array [price, whole lot volume, lot volume]
-                            var ask = tickerData["a"] as JArray;
-                            if (ask != null && ask.Count >= 2)
+                            if (kvp.Key.Contains(krakenSymbol) ||
+                                kvp.Key.Replace("X", "").Replace("Z", "").Contains(ticker.baseName + ticker.quoteName))
                             {
-                                ticker.askPrice = decimal.Parse(ask[0].ToString());
-                                ticker.askQty = decimal.Parse(ask[2].ToString());
+                                tickerData = kvp.Value;
+                                found = true;
+                                break;
+                            }
+                        }
+
+                        if (found)
+                        {
+                            // a = ask array [price, whole lot volume, lot volume]
+                            if (tickerData.TryGetProperty("a", out var ask) && ask.GetArrayLength() >= 2)
+                            {
+                                ticker.askPrice = ask[0].GetDecimalSafe();
+                                ticker.askQty = ask[2].GetDecimalSafe();
                             }
 
                             // b = bid array [price, whole lot volume, lot volume]
-                            var bid = tickerData["b"] as JArray;
-                            if (bid != null && bid.Count >= 2)
+                            if (tickerData.TryGetProperty("b", out var bid) && bid.GetArrayLength() >= 2)
                             {
-                                ticker.bidPrice = decimal.Parse(bid[0].ToString());
-                                ticker.bidQty = decimal.Parse(bid[2].ToString());
+                                ticker.bidPrice = bid[0].GetDecimalSafe();
+                                ticker.bidQty = bid[2].GetDecimalSafe();
                             }
                         }
                         else
@@ -379,18 +392,25 @@ namespace CCXT.Simple.Exchanges.Kraken
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync($"/0/public/Ticker?pair={pairs}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jdata["error"] != null && _jdata["error"].HasValues)
+                if (_root.TryGetProperty("error", out var errorElement) && errorElement.GetArrayLength() > 0)
                 {
-                    var error = _jdata["error"].ToString();
+                    var error = errorElement.GetRawText();
                     mainXchg.OnMessageEvent(ExchangeName, $"GetMarkets error: {error}", 3018);
                     return _result;
                 }
 
-                var result = _jdata["result"] as JObject;
-                if (result != null)
+                if (_root.TryGetProperty("result", out var result))
                 {
+                    // Build dictionary for faster lookup
+                    var resultDict = new Dictionary<string, JsonElement>();
+                    foreach (var prop in result.EnumerateObject())
+                    {
+                        resultDict[prop.Name] = prop.Value;
+                    }
+
                     foreach (var ticker in tickers.items)
                     {
                         if (ticker.symbol == "X")
@@ -399,26 +419,32 @@ namespace CCXT.Simple.Exchanges.Kraken
                         var krakenSymbol = ConvertToKrakenSymbol($"{ticker.baseName}/{ticker.quoteName}");
 
                         // Find matching pair in result
-                        var pairData = result.Properties().FirstOrDefault(p =>
-                            p.Name.Contains(krakenSymbol) ||
-                            p.Name.Replace("X", "").Replace("Z", "").Contains(ticker.baseName + ticker.quoteName));
+                        JsonElement tickerData = default;
+                        bool found = false;
 
-                        if (pairData != null)
+                        foreach (var kvp in resultDict)
                         {
-                            var tickerData = pairData.Value;
-
-                            // c = last trade closed array [price, lot volume]
-                            var lastPrice = tickerData["c"] as JArray;
-                            if (lastPrice != null && lastPrice.Count > 0)
+                            if (kvp.Key.Contains(krakenSymbol) ||
+                                kvp.Key.Replace("X", "").Replace("Z", "").Contains(ticker.baseName + ticker.quoteName))
                             {
-                                ticker.lastPrice = decimal.Parse(lastPrice[0].ToString());
+                                tickerData = kvp.Value;
+                                found = true;
+                                break;
+                            }
+                        }
+
+                        if (found)
+                        {
+                            // c = last trade closed array [price, lot volume]
+                            if (tickerData.TryGetProperty("c", out var lastPrice) && lastPrice.GetArrayLength() > 0)
+                            {
+                                ticker.lastPrice = lastPrice[0].GetDecimalSafe();
                             }
 
                             // v = volume array [today, last 24 hours]
-                            var volume = tickerData["v"] as JArray;
-                            if (volume != null && volume.Count > 1)
+                            if (tickerData.TryGetProperty("v", out var volume) && volume.GetArrayLength() > 1)
                             {
-                                var _volume = decimal.Parse(volume[1].ToString());
+                                var _volume = volume[1].GetDecimalSafe();
                                 var _prev_volume24h = ticker.previous24h;
                                 var _next_timestamp = ticker.timestamp + 60 * 1000;
 
@@ -471,28 +497,28 @@ namespace CCXT.Simple.Exchanges.Kraken
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync($"/0/public/Ticker?pair={krakenSymbol}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jdata["error"] != null && _jdata["error"].HasValues)
+                if (_root.TryGetProperty("error", out var errorElement) && errorElement.GetArrayLength() > 0)
                 {
-                    var error = _jdata["error"].ToString();
+                    var error = errorElement.GetRawText();
                     mainXchg.OnMessageEvent(ExchangeName, $"GetPrice error: {error}", 3000);
                     return _result;
                 }
 
-                var result = _jdata["result"];
-                if (result != null)
+                if (_root.TryGetProperty("result", out var result))
                 {
-                    var pairData = result.First as JProperty;
-                    if (pairData != null)
+                    // Get first property (the pair data)
+                    foreach (var prop in result.EnumerateObject())
                     {
-                        var ticker = pairData.Value;
+                        var ticker = prop.Value;
                         // c = last trade closed array [price, lot volume]
-                        var lastPrice = ticker["c"] as JArray;
-                        if (lastPrice != null && lastPrice.Count > 0)
+                        if (ticker.TryGetProperty("c", out var lastPrice) && lastPrice.GetArrayLength() > 0)
                         {
-                            _result = decimal.Parse(lastPrice[0].ToString());
+                            _result = lastPrice[0].GetDecimalSafe();
                         }
+                        break;
                     }
                 }
             }
@@ -519,32 +545,31 @@ namespace CCXT.Simple.Exchanges.Kraken
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync($"/0/public/Depth?pair={krakenSymbol}&count={limit}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jdata["error"] != null && _jdata["error"].HasValues)
+                if (_root.TryGetProperty("error", out var errorElement) && errorElement.GetArrayLength() > 0)
                 {
-                    var error = _jdata["error"].ToString();
+                    var error = errorElement.GetRawText();
                     mainXchg.OnMessageEvent(ExchangeName, $"GetOrderbook error: {error}", 3001);
                     return _result;
                 }
 
-                var result = _jdata["result"];
-                if (result != null)
+                if (_root.TryGetProperty("result", out var result))
                 {
-                    var pairData = result.First as JProperty;
-                    if (pairData != null)
+                    // Get first property (the pair data)
+                    foreach (var prop in result.EnumerateObject())
                     {
-                        var orderbook = pairData.Value;
+                        var orderbook = prop.Value;
 
                         // Process asks
-                        var asks = orderbook["asks"] as JArray;
-                        if (asks != null)
+                        if (orderbook.TryGetProperty("asks", out var asks))
                         {
                             _result.asks.AddRange(
-                                asks.Take(limit).Select(x => new OrderbookItem
+                                asks.EnumerateArray().Take(limit).Select(x => new OrderbookItem
                                 {
-                                    price = decimal.Parse(x[0].ToString()),
-                                    quantity = decimal.Parse(x[1].ToString()),
+                                    price = x[0].GetDecimalSafe(),
+                                    quantity = x[1].GetDecimalSafe(),
                                     total = 1
                                 })
                                 .OrderBy(x => x.price)
@@ -552,19 +577,20 @@ namespace CCXT.Simple.Exchanges.Kraken
                         }
 
                         // Process bids
-                        var bids = orderbook["bids"] as JArray;
-                        if (bids != null)
+                        if (orderbook.TryGetProperty("bids", out var bids))
                         {
                             _result.bids.AddRange(
-                                bids.Take(limit).Select(x => new OrderbookItem
+                                bids.EnumerateArray().Take(limit).Select(x => new OrderbookItem
                                 {
-                                    price = decimal.Parse(x[0].ToString()),
-                                    quantity = decimal.Parse(x[1].ToString()),
+                                    price = x[0].GetDecimalSafe(),
+                                    quantity = x[1].GetDecimalSafe(),
                                     total = 1
                                 })
                                 .OrderByDescending(x => x.price)
                             );
                         }
+
+                        break;
                     }
                 }
             }
@@ -627,37 +653,40 @@ namespace CCXT.Simple.Exchanges.Kraken
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync(url);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jdata["error"] != null && _jdata["error"].HasValues)
+                if (_root.TryGetProperty("error", out var errorElement) && errorElement.GetArrayLength() > 0)
                 {
-                    var error = _jdata["error"].ToString();
+                    var error = errorElement.GetRawText();
                     mainXchg.OnMessageEvent(ExchangeName, $"GetCandles error: {error}", 3003);
                     return _result;
                 }
 
-                var result = _jdata["result"];
-                if (result != null)
+                if (_root.TryGetProperty("result", out var result))
                 {
-                    var pairData = result.First as JProperty;
-                    if (pairData != null)
+                    // Get first property (the pair data), skip "last" property
+                    foreach (var prop in result.EnumerateObject())
                     {
-                        var candles = pairData.Value as JArray;
-                        if (candles != null)
+                        if (prop.Name == "last") continue;
+
+                        var candles = prop.Value;
+                        if (candles.ValueKind == JsonValueKind.Array)
                         {
-                            foreach (var candle in candles.Take(limit))
+                            foreach (var candle in candles.EnumerateArray().Take(limit))
                             {
                                 _result.Add(new decimal[]
                                 {
-                                    decimal.Parse(candle[0].ToString()) * 1000, // timestamp (convert to ms)
-                                    decimal.Parse(candle[1].ToString()), // open
-                                    decimal.Parse(candle[2].ToString()), // high
-                                    decimal.Parse(candle[3].ToString()), // low
-                                    decimal.Parse(candle[4].ToString()), // close
-                                    decimal.Parse(candle[6].ToString())  // volume
+                                    candle[0].GetDecimalSafe() * 1000, // timestamp (convert to ms)
+                                    candle[1].GetDecimalSafe(), // open
+                                    candle[2].GetDecimalSafe(), // high
+                                    candle[3].GetDecimalSafe(), // low
+                                    candle[4].GetDecimalSafe(), // close
+                                    candle[6].GetDecimalSafe()  // volume
                                 });
                             }
                         }
+                        break;
                     }
                 }
             }
@@ -699,36 +728,39 @@ namespace CCXT.Simple.Exchanges.Kraken
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync($"/0/public/Trades?pair={krakenSymbol}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jdata["error"] != null && _jdata["error"].HasValues)
+                if (_root.TryGetProperty("error", out var errorElement) && errorElement.GetArrayLength() > 0)
                 {
-                    var error = _jdata["error"].ToString();
+                    var error = errorElement.GetRawText();
                     mainXchg.OnMessageEvent(ExchangeName, $"GetTrades error: {error}", 3005);
                     return _result;
                 }
 
-                var result = _jdata["result"];
-                if (result != null)
+                if (_root.TryGetProperty("result", out var result))
                 {
-                    var pairData = result.First as JProperty;
-                    if (pairData != null)
+                    // Get first property (the pair data), skip "last" property
+                    foreach (var prop in result.EnumerateObject())
                     {
-                        var trades = pairData.Value as JArray;
-                        if (trades != null)
+                        if (prop.Name == "last") continue;
+
+                        var trades = prop.Value;
+                        if (trades.ValueKind == JsonValueKind.Array)
                         {
-                            foreach (var trade in trades.Take(limit))
+                            foreach (var trade in trades.EnumerateArray().Take(limit))
                             {
                                 _result.Add(new TradeData
                                 {
                                     id = "", // Kraken doesn't provide trade ID in public trades
-                                    timestamp = (long)(decimal.Parse(trade[2].ToString()) * 1000),
-                                    price = decimal.Parse(trade[0].ToString()),
-                                    amount = decimal.Parse(trade[1].ToString()),
-                                    side = trade[3].ToString() == "b" ? SideType.Bid : SideType.Ask
+                                    timestamp = (long)(trade[2].GetDecimalSafe() * 1000),
+                                    price = trade[0].GetDecimalSafe(),
+                                    amount = trade[1].GetDecimalSafe(),
+                                    side = trade[3].GetStringSafe() == "b" ? SideType.Bid : SideType.Ask
                                 });
                             }
                         }
+                        break;
                     }
                 }
             }
@@ -761,22 +793,22 @@ namespace CCXT.Simple.Exchanges.Kraken
 
                 var _response = await _client.SendAsync(request);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jdata["error"] != null && _jdata["error"].HasValues)
+                if (_root.TryGetProperty("error", out var errorElement) && errorElement.GetArrayLength() > 0)
                 {
-                    var error = _jdata["error"].ToString();
+                    var error = errorElement.GetRawText();
                     mainXchg.OnMessageEvent(ExchangeName, $"GetBalance error: {error}", 3007);
                     return _result;
                 }
 
-                var result = _jdata["result"];
-                if (result != null)
+                if (_root.TryGetProperty("result", out var result))
                 {
-                    foreach (var balance in result.Children<JProperty>())
+                    foreach (var balance in result.EnumerateObject())
                     {
                         var currency = NormalizeKrakenCurrency(balance.Name);
-                        var amount = decimal.Parse(balance.Value.ToString());
+                        var amount = balance.Value.GetDecimalSafe();
 
                         _result[currency] = new BalanceInfo
                         {
@@ -832,17 +864,17 @@ namespace CCXT.Simple.Exchanges.Kraken
 
                 var _response = await _client.SendAsync(request);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jdata["error"] != null && _jdata["error"].HasValues)
+                if (_root.TryGetProperty("error", out var errorElement) && errorElement.GetArrayLength() > 0)
                 {
-                    var error = _jdata["error"].ToString();
+                    var error = errorElement.GetRawText();
                     mainXchg.OnMessageEvent(ExchangeName, $"GetAccount error: {error}", 3009);
                     return _result;
                 }
 
-                var result = _jdata["result"];
-                if (result != null)
+                if (_root.TryGetProperty("result", out var result))
                 {
                     _result.id = ApiKey.Substring(0, 8); // Use first 8 chars of API key as ID
                     _result.type = "trading";
@@ -893,22 +925,21 @@ namespace CCXT.Simple.Exchanges.Kraken
 
                 var _response = await _client.SendAsync(request);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jdata["error"] != null && _jdata["error"].HasValues)
+                if (_root.TryGetProperty("error", out var errorElement) && errorElement.GetArrayLength() > 0)
                 {
-                    var error = _jdata["error"].ToString();
+                    var error = errorElement.GetRawText();
                     mainXchg.OnMessageEvent(ExchangeName, $"PlaceOrder error: {error}", 3011);
                     return _result;
                 }
 
-                var result = _jdata["result"];
-                if (result != null)
+                if (_root.TryGetProperty("result", out var result))
                 {
-                    var txid = result["txid"];
-                    if (txid != null && txid.HasValues)
+                    if (result.TryGetProperty("txid", out var txid) && txid.GetArrayLength() > 0)
                     {
-                        _result.id = txid[0].ToString();
+                        _result.id = txid[0].GetStringSafe();
                         _result.clientOrderId = clientOrderId;
                         _result.symbol = symbol;
                         _result.side = side;
@@ -959,19 +990,19 @@ namespace CCXT.Simple.Exchanges.Kraken
 
                 var _response = await _client.SendAsync(request);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jdata["error"] != null && _jdata["error"].HasValues)
+                if (_root.TryGetProperty("error", out var errorElement) && errorElement.GetArrayLength() > 0)
                 {
-                    var error = _jdata["error"].ToString();
+                    var error = errorElement.GetRawText();
                     mainXchg.OnMessageEvent(ExchangeName, $"CancelOrder error: {error}", 3013);
                     return false;
                 }
 
-                var result = _jdata["result"];
-                if (result != null)
+                if (_root.TryGetProperty("result", out var result))
                 {
-                    var count = result["count"]?.Value<int>() ?? 0;
+                    var count = result.GetInt32Safe("count");
                     return count > 0;
                 }
             }
@@ -1004,32 +1035,36 @@ namespace CCXT.Simple.Exchanges.Kraken
 
                 var _response = await _client.SendAsync(request);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jdata["error"] != null && _jdata["error"].HasValues)
+                if (_root.TryGetProperty("error", out var errorElement) && errorElement.GetArrayLength() > 0)
                 {
-                    var error = _jdata["error"].ToString();
+                    var error = errorElement.GetRawText();
                     mainXchg.OnMessageEvent(ExchangeName, $"GetOrder error: {error}", 3015);
                     return _result;
                 }
 
-                var result = _jdata["result"];
-                if (result != null)
+                if (_root.TryGetProperty("result", out var result))
                 {
-                    var order = result[orderId];
-                    if (order != null)
+                    if (result.TryGetProperty(orderId, out var order))
                     {
                         _result.id = orderId;
-                        _result.symbol = symbol ?? order["descr"]?["pair"]?.ToString();
-                        _result.side = order["descr"]?["type"]?.ToString() == "buy" ? SideType.Bid : SideType.Ask;
-                        _result.type = order["descr"]?["ordertype"]?.ToString();
-                        _result.price = decimal.Parse(order["descr"]?["price"]?.ToString() ?? "0");
-                        _result.amount = decimal.Parse(order["vol"]?.ToString() ?? "0");
-                        _result.filled = decimal.Parse(order["vol_exec"]?.ToString() ?? "0");
+
+                        if (order.TryGetProperty("descr", out var descr))
+                        {
+                            _result.symbol = symbol ?? descr.GetStringSafe("pair");
+                            _result.side = descr.GetStringSafe("type") == "buy" ? SideType.Bid : SideType.Ask;
+                            _result.type = descr.GetStringSafe("ordertype");
+                            _result.price = descr.GetDecimalSafe("price");
+                        }
+
+                        _result.amount = order.GetDecimalSafe("vol");
+                        _result.filled = order.GetDecimalSafe("vol_exec");
                         _result.remaining = _result.amount - _result.filled;
-                        _result.status = ConvertOrderStatus(order["status"]?.ToString());
-                        _result.timestamp = (long)(decimal.Parse(order["opentm"]?.ToString() ?? "0") * 1000);
-                        _result.clientOrderId = order["userref"]?.ToString();
+                        _result.status = ConvertOrderStatus(order.GetStringSafe("status"));
+                        _result.timestamp = (long)(order.GetDecimalSafe("opentm") * 1000);
+                        _result.clientOrderId = order.GetStringSafe("userref");
                     }
                 }
             }
@@ -1075,39 +1110,54 @@ namespace CCXT.Simple.Exchanges.Kraken
 
                 var _response = await _client.SendAsync(request);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jdata["error"] != null && _jdata["error"].HasValues)
+                if (_root.TryGetProperty("error", out var errorElement) && errorElement.GetArrayLength() > 0)
                 {
-                    var error = _jdata["error"].ToString();
+                    var error = errorElement.GetRawText();
                     mainXchg.OnMessageEvent(ExchangeName, $"GetOpenOrders error: {error}", 3017);
                     return _result;
                 }
 
-                var result = _jdata["result"]?["open"];
-                if (result != null)
+                if (_root.TryGetProperty("result", out var resultElement) && resultElement.TryGetProperty("open", out var openOrders))
                 {
-                    foreach (var orderProp in result.Children<JProperty>())
+                    foreach (var orderProp in openOrders.EnumerateObject())
                     {
                         var orderId = orderProp.Name;
                         var order = orderProp.Value;
 
-                        var orderSymbol = order["descr"]?["pair"]?.ToString();
+                        string orderSymbol = null;
+                        SideType orderSide = SideType.Ask;
+                        string orderType = null;
+                        decimal orderPrice = 0;
+
+                        if (order.TryGetProperty("descr", out var descr))
+                        {
+                            orderSymbol = descr.GetStringSafe("pair");
+                            orderSide = descr.GetStringSafe("type") == "buy" ? SideType.Bid : SideType.Ask;
+                            orderType = descr.GetStringSafe("ordertype");
+                            orderPrice = descr.GetDecimalSafe("price");
+                        }
+
                         if (symbol == null || orderSymbol == ConvertToKrakenSymbol(symbol))
                         {
+                            var vol = order.GetDecimalSafe("vol");
+                            var volExec = order.GetDecimalSafe("vol_exec");
+
                             _result.Add(new OrderInfo
                             {
                                 id = orderId,
                                 symbol = orderSymbol,
-                                side = order["descr"]?["type"]?.ToString() == "buy" ? SideType.Bid : SideType.Ask,
-                                type = order["descr"]?["ordertype"]?.ToString(),
-                                price = decimal.Parse(order["descr"]?["price"]?.ToString() ?? "0"),
-                                amount = decimal.Parse(order["vol"]?.ToString() ?? "0"),
-                                filled = decimal.Parse(order["vol_exec"]?.ToString() ?? "0"),
-                                remaining = decimal.Parse(order["vol"]?.ToString() ?? "0") - decimal.Parse(order["vol_exec"]?.ToString() ?? "0"),
+                                side = orderSide,
+                                type = orderType,
+                                price = orderPrice,
+                                amount = vol,
+                                filled = volExec,
+                                remaining = vol - volExec,
                                 status = "open",
-                                timestamp = (long)(decimal.Parse(order["opentm"]?.ToString() ?? "0") * 1000),
-                                clientOrderId = order["userref"]?.ToString()
+                                timestamp = (long)(order.GetDecimalSafe("opentm") * 1000),
+                                clientOrderId = order.GetStringSafe("userref")
                             });
                         }
                     }
@@ -1142,41 +1192,56 @@ namespace CCXT.Simple.Exchanges.Kraken
 
                 var _response = await _client.SendAsync(request);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jdata["error"] != null && _jdata["error"].HasValues)
+                if (_root.TryGetProperty("error", out var errorElement) && errorElement.GetArrayLength() > 0)
                 {
-                    var error = _jdata["error"].ToString();
+                    var error = errorElement.GetRawText();
                     mainXchg.OnMessageEvent(ExchangeName, $"GetOrderHistory error: {error}", 3019);
                     return _result;
                 }
 
-                var result = _jdata["result"]?["closed"];
-                if (result != null)
+                if (_root.TryGetProperty("result", out var resultElement) && resultElement.TryGetProperty("closed", out var closedOrders))
                 {
-                    var orders = result.Children<JProperty>().Take(limit);
-                    foreach (var orderProp in orders)
+                    var count = 0;
+                    foreach (var orderProp in closedOrders.EnumerateObject())
                     {
+                        if (count >= limit) break;
+
                         var orderId = orderProp.Name;
                         var order = orderProp.Value;
 
-                        var orderSymbol = order["descr"]?["pair"]?.ToString();
+                        string orderSymbol = null;
+                        SideType orderSide = SideType.Ask;
+                        string orderType = null;
+                        decimal orderPrice = 0;
+
+                        if (order.TryGetProperty("descr", out var descr))
+                        {
+                            orderSymbol = descr.GetStringSafe("pair");
+                            orderSide = descr.GetStringSafe("type") == "buy" ? SideType.Bid : SideType.Ask;
+                            orderType = descr.GetStringSafe("ordertype");
+                            orderPrice = descr.GetDecimalSafe("price");
+                        }
+
                         if (symbol == null || orderSymbol == ConvertToKrakenSymbol(symbol))
                         {
                             _result.Add(new OrderInfo
                             {
                                 id = orderId,
                                 symbol = orderSymbol,
-                                side = order["descr"]?["type"]?.ToString() == "buy" ? SideType.Bid : SideType.Ask,
-                                type = order["descr"]?["ordertype"]?.ToString(),
-                                price = decimal.Parse(order["descr"]?["price"]?.ToString() ?? "0"),
-                                amount = decimal.Parse(order["vol"]?.ToString() ?? "0"),
-                                filled = decimal.Parse(order["vol_exec"]?.ToString() ?? "0"),
+                                side = orderSide,
+                                type = orderType,
+                                price = orderPrice,
+                                amount = order.GetDecimalSafe("vol"),
+                                filled = order.GetDecimalSafe("vol_exec"),
                                 remaining = 0,
-                                status = ConvertOrderStatus(order["status"]?.ToString()),
-                                timestamp = (long)(decimal.Parse(order["opentm"]?.ToString() ?? "0") * 1000),
-                                clientOrderId = order["userref"]?.ToString()
+                                status = ConvertOrderStatus(order.GetStringSafe("status")),
+                                timestamp = (long)(order.GetDecimalSafe("opentm") * 1000),
+                                clientOrderId = order.GetStringSafe("userref")
                             });
+                            count++;
                         }
                     }
                 }
@@ -1210,39 +1275,42 @@ namespace CCXT.Simple.Exchanges.Kraken
 
                 var _response = await _client.SendAsync(request);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jdata["error"] != null && _jdata["error"].HasValues)
+                if (_root.TryGetProperty("error", out var errorElement) && errorElement.GetArrayLength() > 0)
                 {
-                    var error = _jdata["error"].ToString();
+                    var error = errorElement.GetRawText();
                     mainXchg.OnMessageEvent(ExchangeName, $"GetTradeHistory error: {error}", 3021);
                     return _result;
                 }
 
-                var result = _jdata["result"]?["trades"];
-                if (result != null)
+                if (_root.TryGetProperty("result", out var resultElement) && resultElement.TryGetProperty("trades", out var trades))
                 {
-                    var trades = result.Children<JProperty>().Take(limit);
-                    foreach (var tradeProp in trades)
+                    var count = 0;
+                    foreach (var tradeProp in trades.EnumerateObject())
                     {
+                        if (count >= limit) break;
+
                         var tradeId = tradeProp.Name;
                         var trade = tradeProp.Value;
 
-                        var tradeSymbol = trade["pair"]?.ToString();
+                        var tradeSymbol = trade.GetStringSafe("pair");
                         if (symbol == null || tradeSymbol == ConvertToKrakenSymbol(symbol))
                         {
                             _result.Add(new TradeInfo
                             {
                                 id = tradeId,
-                                orderId = trade["ordertxid"]?.ToString(),
+                                orderId = trade.GetStringSafe("ordertxid"),
                                 symbol = tradeSymbol,
-                                side = trade["type"]?.ToString() == "buy" ? SideType.Bid : SideType.Ask,
-                                price = decimal.Parse(trade["price"]?.ToString() ?? "0"),
-                                amount = decimal.Parse(trade["vol"]?.ToString() ?? "0"),
-                                fee = decimal.Parse(trade["fee"]?.ToString() ?? "0"),
+                                side = trade.GetStringSafe("type") == "buy" ? SideType.Bid : SideType.Ask,
+                                price = trade.GetDecimalSafe("price"),
+                                amount = trade.GetDecimalSafe("vol"),
+                                fee = trade.GetDecimalSafe("fee"),
                                 feeAsset = "USD", // Kraken doesn't specify fee currency in this endpoint
-                                timestamp = (long)(decimal.Parse(trade["time"]?.ToString() ?? "0") * 1000)
+                                timestamp = (long)(trade.GetDecimalSafe("time") * 1000)
                             });
+                            count++;
                         }
                     }
                 }
@@ -1277,27 +1345,23 @@ namespace CCXT.Simple.Exchanges.Kraken
 
                 var _response = await _client.SendAsync(request);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jdata["error"] != null && _jdata["error"].HasValues)
+                if (_root.TryGetProperty("error", out var errorElement) && errorElement.GetArrayLength() > 0)
                 {
-                    var error = _jdata["error"].ToString();
+                    var error = errorElement.GetRawText();
                     mainXchg.OnMessageEvent(ExchangeName, $"GetDepositAddress error: {error}", 3023);
                     return _result;
                 }
 
-                var result = _jdata["result"];
-                if (result != null && result.HasValues)
+                if (_root.TryGetProperty("result", out var result) && result.GetArrayLength() > 0)
                 {
-                    var addresses = result as JArray;
-                    if (addresses != null && addresses.Count > 0)
-                    {
-                        var address = addresses[0];
-                        _result.currency = currency;
-                        _result.address = address["address"]?.ToString();
-                        _result.tag = address["tag"]?.ToString();
-                        _result.network = network ?? krakenCurrency;
-                    }
+                    var address = result[0];
+                    _result.currency = currency;
+                    _result.address = address.GetStringSafe("address");
+                    _result.tag = address.GetStringSafe("tag");
+                    _result.network = network ?? krakenCurrency;
                 }
             }
             catch (Exception ex)
@@ -1355,19 +1419,19 @@ namespace CCXT.Simple.Exchanges.Kraken
 
                 var _response = await _client.SendAsync(request);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jdata["error"] != null && _jdata["error"].HasValues)
+                if (_root.TryGetProperty("error", out var errorElement) && errorElement.GetArrayLength() > 0)
                 {
-                    var error = _jdata["error"].ToString();
+                    var error = errorElement.GetRawText();
                     mainXchg.OnMessageEvent(ExchangeName, $"Withdraw error: {error}", 3026);
                     return _result;
                 }
 
-                var result = _jdata["result"];
-                if (result != null)
+                if (_root.TryGetProperty("result", out var result))
                 {
-                    _result.id = result["refid"]?.ToString();
+                    _result.id = result.GetStringSafe("refid");
                     _result.currency = currency;
                     _result.amount = amount;
                     _result.address = address;
@@ -1403,17 +1467,17 @@ namespace CCXT.Simple.Exchanges.Kraken
 
                 var _response = await _client.SendAsync(request);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jdata["error"] == null || !_jdata["error"].HasValues)
+                if (!_root.TryGetProperty("error", out var errorElement) || errorElement.GetArrayLength() == 0)
                 {
-                    var result = _jdata["result"];
-                    if (result != null)
+                    if (_root.TryGetProperty("result", out var result))
                     {
-                        foreach (var item in result.Children<JProperty>())
+                        foreach (var item in result.EnumerateObject())
                         {
                             var withdrawInfo = item.Value;
-                            if (withdrawInfo["address"]?.ToString() == address)
+                            if (withdrawInfo.GetStringSafe("address") == address)
                             {
                                 return item.Name; // Return the key
                             }
@@ -1457,35 +1521,35 @@ namespace CCXT.Simple.Exchanges.Kraken
 
                 var _response = await _client.SendAsync(request);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jdata["error"] != null && _jdata["error"].HasValues)
+                if (_root.TryGetProperty("error", out var errorElement) && errorElement.GetArrayLength() > 0)
                 {
-                    var error = _jdata["error"].ToString();
+                    var error = errorElement.GetRawText();
                     mainXchg.OnMessageEvent(ExchangeName, $"GetDepositHistory error: {error}", 3028);
                     return _result;
                 }
 
-                var result = _jdata["result"];
-                if (result != null)
+                if (_root.TryGetProperty("result", out var result) && result.ValueKind == JsonValueKind.Array)
                 {
-                    var deposits = result as JArray;
-                    if (deposits != null)
+                    var count = 0;
+                    foreach (var deposit in result.EnumerateArray())
                     {
-                        foreach (var deposit in deposits.Take(limit))
+                        if (count >= limit) break;
+
+                        _result.Add(new DepositInfo
                         {
-                            _result.Add(new DepositInfo
-                            {
-                                id = deposit["refid"]?.ToString() ?? deposit["txid"]?.ToString(),
-                                txid = deposit["txid"]?.ToString(),
-                                currency = NormalizeKrakenCurrency(deposit["asset"]?.ToString()),
-                                amount = decimal.Parse(deposit["amount"]?.ToString() ?? "0"),
-                                address = deposit["info"]?.ToString(),
-                                status = ConvertDepositStatus(deposit["status"]?.ToString()),
-                                timestamp = (long)(decimal.Parse(deposit["time"]?.ToString() ?? "0") * 1000),
-                                network = deposit["method"]?.ToString()
-                            });
-                        }
+                            id = deposit.GetStringSafe("refid") ?? deposit.GetStringSafe("txid"),
+                            txid = deposit.GetStringSafe("txid"),
+                            currency = NormalizeKrakenCurrency(deposit.GetStringSafe("asset")),
+                            amount = deposit.GetDecimalSafe("amount"),
+                            address = deposit.GetStringSafe("info"),
+                            status = ConvertDepositStatus(deposit.GetStringSafe("status")),
+                            timestamp = (long)(deposit.GetDecimalSafe("time") * 1000),
+                            network = deposit.GetStringSafe("method")
+                        });
+                        count++;
                     }
                 }
             }
@@ -1538,35 +1602,35 @@ namespace CCXT.Simple.Exchanges.Kraken
 
                 var _response = await _client.SendAsync(request);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jdata["error"] != null && _jdata["error"].HasValues)
+                if (_root.TryGetProperty("error", out var errorElement) && errorElement.GetArrayLength() > 0)
                 {
-                    var error = _jdata["error"].ToString();
+                    var error = errorElement.GetRawText();
                     mainXchg.OnMessageEvent(ExchangeName, $"GetWithdrawalHistory error: {error}", 3030);
                     return _result;
                 }
 
-                var result = _jdata["result"];
-                if (result != null)
+                if (_root.TryGetProperty("result", out var result) && result.ValueKind == JsonValueKind.Array)
                 {
-                    var withdrawals = result as JArray;
-                    if (withdrawals != null)
+                    var count = 0;
+                    foreach (var withdrawal in result.EnumerateArray())
                     {
-                        foreach (var withdrawal in withdrawals.Take(limit))
+                        if (count >= limit) break;
+
+                        _result.Add(new WithdrawalInfo
                         {
-                            _result.Add(new WithdrawalInfo
-                            {
-                                id = withdrawal["refid"]?.ToString(),
-                                currency = NormalizeKrakenCurrency(withdrawal["asset"]?.ToString()),
-                                amount = decimal.Parse(withdrawal["amount"]?.ToString() ?? "0"),
-                                address = withdrawal["info"]?.ToString(),
-                                status = ConvertWithdrawalStatus(withdrawal["status"]?.ToString()),
-                                timestamp = (long)(decimal.Parse(withdrawal["time"]?.ToString() ?? "0") * 1000),
-                                fee = decimal.Parse(withdrawal["fee"]?.ToString() ?? "0"),
-                                network = withdrawal["method"]?.ToString()
-                            });
-                        }
+                            id = withdrawal.GetStringSafe("refid"),
+                            currency = NormalizeKrakenCurrency(withdrawal.GetStringSafe("asset")),
+                            amount = withdrawal.GetDecimalSafe("amount"),
+                            address = withdrawal.GetStringSafe("info"),
+                            status = ConvertWithdrawalStatus(withdrawal.GetStringSafe("status")),
+                            timestamp = (long)(withdrawal.GetDecimalSafe("time") * 1000),
+                            fee = withdrawal.GetDecimalSafe("fee"),
+                            network = withdrawal.GetStringSafe("method")
+                        });
+                        count++;
                     }
                 }
             }

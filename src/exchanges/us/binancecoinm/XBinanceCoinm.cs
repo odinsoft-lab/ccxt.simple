@@ -1,4 +1,4 @@
-// == CCXT-SIMPLE-META-BEGIN ==
+﻿// == CCXT-SIMPLE-META-BEGIN ==
 // EXCHANGE: binancecoinm
 // IMPLEMENTATION_STATUS: SKELETON
 // PROGRESS_STATUS: TODO
@@ -10,7 +10,6 @@
 using CCXT.Simple.Core.Converters;
 using CCXT.Simple.Core.Interfaces;
 using CCXT.Simple.Core;
-using Newtonsoft.Json;
 using System.Security.Cryptography;
 using System.Text;
 using CCXT.Simple.Models.Account;

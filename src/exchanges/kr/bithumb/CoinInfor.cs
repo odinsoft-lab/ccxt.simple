@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace CCXT.Simple.Exchanges.Bithumb
 {
@@ -14,12 +15,14 @@ namespace CCXT.Simple.Exchanges.Bithumb
         /// <summary>
         /// Status code (0000 success)
         /// </summary>
-        public int status { get; set; }
+        [JsonPropertyName("status")]
+        public string status { get; set; }
 
         /// <summary>
         /// Dynamic object keyed by currency symbol containing ticker metrics.
         /// </summary>
-        public JObject data { get; set; }
+        [JsonPropertyName("data")]
+        public JsonElement data { get; set; }
     }
 
     /// <summary>

@@ -14,11 +14,10 @@ using CCXT.Simple.Core.Extensions;
 using CCXT.Simple.Core.Services;
 using CCXT.Simple.Core.Interfaces;
 using CCXT.Simple.Core;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using CCXT.Simple.Models.Account;
 using CCXT.Simple.Models.Funding;
 using CCXT.Simple.Models.Market;
@@ -156,7 +155,7 @@ namespace CCXT.Simple.Exchanges.Binance
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync("/api/v3/ticker/price");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JsonConvert.DeserializeObject<List<CoinInfor>>(_jstring);
+                var _jarray = JsonSerializer.Deserialize<List<CoinInfor>>(_jstring, mainXchg.StjOptions);
 
                 var _queue_info = mainXchg.GetXInfors(ExchangeName);
 
@@ -209,7 +208,7 @@ namespace CCXT.Simple.Exchanges.Binance
 
                 var _response = await _client.GetAsync("/sapi/v1/capital/config/getall?" + _args);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JsonConvert.DeserializeObject<List<CoinState>>(_jstring);
+                var _jarray = JsonSerializer.Deserialize<List<CoinState>>(_jstring, mainXchg.StjOptions);
 
                 foreach (var c in _jarray)
                 {
@@ -312,8 +311,8 @@ namespace CCXT.Simple.Exchanges.Binance
                 var _response = await _client.GetAsync("/api/v3/ticker/24hr?symbol=" + symbol);
                 var _jstring = await _response.Content.ReadAsStringAsync();
 
-                var _jobject = JObject.Parse(_jstring);
-                _result = _jobject.Value<decimal>("lastPrice");
+                using var _doc = JsonDocument.Parse(_jstring);
+                _result = _doc.RootElement.GetDecimalSafe("lastPrice");
 
                 Debug.Assert(_result != 0.0m);
             }
@@ -335,7 +334,7 @@ namespace CCXT.Simple.Exchanges.Binance
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync("/api/v3/ticker/24hr");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jtickers = JsonConvert.DeserializeObject<List<RaTicker>>(_jstring);
+                var _jtickers = JsonSerializer.Deserialize<List<RaTicker>>(_jstring, mainXchg.StjOptions);
 
                 for (var i = 0; i < tickers.items.Count; i++)
                 {
@@ -389,7 +388,7 @@ namespace CCXT.Simple.Exchanges.Binance
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync("/api/v3/ticker/bookTicker");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _tickers = JsonConvert.DeserializeObject<List<BookTicker>>(_jstring);
+                var _tickers = JsonSerializer.Deserialize<List<BookTicker>>(_jstring, mainXchg.StjOptions);
 
                 for (var i = 0; i < tickers.items.Count; i++)
                 {
@@ -445,7 +444,7 @@ namespace CCXT.Simple.Exchanges.Binance
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync("/api/v3/ticker/24hr");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jtickers = JsonConvert.DeserializeObject<List<RaTicker>>(_jstring);
+                var _jtickers = JsonSerializer.Deserialize<List<RaTicker>>(_jstring, mainXchg.StjOptions);
 
                 for (var i = 0; i < tickers.items.Count; i++)
                 {
@@ -509,7 +508,7 @@ namespace CCXT.Simple.Exchanges.Binance
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync("/api/v3/ticker/24hr");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jtickers = JsonConvert.DeserializeObject<List<RaTicker>>(_jstring);
+                var _jtickers = JsonSerializer.Deserialize<List<RaTicker>>(_jstring, mainXchg.StjOptions);
 
                 for (var i = 0; i < tickers.items.Count; i++)
                 {
@@ -593,7 +592,7 @@ namespace CCXT.Simple.Exchanges.Binance
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync("/api/v3/depth?symbol={symbol}&limit={limit}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jorderbook = JsonConvert.DeserializeObject<Binance.Orderbook>(_jstring);
+                var _jorderbook = JsonSerializer.Deserialize<Binance.Orderbook>(_jstring, mainXchg.StjOptions);
 
                 var _ticker = tickers.items.Where(x => x.symbol == symbol).FirstOrDefault();
                 if (_ticker != null)
@@ -646,7 +645,7 @@ namespace CCXT.Simple.Exchanges.Binance
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync("/api/v3/depth?symbol={symbol}&limit={limit}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jorderbook = JsonConvert.DeserializeObject<Binance.Orderbook>(_jstring);
+                var _jorderbook = JsonSerializer.Deserialize<Binance.Orderbook>(_jstring, mainXchg.StjOptions);
 
                 _result.asks.AddRange(
                     _jorderbook.asks
@@ -687,27 +686,27 @@ namespace CCXT.Simple.Exchanges.Binance
             {
                 // Convert symbol format if needed (e.g., BTC/USDT -> BTCUSDT)
                 var binanceSymbol = symbol.Replace("/", "");
-                
+
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _params = $"?symbol={binanceSymbol}&interval={timeframe}&limit={limit}";
-                
+
                 if (since.HasValue)
                     _params += $"&startTime={since.Value}";
-                
+
                 var _response = await _client.GetAsync($"/api/v3/klines{_params}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JArray.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
 
-                foreach (var candle in _jarray)
+                foreach (var candle in _doc.RootElement.EnumerateArray())
                 {
                     _result.Add(new decimal[]
                     {
-                        Convert.ToDecimal(candle[0]),  // timestamp
-                        Convert.ToDecimal(candle[1]),  // open
-                        Convert.ToDecimal(candle[2]),  // high
-                        Convert.ToDecimal(candle[3]),  // low
-                        Convert.ToDecimal(candle[4]),  // close
-                        Convert.ToDecimal(candle[5])   // volume
+                        candle[0].GetDecimalSafe(),  // timestamp
+                        candle[1].GetDecimalSafe(),  // open
+                        candle[2].GetDecimalSafe(),  // high
+                        candle[3].GetDecimalSafe(),  // low
+                        candle[4].GetDecimalSafe(),  // close
+                        candle[5].GetDecimalSafe()   // volume
                     });
                 }
             }
@@ -728,21 +727,21 @@ namespace CCXT.Simple.Exchanges.Binance
             {
                 // Convert symbol format if needed (e.g., BTC/USDT -> BTCUSDT)
                 var binanceSymbol = symbol.Replace("/", "");
-                
+
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync($"/api/v3/trades?symbol={binanceSymbol}&limit={limit}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JArray.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
 
-                foreach (var trade in _jarray)
+                foreach (var trade in _doc.RootElement.EnumerateArray())
                 {
                     _result.Add(new TradeData
                     {
-                        id = trade["id"]?.ToString(),
-                        timestamp = Convert.ToInt64(trade["time"]),
-                        side = trade["isBuyerMaker"].Value<bool>() ? SideType.Ask : SideType.Bid,
-                        price = trade.Value<decimal>("price"),
-                        amount = trade.Value<decimal>("qty")
+                        id = trade.GetStringSafe("id"),
+                        timestamp = trade.GetInt64Safe("time"),
+                        side = trade.GetBooleanSafe("isBuyerMaker") ? SideType.Ask : SideType.Bid,
+                        price = trade.GetDecimalSafe("price"),
+                        amount = trade.GetDecimalSafe("qty")
                     });
                 }
             }
@@ -763,23 +762,22 @@ namespace CCXT.Simple.Exchanges.Binance
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _args = this.CreateSignature(_client);
-                
+
                 var _response = await _client.GetAsync($"/api/v3/account?{_args}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
 
-                var balances = _jdata["balances"] as JArray;
-                if (balances != null)
+                if (_doc.RootElement.TryGetProperty("balances", out var balances))
                 {
-                    foreach (var balance in balances)
+                    foreach (var balance in balances.EnumerateArray())
                     {
-                        var free = balance.Value<decimal>("free");
-                        var locked = balance.Value<decimal>("locked");
+                        var free = balance.GetDecimalSafe("free");
+                        var locked = balance.GetDecimalSafe("locked");
                         var total = free + locked;
-                        
+
                         if (total > 0)
                         {
-                            var asset = balance.Value<string>("asset");
+                            var asset = balance.GetStringSafe("asset");
                             _result[asset] = new BalanceInfo
                             {
                                 free = free,
@@ -807,16 +805,17 @@ namespace CCXT.Simple.Exchanges.Binance
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _args = this.CreateSignature(_client);
-                
+
                 var _response = await _client.GetAsync($"/api/v3/account?{_args}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
                 _result.id = "binance_account";
-                _result.canTrade = _jdata.Value<bool>("canTrade");
-                _result.canWithdraw = _jdata.Value<bool>("canWithdraw");
-                _result.canDeposit = _jdata.Value<bool>("canDeposit");
-                _result.type = _jdata.Value<string>("accountType");
+                _result.canTrade = _root.GetBooleanSafe("canTrade");
+                _result.canWithdraw = _root.GetBooleanSafe("canWithdraw");
+                _result.canDeposit = _root.GetBooleanSafe("canDeposit");
+                _result.type = _root.GetStringSafe("accountType");
                 _result.balances = new Dictionary<string, BalanceInfo>();
             }
             catch (Exception ex)
@@ -837,40 +836,41 @@ namespace CCXT.Simple.Exchanges.Binance
                 var binanceSymbol = symbol.Replace("/", "");
                 var binanceSide = side == SideType.Bid ? "BUY" : "SELL";
                 var binanceType = orderType.ToUpper();
-                
+
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var _params = $"symbol={binanceSymbol}&side={binanceSide}&type={binanceType}&quantity={amount}";
-                
+
                 if (binanceType == "LIMIT")
                 {
                     _params += $"&price={price}&timeInForce=GTC";
                 }
-                
+
                 if (!string.IsNullOrEmpty(clientOrderId))
                     _params += $"&newClientOrderId={clientOrderId}";
-                
+
                 _params += $"&timestamp={TimeExtensions.NowMilli}";
-                
+
                 var _signature = BitConverter.ToString(Encryptor.ComputeHash(Encoding.UTF8.GetBytes(_params))).Replace("-", "");
                 _params += $"&signature={_signature}";
-                
+
                 _client.DefaultRequestHeaders.Add("X-MBX-APIKEY", this.ApiKey);
-                
+
                 var content = new StringContent("", Encoding.UTF8, "application/x-www-form-urlencoded");
                 var _response = await _client.PostAsync($"/api/v3/order?{_params}", content);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                _result.id = _jdata.Value<string>("orderId");
-                _result.clientOrderId = _jdata.Value<string>("clientOrderId");
+                _result.id = _root.GetStringSafe("orderId");
+                _result.clientOrderId = _root.GetStringSafe("clientOrderId");
                 _result.symbol = symbol;
                 _result.side = side;
                 _result.type = orderType;
                 _result.amount = amount;
                 _result.price = price ?? 0;
-                _result.status = _jdata.Value<string>("status");
-                _result.timestamp = _jdata.Value<long>("transactTime");
+                _result.status = _root.GetStringSafe("status");
+                _result.timestamp = _root.GetInt64Safe("transactTime");
             }
             catch (Exception ex)
             {
@@ -928,37 +928,38 @@ namespace CCXT.Simple.Exchanges.Binance
             try
             {
                 var binanceSymbol = symbol?.Replace("/", "");
-                
+
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var _params = $"symbol={binanceSymbol}";
-                
+
                 if (!string.IsNullOrEmpty(orderId))
                     _params += $"&orderId={orderId}";
                 else if (!string.IsNullOrEmpty(clientOrderId))
                     _params += $"&origClientOrderId={clientOrderId}";
-                
+
                 _params += $"&timestamp={TimeExtensions.NowMilli}";
-                
+
                 var _signature = BitConverter.ToString(Encryptor.ComputeHash(Encoding.UTF8.GetBytes(_params))).Replace("-", "");
                 _params += $"&signature={_signature}";
-                
+
                 _client.DefaultRequestHeaders.Add("X-MBX-APIKEY", this.ApiKey);
-                
+
                 var _response = await _client.GetAsync($"/api/v3/order?{_params}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                _result.id = _jdata.Value<string>("orderId");
-                _result.clientOrderId = _jdata.Value<string>("clientOrderId");
+                _result.id = _root.GetStringSafe("orderId");
+                _result.clientOrderId = _root.GetStringSafe("clientOrderId");
                 _result.symbol = symbol;
-                _result.side = _jdata.Value<string>("side") == "BUY" ? SideType.Bid : SideType.Ask;
-                _result.type = _jdata.Value<string>("type").ToLower();
-                _result.amount = _jdata.Value<decimal>("origQty");
-                _result.price = _jdata.Value<decimal>("price");
-                _result.filled = _jdata.Value<decimal>("executedQty");
-                _result.status = _jdata.Value<string>("status");
-                _result.timestamp = _jdata.Value<long>("time");
+                _result.side = _root.GetStringSafe("side") == "BUY" ? SideType.Bid : SideType.Ask;
+                _result.type = _root.GetStringSafe("type")?.ToLower();
+                _result.amount = _root.GetDecimalSafe("origQty");
+                _result.price = _root.GetDecimalSafe("price");
+                _result.filled = _root.GetDecimalSafe("executedQty");
+                _result.status = _root.GetStringSafe("status");
+                _result.timestamp = _root.GetInt64Safe("time");
             }
             catch (Exception ex)
             {
@@ -976,38 +977,38 @@ namespace CCXT.Simple.Exchanges.Binance
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var _params = $"timestamp={TimeExtensions.NowMilli}";
-                
+
                 if (!string.IsNullOrEmpty(symbol))
                 {
                     var binanceSymbol = symbol.Replace("/", "");
                     _params = $"symbol={binanceSymbol}&" + _params;
                 }
-                
+
                 var _signature = BitConverter.ToString(Encryptor.ComputeHash(Encoding.UTF8.GetBytes(_params))).Replace("-", "");
                 _params += $"&signature={_signature}";
-                
+
                 _client.DefaultRequestHeaders.Add("X-MBX-APIKEY", this.ApiKey);
-                
+
                 var _response = await _client.GetAsync($"/api/v3/openOrders?{_params}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JArray.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
 
-                foreach (var order in _jarray)
+                foreach (var order in _doc.RootElement.EnumerateArray())
                 {
                     _result.Add(new OrderInfo
                     {
-                        id = order.Value<string>("orderId"),
-                        clientOrderId = order.Value<string>("clientOrderId"),
-                        symbol = order.Value<string>("symbol"),
-                        side = order.Value<string>("side") == "BUY" ? SideType.Bid : SideType.Ask,
-                        type = order.Value<string>("type").ToLower(),
-                        amount = order.Value<decimal>("origQty"),
-                        price = order.Value<decimal>("price"),
-                        filled = order.Value<decimal>("executedQty"),
-                        status = order.Value<string>("status"),
-                        timestamp = order.Value<long>("time")
+                        id = order.GetStringSafe("orderId"),
+                        clientOrderId = order.GetStringSafe("clientOrderId"),
+                        symbol = order.GetStringSafe("symbol"),
+                        side = order.GetStringSafe("side") == "BUY" ? SideType.Bid : SideType.Ask,
+                        type = order.GetStringSafe("type")?.ToLower(),
+                        amount = order.GetDecimalSafe("origQty"),
+                        price = order.GetDecimalSafe("price"),
+                        filled = order.GetDecimalSafe("executedQty"),
+                        status = order.GetStringSafe("status"),
+                        timestamp = order.GetInt64Safe("time")
                     });
                 }
             }
@@ -1027,38 +1028,38 @@ namespace CCXT.Simple.Exchanges.Binance
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var _params = $"limit={limit}&timestamp={TimeExtensions.NowMilli}";
-                
+
                 if (!string.IsNullOrEmpty(symbol))
                 {
                     var binanceSymbol = symbol.Replace("/", "");
                     _params = $"symbol={binanceSymbol}&" + _params;
                 }
-                
+
                 var _signature = BitConverter.ToString(Encryptor.ComputeHash(Encoding.UTF8.GetBytes(_params))).Replace("-", "");
                 _params += $"&signature={_signature}";
-                
+
                 _client.DefaultRequestHeaders.Add("X-MBX-APIKEY", this.ApiKey);
-                
+
                 var _response = await _client.GetAsync($"/api/v3/allOrders?{_params}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JArray.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
 
-                foreach (var order in _jarray)
+                foreach (var order in _doc.RootElement.EnumerateArray())
                 {
                     _result.Add(new OrderInfo
                     {
-                        id = order.Value<string>("orderId"),
-                        clientOrderId = order.Value<string>("clientOrderId"),
-                        symbol = order.Value<string>("symbol"),
-                        side = order.Value<string>("side") == "BUY" ? SideType.Bid : SideType.Ask,
-                        type = order.Value<string>("type").ToLower(),
-                        amount = order.Value<decimal>("origQty"),
-                        price = order.Value<decimal>("price"),
-                        filled = order.Value<decimal>("executedQty"),
-                        status = order.Value<string>("status"),
-                        timestamp = order.Value<long>("time")
+                        id = order.GetStringSafe("orderId"),
+                        clientOrderId = order.GetStringSafe("clientOrderId"),
+                        symbol = order.GetStringSafe("symbol"),
+                        side = order.GetStringSafe("side") == "BUY" ? SideType.Bid : SideType.Ask,
+                        type = order.GetStringSafe("type")?.ToLower(),
+                        amount = order.GetDecimalSafe("origQty"),
+                        price = order.GetDecimalSafe("price"),
+                        filled = order.GetDecimalSafe("executedQty"),
+                        status = order.GetStringSafe("status"),
+                        timestamp = order.GetInt64Safe("time")
                     });
                 }
             }
@@ -1078,37 +1079,37 @@ namespace CCXT.Simple.Exchanges.Binance
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var _params = $"limit={limit}&timestamp={TimeExtensions.NowMilli}";
-                
+
                 if (!string.IsNullOrEmpty(symbol))
                 {
                     var binanceSymbol = symbol.Replace("/", "");
                     _params = $"symbol={binanceSymbol}&" + _params;
                 }
-                
+
                 var _signature = BitConverter.ToString(Encryptor.ComputeHash(Encoding.UTF8.GetBytes(_params))).Replace("-", "");
                 _params += $"&signature={_signature}";
-                
+
                 _client.DefaultRequestHeaders.Add("X-MBX-APIKEY", this.ApiKey);
-                
+
                 var _response = await _client.GetAsync($"/api/v3/myTrades?{_params}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JArray.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
 
-                foreach (var trade in _jarray)
+                foreach (var trade in _doc.RootElement.EnumerateArray())
                 {
                     _result.Add(new TradeInfo
                     {
-                        id = trade.Value<string>("id"),
-                        orderId = trade.Value<string>("orderId"),
-                        symbol = trade.Value<string>("symbol"),
-                        side = trade.Value<bool>("isBuyer") ? SideType.Bid : SideType.Ask,
-                        price = trade.Value<decimal>("price"),
-                        amount = trade.Value<decimal>("qty"),
-                        fee = trade.Value<decimal>("commission"),
-                        feeAsset = trade.Value<string>("commissionAsset"),
-                        timestamp = trade.Value<long>("time")
+                        id = trade.GetStringSafe("id"),
+                        orderId = trade.GetStringSafe("orderId"),
+                        symbol = trade.GetStringSafe("symbol"),
+                        side = trade.GetBooleanSafe("isBuyer") ? SideType.Bid : SideType.Ask,
+                        price = trade.GetDecimalSafe("price"),
+                        amount = trade.GetDecimalSafe("qty"),
+                        fee = trade.GetDecimalSafe("commission"),
+                        feeAsset = trade.GetStringSafe("commissionAsset"),
+                        timestamp = trade.GetInt64Safe("time")
                     });
                 }
             }
@@ -1128,24 +1129,25 @@ namespace CCXT.Simple.Exchanges.Binance
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var _params = $"coin={currency}&timestamp={TimeExtensions.NowMilli}";
-                
+
                 if (!string.IsNullOrEmpty(network))
                     _params += $"&network={network}";
-                
+
                 var _signature = BitConverter.ToString(Encryptor.ComputeHash(Encoding.UTF8.GetBytes(_params))).Replace("-", "");
                 _params += $"&signature={_signature}";
-                
+
                 _client.DefaultRequestHeaders.Add("X-MBX-APIKEY", this.ApiKey);
-                
+
                 var _response = await _client.GetAsync($"/sapi/v1/capital/deposit/address?{_params}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
                 _result.currency = currency;
-                _result.address = _jdata.Value<string>("address");
-                _result.tag = _jdata.Value<string>("tag");
+                _result.address = _root.GetStringSafe("address");
+                _result.tag = _root.GetStringSafe("tag");
                 _result.network = network;
             }
             catch (Exception ex)
@@ -1164,26 +1166,27 @@ namespace CCXT.Simple.Exchanges.Binance
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var _params = $"coin={currency}&amount={amount}&address={address}&timestamp={TimeExtensions.NowMilli}";
-                
+
                 if (!string.IsNullOrEmpty(tag))
                     _params += $"&addressTag={tag}";
-                
+
                 if (!string.IsNullOrEmpty(network))
                     _params += $"&network={network}";
-                
+
                 var _signature = BitConverter.ToString(Encryptor.ComputeHash(Encoding.UTF8.GetBytes(_params))).Replace("-", "");
                 _params += $"&signature={_signature}";
-                
+
                 _client.DefaultRequestHeaders.Add("X-MBX-APIKEY", this.ApiKey);
-                
+
                 var content = new StringContent("", Encoding.UTF8, "application/x-www-form-urlencoded");
                 var _response = await _client.PostAsync($"/sapi/v1/capital/withdraw/apply?{_params}", content);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jdata = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                _result.id = _jdata.Value<string>("id");
+                _result.id = _root.GetStringSafe("id");
                 _result.currency = currency;
                 _result.amount = amount;
                 _result.address = address;
@@ -1208,34 +1211,37 @@ namespace CCXT.Simple.Exchanges.Binance
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var _params = $"timestamp={TimeExtensions.NowMilli}";
-                
+
                 if (!string.IsNullOrEmpty(currency))
                     _params = $"coin={currency}&" + _params;
-                
+
                 var _signature = BitConverter.ToString(Encryptor.ComputeHash(Encoding.UTF8.GetBytes(_params))).Replace("-", "");
                 _params += $"&signature={_signature}";
-                
+
                 _client.DefaultRequestHeaders.Add("X-MBX-APIKEY", this.ApiKey);
-                
+
                 var _response = await _client.GetAsync($"/sapi/v1/capital/deposit/hisrec?{_params}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JArray.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
 
-                foreach (var deposit in _jarray.Take(limit))
+                var count = 0;
+                foreach (var deposit in _doc.RootElement.EnumerateArray())
                 {
+                    if (count++ >= limit) break;
+
                     _result.Add(new DepositInfo
                     {
-                        id = deposit.Value<string>("id"),
-                        txid = deposit.Value<string>("txId"),
-                        currency = deposit.Value<string>("coin"),
-                        amount = deposit.Value<decimal>("amount"),
-                        address = deposit.Value<string>("address"),
-                        tag = deposit.Value<string>("addressTag"),
-                        status = ConvertDepositStatus(deposit.Value<int>("status")),
-                        network = deposit.Value<string>("network"),
-                        timestamp = deposit.Value<long>("insertTime")
+                        id = deposit.GetStringSafe("id"),
+                        txid = deposit.GetStringSafe("txId"),
+                        currency = deposit.GetStringSafe("coin"),
+                        amount = deposit.GetDecimalSafe("amount"),
+                        address = deposit.GetStringSafe("address"),
+                        tag = deposit.GetStringSafe("addressTag"),
+                        status = ConvertDepositStatus(deposit.GetInt32Safe("status")),
+                        network = deposit.GetStringSafe("network"),
+                        timestamp = deposit.GetInt64Safe("insertTime")
                     });
                 }
             }
@@ -1268,34 +1274,37 @@ namespace CCXT.Simple.Exchanges.Binance
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var _params = $"timestamp={TimeExtensions.NowMilli}";
-                
+
                 if (!string.IsNullOrEmpty(currency))
                     _params = $"coin={currency}&" + _params;
-                
+
                 var _signature = BitConverter.ToString(Encryptor.ComputeHash(Encoding.UTF8.GetBytes(_params))).Replace("-", "");
                 _params += $"&signature={_signature}";
-                
+
                 _client.DefaultRequestHeaders.Add("X-MBX-APIKEY", this.ApiKey);
-                
+
                 var _response = await _client.GetAsync($"/sapi/v1/capital/withdraw/history?{_params}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JArray.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
 
-                foreach (var withdrawal in _jarray.Take(limit))
+                var count = 0;
+                foreach (var withdrawal in _doc.RootElement.EnumerateArray())
                 {
+                    if (count++ >= limit) break;
+
                     _result.Add(new WithdrawalInfo
                     {
-                        id = withdrawal.Value<string>("id"),
-                        currency = withdrawal.Value<string>("coin"),
-                        amount = withdrawal.Value<decimal>("amount"),
-                        address = withdrawal.Value<string>("address"),
-                        tag = withdrawal.Value<string>("addressTag"),
-                        status = ConvertWithdrawalStatus(withdrawal.Value<int>("status")),
-                        network = withdrawal.Value<string>("network"),
-                        fee = withdrawal.Value<decimal>("transactionFee"),
-                        timestamp = withdrawal.Value<long>("applyTime")
+                        id = withdrawal.GetStringSafe("id"),
+                        currency = withdrawal.GetStringSafe("coin"),
+                        amount = withdrawal.GetDecimalSafe("amount"),
+                        address = withdrawal.GetStringSafe("address"),
+                        tag = withdrawal.GetStringSafe("addressTag"),
+                        status = ConvertWithdrawalStatus(withdrawal.GetInt32Safe("status")),
+                        network = withdrawal.GetStringSafe("network"),
+                        fee = withdrawal.GetDecimalSafe("transactionFee"),
+                        timestamp = withdrawal.GetInt64Safe("applyTime")
                     });
                 }
             }

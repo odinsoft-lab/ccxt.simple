@@ -11,8 +11,7 @@
 
 using CCXT.Simple.Core.Converters;
 using CCXT.Simple.Core.Extensions;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
@@ -125,14 +124,14 @@ namespace CCXT.Simple.Exchanges.Bithumb
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync("/public/ticker/ALL_KRW");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobj = JsonConvert.DeserializeObject<JObject>(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
                 var _queue_info = mainXchg.GetXInfors(ExchangeName);
 
-                if (_jobj?["status"]?.ToString() == "0000" && _jobj["data"] != null)
+                if (_root.GetStringSafe("status") == "0000" && _root.TryGetProperty("data", out var _data))
                 {
-                    var _data = _jobj["data"] as JObject;
-                    foreach (var item in _data.Properties())
+                    foreach (var item in _data.EnumerateObject())
                     {
                         var _base = item.Name;
                         if (_base == "date") // Skip the date field
@@ -177,22 +176,22 @@ namespace CCXT.Simple.Exchanges.Bithumb
                 var _basePath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
                 var _jsonPath = Path.Combine(_basePath, "Exchanges", "KR", "Bithumb", "CoinState.json");
                 var _cstring = File.ReadAllText(_jsonPath);
-                var _carray = JsonConvert.DeserializeObject<CoinState>(_cstring);
+                var _carray = JsonSerializer.Deserialize<CoinState>(_cstring, mainXchg.StjOptions);
 
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
 
                 var _response = await _client.GetAsync("/public/assetsstatus/ALL");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JsonConvert.DeserializeObject<WalletState>(_jstring);
+                var _jarray = JsonSerializer.Deserialize<WalletState>(_jstring, mainXchg.StjOptions);
 
                 foreach (var s in _carray.data)
                 {
                     var _currency = s.coinSymbolNm;
 
-                    if (!_jarray.data.ContainsKey(_currency))
+                    if (_jarray.data == null || !_jarray.data.ContainsKey(_currency))
                         continue;
 
-                    var _w = JsonConvert.DeserializeObject<WsData>(_jarray.data[_currency].ToString());
+                    var _w = _jarray.data[_currency];
 
                     var _active = _w.deposit_status == 1 || _w.withdrawal_status == 1;
                     var _deposit = _w.deposit_status == 1;
@@ -280,11 +279,12 @@ namespace CCXT.Simple.Exchanges.Bithumb
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync($"/ticker?markets={_marketCode}");
                 var _tstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JsonConvert.DeserializeObject<JArray>(_tstring);
+                using var _doc = JsonDocument.Parse(_tstring);
+                var _root = _doc.RootElement;
 
-                if (_jarray != null && _jarray.Count > 0)
+                if (_root.ValueKind == JsonValueKind.Array && _root.GetArrayLength() > 0)
                 {
-                    _result = _jarray[0]["trade_price"]?.Value<decimal>() ?? 0;
+                    _result = _root[0].GetDecimalSafe("trade_price");
                     Debug.Assert(_result != 0.0m);
                 }
             }
@@ -325,25 +325,26 @@ namespace CCXT.Simple.Exchanges.Bithumb
                 {
                     var _response = await _client.GetAsync("/public/orderbook/" + symbol + "?count=30");
                     var _tstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JObject.Parse(_tstring);
+                    using var _doc = JsonDocument.Parse(_tstring);
+                    var _data = _doc.RootElement.GetProperty("data");
 
-                    var _asks = _jobject["data"].Value<JArray>("asks");
-                    _result.asks.AddRange(
-                        _asks.Select(x => new Bithumb.RaOrderbookItem
+                    foreach (var x in _data.GetProperty("asks").EnumerateArray())
+                    {
+                        _result.asks.Add(new Bithumb.RaOrderbookItem
                         {
-                            price = x.Value<decimal>("price"),
-                            quantity = x.Value<decimal>("quantity")
-                        })
-                    );
+                            price = x.GetDecimalSafe("price"),
+                            quantity = x.GetDecimalSafe("quantity")
+                        });
+                    }
 
-                    var _bids = _jobject["data"].Value<JArray>("bids");
-                    _result.bids.AddRange(
-                        _bids.Select(x => new Bithumb.RaOrderbookItem
+                    foreach (var x in _data.GetProperty("bids").EnumerateArray())
+                    {
+                        _result.bids.Add(new Bithumb.RaOrderbookItem
                         {
-                            price = x.Value<decimal>("price"),
-                            quantity = x.Value<decimal>("quantity")
-                        })
-                    );
+                            price = x.GetDecimalSafe("price"),
+                            quantity = x.GetDecimalSafe("quantity")
+                        });
+                    }
                 }
             }
             catch (Exception ex)
@@ -369,15 +370,29 @@ namespace CCXT.Simple.Exchanges.Bithumb
 
                 var _k_response = await _client.GetAsync("/public/orderbook/ALL_KRW?count=1");
                 var _k_jstring = await _k_response.Content.ReadAsStringAsync();
-                var _k_jobject = JObject.Parse(_k_jstring);
-                var _k_data = _k_jobject["data"].ToObject<JObject>();
+                using var _k_doc = JsonDocument.Parse(_k_jstring);
+                var _k_data = _k_doc.RootElement.GetProperty("data");
+
+                // Build dictionary for KRW data for performance
+                var _k_dict = new Dictionary<string, JsonElement>();
+                foreach (var prop in _k_data.EnumerateObject())
+                {
+                    _k_dict[prop.Name] = prop.Value;
+                }
 
                 await Task.Delay(100);
 
                 var _b_response = await _client.GetAsync("/public/orderbook/ALL_BTC?count=1");
                 var _b_jstring = await _b_response.Content.ReadAsStringAsync();
-                var _b_jobject = JObject.Parse(_b_jstring);
-                var _b_data = _b_jobject["data"].ToObject<JObject>();
+                using var _b_doc = JsonDocument.Parse(_b_jstring);
+                var _b_data = _b_doc.RootElement.GetProperty("data");
+
+                // Build dictionary for BTC data for performance
+                var _b_dict = new Dictionary<string, JsonElement>();
+                foreach (var prop in _b_data.EnumerateObject())
+                {
+                    _b_dict[prop.Name] = prop.Value;
+                }
 
                 for (var i = 0; i < tickers.items.Count; i++)
                 {
@@ -385,25 +400,25 @@ namespace CCXT.Simple.Exchanges.Bithumb
                     if (_ticker.symbol == "X")
                         continue;
 
-                    if (_ticker.quoteName == "KRW" && _k_data.ContainsKey(_ticker.baseName))
+                    if (_ticker.quoteName == "KRW" && _k_dict.TryGetValue(_ticker.baseName, out var _k_item))
                     {
-                        var _bid = _k_data[_ticker.baseName]["bids"][0];
-                        var _ask = _k_data[_ticker.baseName]["asks"][0];
+                        var _bid = _k_item.GetProperty("bids")[0];
+                        var _ask = _k_item.GetProperty("asks")[0];
 
-                        _ticker.askPrice = _ask.Value<decimal>("price");
-                        _ticker.askQty = _ask.Value<decimal>("quantity");
-                        _ticker.bidPrice = _bid.Value<decimal>("price");
-                        _ticker.bidQty = _bid.Value<decimal>("quantity");
+                        _ticker.askPrice = _ask.GetDecimalSafe("price");
+                        _ticker.askQty = _ask.GetDecimalSafe("quantity");
+                        _ticker.bidPrice = _bid.GetDecimalSafe("price");
+                        _ticker.bidQty = _bid.GetDecimalSafe("quantity");
                     }
-                    else if (_ticker.quoteName == "BTC" && _b_data.ContainsKey(_ticker.baseName))
+                    else if (_ticker.quoteName == "BTC" && _b_dict.TryGetValue(_ticker.baseName, out var _b_item))
                     {
-                        var _bid = _b_data[_ticker.baseName]["bids"][0];
-                        var _ask = _b_data[_ticker.baseName]["asks"][0];
+                        var _bid = _b_item.GetProperty("bids")[0];
+                        var _ask = _b_item.GetProperty("asks")[0];
 
-                        _ticker.askPrice = _ask.Value<decimal>("price") * mainXchg.fiat_btc_price;
-                        _ticker.askQty = _ask.Value<decimal>("quantity");
-                        _ticker.bidPrice = _bid.Value<decimal>("price") * mainXchg.fiat_btc_price;
-                        _ticker.bidQty = _bid.Value<decimal>("quantity");
+                        _ticker.askPrice = _ask.GetDecimalSafe("price") * mainXchg.fiat_btc_price;
+                        _ticker.askQty = _ask.GetDecimalSafe("quantity");
+                        _ticker.bidPrice = _bid.GetDecimalSafe("price") * mainXchg.fiat_btc_price;
+                        _ticker.bidQty = _bid.GetDecimalSafe("quantity");
                     }
                     else
                     {
@@ -439,14 +454,30 @@ namespace CCXT.Simple.Exchanges.Bithumb
                 var _k_response = await _client.GetAsync("/public/ticker/ALL_KRW");
                 var _k_tstring = await _k_response.Content.ReadAsStringAsync();
                 var _k_jstring = _k_tstring.Substring(24, _k_tstring.Length - 25);
-                var _k_jobject = JObject.Parse(_k_jstring);
+                using var _k_doc = JsonDocument.Parse(_k_jstring);
+                var _k_root = _k_doc.RootElement;
+
+                // Build dictionary for KRW data for performance
+                var _k_dict = new Dictionary<string, JsonElement>();
+                foreach (var prop in _k_root.EnumerateObject())
+                {
+                    _k_dict[prop.Name] = prop.Value;
+                }
 
                 await Task.Delay(100);
 
                 var _b_response = await _client.GetAsync("/public/ticker/ALL_BTC");
                 var _b_tstring = await _b_response.Content.ReadAsStringAsync();
                 var _b_jstring = _b_tstring.Substring(24, _b_tstring.Length - 25);
-                var _b_jobject = JObject.Parse(_b_jstring);
+                using var _b_doc = JsonDocument.Parse(_b_jstring);
+                var _b_root = _b_doc.RootElement;
+
+                // Build dictionary for BTC data for performance
+                var _b_dict = new Dictionary<string, JsonElement>();
+                foreach (var prop in _b_root.EnumerateObject())
+                {
+                    _b_dict[prop.Name] = prop.Value;
+                }
 
                 for (var i = 0; i < tickers.items.Count; i++)
                 {
@@ -454,12 +485,12 @@ namespace CCXT.Simple.Exchanges.Bithumb
                     if (_ticker.symbol == "X")
                         continue;
 
-                    if (_ticker.quoteName == "KRW" && _k_jobject.ContainsKey(_ticker.baseName))
+                    if (_ticker.quoteName == "KRW" && _k_dict.TryGetValue(_ticker.baseName, out var _k_item))
                     {
-                        var _price = _k_jobject[_ticker.baseName].Value<decimal>("closing_price");
+                        var _price = _k_item.GetDecimalSafe("closing_price");
                         _ticker.lastPrice = _price;
 
-                        var _volume = _k_jobject[_ticker.baseName].Value<decimal>("acc_trade_value");
+                        var _volume = _k_item.GetDecimalSafe("acc_trade_value");
                         {
                             var _prev_volume24h = _ticker.previous24h;
                             var _next_timestamp = _ticker.timestamp + 60 * 1000;
@@ -476,12 +507,12 @@ namespace CCXT.Simple.Exchanges.Bithumb
                             }
                         }
                     }
-                    else if (_ticker.quoteName == "BTC" && _b_jobject.ContainsKey(_ticker.baseName))
+                    else if (_ticker.quoteName == "BTC" && _b_dict.TryGetValue(_ticker.baseName, out var _b_item))
                     {
-                        var _price = _b_jobject[_ticker.baseName].Value<decimal>("closing_price");
+                        var _price = _b_item.GetDecimalSafe("closing_price");
                         _ticker.lastPrice = _price * mainXchg.fiat_btc_price;
 
-                        var _volume = _b_jobject[_ticker.baseName].Value<decimal>("acc_trade_value");
+                        var _volume = _b_item.GetDecimalSafe("acc_trade_value");
                         {
                             var _prev_volume24h = _ticker.previous24h;
                             var _next_timestamp = _ticker.timestamp + 60 * 1000;
@@ -588,17 +619,16 @@ namespace CCXT.Simple.Exchanges.Bithumb
         {
             var _result = (success: false, message: "");
 
-            var _json_result = JsonConvert.DeserializeObject<JToken>(jstring);
+            using var _doc = JsonDocument.Parse(jstring);
+            var _root = _doc.RootElement;
 
-            var _json_status = _json_result.SelectToken("status");
-            if (_json_status != null)
+            if (_root.TryGetProperty("status", out var _json_status))
             {
-                var _status_code = _json_status.Value<int>();
+                var _status_code = _json_status.GetInt32Safe();
                 if (_status_code != 0)
                 {
-                    var _json_message = _json_result.SelectToken("message");
-                    if (_json_message != null)
-                        _result.message = _json_message.Value<string>();
+                    if (_root.TryGetProperty("message", out var _json_message))
+                        _result.message = _json_message.GetStringSafe();
                 }
                 else
                     _result.success = true;
@@ -647,7 +677,7 @@ namespace CCXT.Simple.Exchanges.Bithumb
                         var _json_result = this.ParsingResponse(_jstring);
                         if (_json_result.success)
                         {
-                            var _json_data = JsonConvert.DeserializeObject<PlaceOrders>(_jstring);
+                            var _json_data = JsonSerializer.Deserialize<PlaceOrders>(_jstring, mainXchg.StjOptions);
                             if (_json_data.success)
                             {
                                 _result.orderId = _json_data.orderId;
@@ -685,35 +715,35 @@ namespace CCXT.Simple.Exchanges.Bithumb
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync($"/orderbook?markets={_marketCode}&level=0");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JsonConvert.DeserializeObject<JArray>(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jarray != null && _jarray.Count > 0)
+                if (_root.ValueKind == JsonValueKind.Array && _root.GetArrayLength() > 0)
                 {
-                    var _data = _jarray[0];
-                    _result.timestamp = _data["timestamp"]?.Value<long>() ?? TimeExtensions.NowMilli;
+                    var _data = _root[0];
+                    _result.timestamp = _data.GetInt64Safe("timestamp", TimeExtensions.NowMilli);
 
-                    var _units = _data["orderbook_units"];
-                    if (_units != null)
+                    if (_data.TryGetProperty("orderbook_units", out var _units))
                     {
                         var _count = 0;
-                        foreach (var unit in _units)
+                        foreach (var unit in _units.EnumerateArray())
                         {
                             if (_count >= limit) break;
-                            
+
                             // Add ask
                             _result.asks.Add(new OrderbookItem
                             {
-                                price = unit["ask_price"]?.Value<decimal>() ?? 0,
-                                quantity = unit["ask_size"]?.Value<decimal>() ?? 0
+                                price = unit.GetDecimalSafe("ask_price"),
+                                quantity = unit.GetDecimalSafe("ask_size")
                             });
 
                             // Add bid
                             _result.bids.Add(new OrderbookItem
                             {
-                                price = unit["bid_price"]?.Value<decimal>() ?? 0,
-                                quantity = unit["bid_size"]?.Value<decimal>() ?? 0
+                                price = unit.GetDecimalSafe("bid_price"),
+                                quantity = unit.GetDecimalSafe("bid_size")
                             });
-                            
+
                             _count++;
                         }
                     }
@@ -756,22 +786,23 @@ namespace CCXT.Simple.Exchanges.Bithumb
                 
                 var _response = await _client.GetAsync(_url);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JsonConvert.DeserializeObject<JArray>(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jarray != null)
+                if (_root.ValueKind == JsonValueKind.Array)
                 {
-                    foreach (var candle in _jarray)
+                    foreach (var candle in _root.EnumerateArray())
                     {
                         // v2.1.0 returns: candle_date_time_utc, opening_price, high_price, low_price, trade_price, candle_acc_trade_volume
-                        var _timestamp = TimeExtensions.ConvertToUnixTimeMilli(DateTime.Parse(candle["candle_date_time_utc"]?.Value<string>() ?? DateTime.UtcNow.ToString()));
+                        var _timestamp = TimeExtensions.ConvertToUnixTimeMilli(DateTime.Parse(candle.GetStringSafe("candle_date_time_utc") ?? DateTime.UtcNow.ToString()));
                         _result.Add(new decimal[]
                         {
                             _timestamp,
-                            candle["opening_price"]?.Value<decimal>() ?? 0,
-                            candle["high_price"]?.Value<decimal>() ?? 0,
-                            candle["low_price"]?.Value<decimal>() ?? 0,
-                            candle["trade_price"]?.Value<decimal>() ?? 0,
-                            candle["candle_acc_trade_volume"]?.Value<decimal>() ?? 0
+                            candle.GetDecimalSafe("opening_price"),
+                            candle.GetDecimalSafe("high_price"),
+                            candle.GetDecimalSafe("low_price"),
+                            candle.GetDecimalSafe("trade_price"),
+                            candle.GetDecimalSafe("candle_acc_trade_volume")
                         });
                     }
                 }
@@ -835,19 +866,20 @@ namespace CCXT.Simple.Exchanges.Bithumb
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
                 var _response = await _client.GetAsync($"/trades/ticks?market={_marketCode}&count={Math.Min(limit, 500)}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jarray = JsonConvert.DeserializeObject<JArray>(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jarray != null)
+                if (_root.ValueKind == JsonValueKind.Array)
                 {
-                    foreach (var trade in _jarray)
+                    foreach (var trade in _root.EnumerateArray())
                     {
                         _result.Add(new TradeData
                         {
-                            id = trade["sequential_id"]?.Value<string>(),
-                            timestamp = trade["timestamp"]?.Value<long>() ?? 0,
-                            side = trade["ask_bid"]?.Value<string>()?.ToLower() == "ask" ? SideType.Ask : SideType.Bid,
-                            price = trade["trade_price"]?.Value<decimal>() ?? 0,
-                            amount = trade["trade_volume"]?.Value<decimal>() ?? 0
+                            id = trade.GetStringSafe("sequential_id"),
+                            timestamp = trade.GetInt64Safe("timestamp"),
+                            side = trade.GetStringSafe("ask_bid")?.ToLower() == "ask" ? SideType.Ask : SideType.Bid,
+                            price = trade.GetDecimalSafe("trade_price"),
+                            amount = trade.GetDecimalSafe("trade_volume")
                         });
                     }
                 }
@@ -885,12 +917,13 @@ namespace CCXT.Simple.Exchanges.Bithumb
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JObject.Parse(_jstring);
+                    using var _doc = JsonDocument.Parse(_jstring);
+                    var _root = _doc.RootElement;
 
-                    if (_jobject["status"].Value<string>() == "0000")
+                    if (_root.GetStringSafe("status") == "0000")
                     {
-                        var _data = _jobject["data"];
-                        foreach (var prop in _data.Children<JProperty>())
+                        var _data = _root.GetProperty("data");
+                        foreach (var prop in _data.EnumerateObject())
                         {
                             var _currency = prop.Name;
 
@@ -900,9 +933,9 @@ namespace CCXT.Simple.Exchanges.Bithumb
                                 continue;
 
                             // Get total and available balance
-                            var _total = _data[$"total_{_currency.ToLower()}"]?.Value<decimal>() ?? 0;
-                            var _available = _data[$"available_{_currency.ToLower()}"]?.Value<decimal>() ?? 0;
-                            var _inUse = _data[$"in_use_{_currency.ToLower()}"]?.Value<decimal>() ?? 0;
+                            var _total = _data.GetDecimalSafe($"total_{_currency.ToLower()}");
+                            var _available = _data.GetDecimalSafe($"available_{_currency.ToLower()}");
+                            var _inUse = _data.GetDecimalSafe($"in_use_{_currency.ToLower()}");
 
                             if (_total > 0 || _available > 0 || _inUse > 0)
                             {
@@ -950,27 +983,28 @@ namespace CCXT.Simple.Exchanges.Bithumb
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JObject.Parse(_jstring);
+                    using var _doc = JsonDocument.Parse(_jstring);
+                    var _root = _doc.RootElement;
 
-                    if (_jobject["status"].Value<string>() == "0000")
+                    if (_root.GetStringSafe("status") == "0000")
                     {
-                        var _data = _jobject["data"];
+                        var _data = _root.GetProperty("data");
 
-                        _result.id = _data["account_id"]?.Value<string>() ?? "";
+                        _result.id = _data.GetStringSafe("account_id") ?? "";
                         _result.balances = await GetBalance();
 
                         // Get fee information
-                        var _tradeFee = _data["trade_fee"]?.Value<decimal>() ?? 0;
-                        
+                        var _tradeFee = _data.GetDecimalSafe("trade_fee");
+
                                                 _result.canTrade = true;
                         _result.canWithdraw = true;
                         _result.canDeposit = true;
 
                         // Registration date
-                        var _regDate = _data["created"]?.Value<string>();
+                        var _regDate = _data.GetStringSafe("created");
                         if (!string.IsNullOrEmpty(_regDate))
                         {
-                            
+
                         }
                     }
                 }
@@ -1031,11 +1065,12 @@ namespace CCXT.Simple.Exchanges.Bithumb
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JObject.Parse(_jstring);
+                    using var _doc = JsonDocument.Parse(_jstring);
+                    var _root = _doc.RootElement;
 
-                    if (_jobject["status"].Value<string>() == "0000")
+                    if (_root.GetStringSafe("status") == "0000")
                     {
-                        _result.id = _jobject["order_id"]?.Value<string>() ?? "";
+                        _result.id = _root.GetStringSafe("order_id") ?? "";
                         _result.clientOrderId = clientOrderId;
                         _result.side = side;
                         _result.type = orderType;
@@ -1090,9 +1125,10 @@ namespace CCXT.Simple.Exchanges.Bithumb
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JObject.Parse(_jstring);
+                    using var _doc = JsonDocument.Parse(_jstring);
+                    var _root = _doc.RootElement;
 
-                    _result = _jobject["status"].Value<string>() == "0000";
+                    _result = _root.GetStringSafe("status") == "0000";
                 }
             }
             catch (Exception ex)
@@ -1139,22 +1175,22 @@ namespace CCXT.Simple.Exchanges.Bithumb
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JObject.Parse(_jstring);
+                    using var _doc = JsonDocument.Parse(_jstring);
+                    var _root = _doc.RootElement;
 
-                    if (_jobject["status"].Value<string>() == "0000")
+                    if (_root.GetStringSafe("status") == "0000")
                     {
-                        var _data = _jobject["data"];
-                        if (_data != null)
+                        if (_root.TryGetProperty("data", out var _data))
                         {
                             _result.id = orderId;
-                            _result.type = _data["order_type"]?.Value<string>() ?? "limit";
-                            _result.side = _data["type"]?.Value<string>() == "bid" ? SideType.Bid : SideType.Ask;
-                            _result.price = _data["order_price"]?.Value<decimal>() ?? 0;
-                            _result.amount = _data["order_qty"]?.Value<decimal>() ?? 0;
-                            _result.filled = _data["executed_qty"]?.Value<decimal>() ?? 0;
+                            _result.type = _data.GetStringSafe("order_type") ?? "limit";
+                            _result.side = _data.GetStringSafe("type") == "bid" ? SideType.Bid : SideType.Ask;
+                            _result.price = _data.GetDecimalSafe("order_price");
+                            _result.amount = _data.GetDecimalSafe("order_qty");
+                            _result.filled = _data.GetDecimalSafe("executed_qty");
                             _result.remaining = _result.amount - _result.filled;
 
-                            var _status = _data["order_status"]?.Value<string>() ?? "";
+                            var _status = _data.GetStringSafe("order_status") ?? "";
                             _result.status = _status.ToLower() switch
                             {
                                 "placed" => "open",
@@ -1163,7 +1199,7 @@ namespace CCXT.Simple.Exchanges.Bithumb
                                 _ => _status.ToLower()
                             };
 
-                            _result.timestamp = _data["order_date"]?.Value<long>() ?? 0;
+                            _result.timestamp = _data.GetInt64Safe("order_date");
                         }
                     }
                 }
@@ -1215,26 +1251,26 @@ namespace CCXT.Simple.Exchanges.Bithumb
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JObject.Parse(_jstring);
+                    using var _doc = JsonDocument.Parse(_jstring);
+                    var _root = _doc.RootElement;
 
-                    if (_jobject["status"].Value<string>() == "0000")
+                    if (_root.GetStringSafe("status") == "0000")
                     {
-                        var _data = _jobject["data"];
-                        if (_data != null && _data.HasValues)
+                        if (_root.TryGetProperty("data", out var _data) && _data.ValueKind == JsonValueKind.Array)
                         {
-                            foreach (var order in _data)
+                            foreach (var order in _data.EnumerateArray())
                             {
                                 _result.Add(new OrderInfo
                                 {
-                                    id = order["order_id"]?.Value<string>() ?? "",
-                                    symbol = $"{order["order_currency"]?.Value<string>()}_{order["payment_currency"]?.Value<string>()}",
+                                    id = order.GetStringSafe("order_id") ?? "",
+                                    symbol = $"{order.GetStringSafe("order_currency")}_{order.GetStringSafe("payment_currency")}",
                                     type = "limit",
-                                    side = order["type"]?.Value<string>() == "bid" ? SideType.Bid : SideType.Ask,
-                                    price = order["order_price"]?.Value<decimal>() ?? 0,
-                                    amount = order["order_qty"]?.Value<decimal>() ?? 0,
-                                    filled = order["executed_qty"]?.Value<decimal>() ?? 0,
+                                    side = order.GetStringSafe("type") == "bid" ? SideType.Bid : SideType.Ask,
+                                    price = order.GetDecimalSafe("order_price"),
+                                    amount = order.GetDecimalSafe("order_qty"),
+                                    filled = order.GetDecimalSafe("executed_qty"),
                                     status = "open",
-                                    timestamp = order["order_date"]?.Value<long>() ?? 0
+                                    timestamp = order.GetInt64Safe("order_date")
                                 });
                             }
                         }
@@ -1291,29 +1327,29 @@ namespace CCXT.Simple.Exchanges.Bithumb
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JObject.Parse(_jstring);
+                    using var _doc = JsonDocument.Parse(_jstring);
+                    var _root = _doc.RootElement;
 
-                    if (_jobject["status"].Value<string>() == "0000")
+                    if (_root.GetStringSafe("status") == "0000")
                     {
-                        var _data = _jobject["data"];
-                        if (_data != null && _data.HasValues)
+                        if (_root.TryGetProperty("data", out var _data) && _data.ValueKind == JsonValueKind.Array)
                         {
-                            foreach (var order in _data)
+                            foreach (var order in _data.EnumerateArray())
                             {
-                                var _search = order["search"]?.Value<string>() ?? "";
+                                var _search = order.GetStringSafe("search") ?? "";
                                 if (_search == "1" || _search == "2") // Buy or Sell complete
                                 {
                                     _result.Add(new OrderInfo
                                     {
-                                        id = order["order_id"]?.Value<string>() ?? "",
-                                        symbol = $"{order["order_currency"]?.Value<string>()}_{order["payment_currency"]?.Value<string>()}",
+                                        id = order.GetStringSafe("order_id") ?? "",
+                                        symbol = $"{order.GetStringSafe("order_currency")}_{order.GetStringSafe("payment_currency")}",
                                         type = "limit",
                                         side = _search == "1" ? SideType.Bid : SideType.Ask,
-                                        price = order["price"]?.Value<decimal>() ?? 0,
-                                        amount = order["units"]?.Value<decimal>() ?? 0,
-                                        filled = order["units"]?.Value<decimal>() ?? 0,
+                                        price = order.GetDecimalSafe("price"),
+                                        amount = order.GetDecimalSafe("units"),
+                                        filled = order.GetDecimalSafe("units"),
                                         status = "closed",
-                                        timestamp = TimeExtensions.ConvertToUnixTimeMilli(DateTime.Parse(order["transfer_date"]?.Value<string>() ?? DateTime.UtcNow.ToString()))
+                                        timestamp = TimeExtensions.ConvertToUnixTimeMilli(DateTime.Parse(order.GetStringSafe("transfer_date") ?? DateTime.UtcNow.ToString()))
                                     });
                                 }
                             }
@@ -1371,29 +1407,29 @@ namespace CCXT.Simple.Exchanges.Bithumb
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JObject.Parse(_jstring);
+                    using var _doc = JsonDocument.Parse(_jstring);
+                    var _root = _doc.RootElement;
 
-                    if (_jobject["status"].Value<string>() == "0000")
+                    if (_root.GetStringSafe("status") == "0000")
                     {
-                        var _data = _jobject["data"];
-                        if (_data != null && _data.HasValues)
+                        if (_root.TryGetProperty("data", out var _data) && _data.ValueKind == JsonValueKind.Array)
                         {
-                            foreach (var trade in _data)
+                            foreach (var trade in _data.EnumerateArray())
                             {
-                                var _search = trade["search"]?.Value<string>() ?? "";
+                                var _search = trade.GetStringSafe("search") ?? "";
                                 if (_search == "1" || _search == "2") // Buy or Sell complete
                                 {
                                     _result.Add(new TradeInfo
                                     {
-                                        id = trade["cont_no"]?.Value<string>() ?? "",
-                                        orderId = trade["order_id"]?.Value<string>() ?? "",
-                                        symbol = $"{trade["order_currency"]?.Value<string>()}_{trade["payment_currency"]?.Value<string>()}",
+                                        id = trade.GetStringSafe("cont_no") ?? "",
+                                        orderId = trade.GetStringSafe("order_id") ?? "",
+                                        symbol = $"{trade.GetStringSafe("order_currency")}_{trade.GetStringSafe("payment_currency")}",
                                         side = _search == "1" ? SideType.Bid : SideType.Ask,
-                                        price = trade["price"]?.Value<decimal>() ?? 0,
-                                        amount = trade["units"]?.Value<decimal>() ?? 0,
-                                        fee = trade["fee"]?.Value<decimal>() ?? 0,
-                                        feeAsset = trade["fee_currency"]?.Value<string>() ?? "",
-                                        timestamp = TimeExtensions.ConvertToUnixTimeMilli(DateTime.Parse(trade["transfer_date"]?.Value<string>() ?? DateTime.UtcNow.ToString()))
+                                        price = trade.GetDecimalSafe("price"),
+                                        amount = trade.GetDecimalSafe("units"),
+                                        fee = trade.GetDecimalSafe("fee"),
+                                        feeAsset = trade.GetStringSafe("fee_currency") ?? "",
+                                        timestamp = TimeExtensions.ConvertToUnixTimeMilli(DateTime.Parse(trade.GetStringSafe("transfer_date") ?? DateTime.UtcNow.ToString()))
                                     });
                                 }
                             }
@@ -1434,16 +1470,16 @@ namespace CCXT.Simple.Exchanges.Bithumb
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JObject.Parse(_jstring);
+                    using var _doc = JsonDocument.Parse(_jstring);
+                    var _root = _doc.RootElement;
 
-                    if (_jobject["status"].Value<string>() == "0000")
+                    if (_root.GetStringSafe("status") == "0000")
                     {
-                        var _data = _jobject["data"];
-                        if (_data != null)
+                        if (_root.TryGetProperty("data", out var _data))
                         {
                             _result.currency = currency;
-                            _result.address = _data["wallet_address"]?.Value<string>() ?? "";
-                            _result.tag = _data["destination_tag"]?.Value<string>();
+                            _result.address = _data.GetStringSafe("wallet_address") ?? "";
+                            _result.tag = _data.GetStringSafe("destination_tag");
                             _result.network = network;
                         }
                     }
@@ -1490,9 +1526,10 @@ namespace CCXT.Simple.Exchanges.Bithumb
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JObject.Parse(_jstring);
+                    using var _doc = JsonDocument.Parse(_jstring);
+                    var _root = _doc.RootElement;
 
-                    if (_jobject["status"].Value<string>() == "0000")
+                    if (_root.GetStringSafe("status") == "0000")
                     {
                         _result.id = TimeExtensions.NowMilli.ToString(); // Bithumb doesn't return withdrawal ID
                         _result.currency = currency;
@@ -1549,24 +1586,24 @@ namespace CCXT.Simple.Exchanges.Bithumb
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JObject.Parse(_jstring);
+                    using var _doc = JsonDocument.Parse(_jstring);
+                    var _root = _doc.RootElement;
 
-                    if (_jobject["status"].Value<string>() == "0000")
+                    if (_root.GetStringSafe("status") == "0000")
                     {
-                        var _data = _jobject["data"];
-                        if (_data != null && _data.HasValues)
+                        if (_root.TryGetProperty("data", out var _data) && _data.ValueKind == JsonValueKind.Array)
                         {
-                            foreach (var deposit in _data)
+                            foreach (var deposit in _data.EnumerateArray())
                             {
                                 _result.Add(new DepositInfo
                                 {
-                                    id = deposit["cont_no"]?.Value<string>() ?? "",
-                                    currency = deposit["order_currency"]?.Value<string>() ?? "",
-                                    amount = deposit["units"]?.Value<decimal>() ?? 0,
-                                    address = deposit["address"]?.Value<string>() ?? "",
-                                    txid = deposit["txid"]?.Value<string>() ?? "",
+                                    id = deposit.GetStringSafe("cont_no") ?? "",
+                                    currency = deposit.GetStringSafe("order_currency") ?? "",
+                                    amount = deposit.GetDecimalSafe("units"),
+                                    address = deposit.GetStringSafe("address") ?? "",
+                                    txid = deposit.GetStringSafe("txid") ?? "",
                                     status = "completed", // Bithumb only shows completed deposits
-                                    timestamp = TimeExtensions.ConvertToUnixTimeMilli(DateTime.Parse(deposit["transfer_date"]?.Value<string>() ?? DateTime.UtcNow.ToString()))
+                                    timestamp = TimeExtensions.ConvertToUnixTimeMilli(DateTime.Parse(deposit.GetStringSafe("transfer_date") ?? DateTime.UtcNow.ToString()))
                                 });
                             }
                         }
@@ -1617,25 +1654,25 @@ namespace CCXT.Simple.Exchanges.Bithumb
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jobject = JObject.Parse(_jstring);
+                    using var _doc = JsonDocument.Parse(_jstring);
+                    var _root = _doc.RootElement;
 
-                    if (_jobject["status"].Value<string>() == "0000")
+                    if (_root.GetStringSafe("status") == "0000")
                     {
-                        var _data = _jobject["data"];
-                        if (_data != null && _data.HasValues)
+                        if (_root.TryGetProperty("data", out var _data) && _data.ValueKind == JsonValueKind.Array)
                         {
-                            foreach (var withdrawal in _data)
+                            foreach (var withdrawal in _data.EnumerateArray())
                             {
                                 _result.Add(new WithdrawalInfo
                                 {
-                                    id = withdrawal["cont_no"]?.Value<string>() ?? "",
-                                    currency = withdrawal["order_currency"]?.Value<string>() ?? "",
-                                    amount = withdrawal["units"]?.Value<decimal>() ?? 0,
-                                    fee = withdrawal["fee"]?.Value<decimal>() ?? 0,
-                                    address = withdrawal["address"]?.Value<string>() ?? "",
+                                    id = withdrawal.GetStringSafe("cont_no") ?? "",
+                                    currency = withdrawal.GetStringSafe("order_currency") ?? "",
+                                    amount = withdrawal.GetDecimalSafe("units"),
+                                    fee = withdrawal.GetDecimalSafe("fee"),
+                                    address = withdrawal.GetStringSafe("address") ?? "",
                                     // WithdrawalInfo doesn't have txid property
                                     status = "completed", // Bithumb only shows completed withdrawals
-                                    timestamp = TimeExtensions.ConvertToUnixTimeMilli(DateTime.Parse(withdrawal["transfer_date"]?.Value<string>() ?? DateTime.UtcNow.ToString()))
+                                    timestamp = TimeExtensions.ConvertToUnixTimeMilli(DateTime.Parse(withdrawal.GetStringSafe("transfer_date") ?? DateTime.UtcNow.ToString()))
                                 });
                             }
                         }

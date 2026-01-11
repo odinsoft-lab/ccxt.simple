@@ -1,5 +1,4 @@
-using CCXT.Simple.Core.Converters;
-using Newtonsoft.Json;
+﻿using CCXT.Simple.Core.Converters;
 
 namespace CCXT.Simple.Exchanges.Huobi
 {
@@ -20,12 +19,7 @@ namespace CCXT.Simple.Exchanges.Huobi
         public int withdrawPrecision { get; set; }
         public decimal maxWithdrawAmt { get; set; }
         public decimal withdrawQuotaPerDay { get; set; }
-
-        [JsonConverter(typeof(XDecimalNullConverter))]
-
         public decimal withdrawQuotaPerYear { get; set; }
-        [JsonConverter(typeof(XDecimalNullConverter))]
-
         public decimal withdrawQuotaTotal { get; set; }
         public string withdrawFeeType { get; set; }
         public decimal transactFeeWithdraw { get; set; }

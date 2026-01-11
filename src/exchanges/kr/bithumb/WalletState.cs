@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using System.Text.Json.Serialization;
 
 namespace CCXT.Simple.Exchanges.Bithumb
 {
@@ -12,12 +12,14 @@ namespace CCXT.Simple.Exchanges.Bithumb
         /// <summary>
         /// Status code string mapped to integer (0000 success)
         /// </summary>
-        public int status { get; set; }
+        [JsonPropertyName("status")]
+        public string status { get; set; }
 
         /// <summary>
         /// Raw dynamic JSON object keyed by currency symbol containing status flags.
         /// </summary>
-        public JObject data { get; set; }
+        [JsonPropertyName("data")]
+        public Dictionary<string, WsData> data { get; set; }
     }
 
     public class WsData
@@ -26,11 +28,13 @@ namespace CCXT.Simple.Exchanges.Bithumb
         /// <summary>
         /// Withdrawal status flag (1 = enabled)
         /// </summary>
+        [JsonPropertyName("withdrawal_status")]
         public int withdrawal_status { get; set; }
 
         /// <summary>
         /// Deposit status flag (1 = enabled)
         /// </summary>
+        [JsonPropertyName("deposit_status")]
         public int deposit_status { get; set; }
     }
 }

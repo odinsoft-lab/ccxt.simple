@@ -58,11 +58,11 @@ namespace CCXT.Simple.Tests.Exchanges
             // Assert
             Assert.True(result);
             Assert.True(_bybit.Alive);
-            
+
             var queueInfo = _exchange.GetXInfors(_bybit.ExchangeName);
             Assert.NotNull(queueInfo);
             Assert.NotEmpty(queueInfo.symbols);
-            
+
             _output.WriteLine($"Verified {queueInfo.symbols.Count} symbols");
         }
 

@@ -1,0 +1,30 @@
+# ========================================
+# NuGet Configuration Template
+# ========================================
+#
+# This is a template for local NuGet configuration.
+# Copy this file to nuget-config.ps1 and fill in your API key.
+#
+# IMPORTANT: nuget-config.ps1 is in .gitignore and should NEVER be committed!
+#
+# Usage:
+#   1. Copy this file: Copy-Item nuget-config.ps1.example nuget-config.ps1
+#   2. Edit nuget-config.ps1 and add your API key
+#   3. Run: . .\scripts\nuget-config.ps1 (dot-source to load into current session)
+#   4. Then run: .\scripts\publish-nuget.ps1
+#
+# To get your API key:
+#   1. Go to https://www.nuget.org/account/apikeys
+#   2. Create a new API key with "Push" scope for CCXT.Simple package
+#   3. Copy the key and paste below
+#
+
+# Your NuGet API key (replace with your actual key)
+$env:NUGET_API_KEY = "YOUR_NUGET_API_KEY_HERE"
+
+# Verify the key is set
+if ($env:NUGET_API_KEY -eq "YOUR_NUGET_API_KEY_HERE") {
+    Write-Host "WARNING: Please edit nuget-config.ps1 and set your actual API key!" -ForegroundColor Yellow
+} else {
+    Write-Host "NuGet API key configured successfully" -ForegroundColor Green
+}

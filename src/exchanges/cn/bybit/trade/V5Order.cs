@@ -1,5 +1,4 @@
-using Newtonsoft.Json;
-using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace CCXT.Simple.Exchanges.Bybit.Trade
 {
@@ -8,127 +7,127 @@ namespace CCXT.Simple.Exchanges.Bybit.Trade
     /// </summary>
     public class V5Order
     {
-        [JsonProperty("orderId")]
+        [JsonPropertyName("orderId")]
         public string OrderId { get; set; }
 
-        [JsonProperty("orderLinkId")]
+        [JsonPropertyName("orderLinkId")]
         public string OrderLinkId { get; set; }
 
-        [JsonProperty("blockTradeId")]
+        [JsonPropertyName("blockTradeId")]
         public string BlockTradeId { get; set; }
 
-        [JsonProperty("symbol")]
+        [JsonPropertyName("symbol")]
         public string Symbol { get; set; }
 
-        [JsonProperty("price")]
+        [JsonPropertyName("price")]
         public string Price { get; set; }
 
-        [JsonProperty("qty")]
+        [JsonPropertyName("qty")]
         public string Qty { get; set; }
 
-        [JsonProperty("side")]
+        [JsonPropertyName("side")]
         public string Side { get; set; }
 
-        [JsonProperty("isLeverage")]
+        [JsonPropertyName("isLeverage")]
         public string IsLeverage { get; set; }
 
-        [JsonProperty("positionIdx")]
+        [JsonPropertyName("positionIdx")]
         public int PositionIdx { get; set; }
 
-        [JsonProperty("orderStatus")]
+        [JsonPropertyName("orderStatus")]
         public string OrderStatus { get; set; }
 
-        [JsonProperty("cancelType")]
+        [JsonPropertyName("cancelType")]
         public string CancelType { get; set; }
 
-        [JsonProperty("rejectReason")]
+        [JsonPropertyName("rejectReason")]
         public string RejectReason { get; set; }
 
-        [JsonProperty("avgPrice")]
+        [JsonPropertyName("avgPrice")]
         public string AvgPrice { get; set; }
 
-        [JsonProperty("leavesQty")]
+        [JsonPropertyName("leavesQty")]
         public string LeavesQty { get; set; }
 
-        [JsonProperty("leavesValue")]
+        [JsonPropertyName("leavesValue")]
         public string LeavesValue { get; set; }
 
-        [JsonProperty("cumExecQty")]
+        [JsonPropertyName("cumExecQty")]
         public string CumExecQty { get; set; }
 
-        [JsonProperty("cumExecValue")]
+        [JsonPropertyName("cumExecValue")]
         public string CumExecValue { get; set; }
 
-        [JsonProperty("cumExecFee")]
+        [JsonPropertyName("cumExecFee")]
         public string CumExecFee { get; set; }
 
-        [JsonProperty("timeInForce")]
+        [JsonPropertyName("timeInForce")]
         public string TimeInForce { get; set; }
 
-        [JsonProperty("orderType")]
+        [JsonPropertyName("orderType")]
         public string OrderType { get; set; }
 
-        [JsonProperty("stopOrderType")]
+        [JsonPropertyName("stopOrderType")]
         public string StopOrderType { get; set; }
 
-        [JsonProperty("orderIv")]
+        [JsonPropertyName("orderIv")]
         public string OrderIv { get; set; }
 
-        [JsonProperty("triggerPrice")]
+        [JsonPropertyName("triggerPrice")]
         public string TriggerPrice { get; set; }
 
-        [JsonProperty("takeProfit")]
+        [JsonPropertyName("takeProfit")]
         public string TakeProfit { get; set; }
 
-        [JsonProperty("stopLoss")]
+        [JsonPropertyName("stopLoss")]
         public string StopLoss { get; set; }
 
-        [JsonProperty("tpTriggerBy")]
+        [JsonPropertyName("tpTriggerBy")]
         public string TpTriggerBy { get; set; }
 
-        [JsonProperty("slTriggerBy")]
+        [JsonPropertyName("slTriggerBy")]
         public string SlTriggerBy { get; set; }
 
-        [JsonProperty("triggerDirection")]
+        [JsonPropertyName("triggerDirection")]
         public int TriggerDirection { get; set; }
 
-        [JsonProperty("triggerBy")]
+        [JsonPropertyName("triggerBy")]
         public string TriggerBy { get; set; }
 
-        [JsonProperty("lastPriceOnCreated")]
+        [JsonPropertyName("lastPriceOnCreated")]
         public string LastPriceOnCreated { get; set; }
 
-        [JsonProperty("reduceOnly")]
+        [JsonPropertyName("reduceOnly")]
         public bool ReduceOnly { get; set; }
 
-        [JsonProperty("closeOnTrigger")]
+        [JsonPropertyName("closeOnTrigger")]
         public bool CloseOnTrigger { get; set; }
 
-        [JsonProperty("smpType")]
+        [JsonPropertyName("smpType")]
         public string SmpType { get; set; }
 
-        [JsonProperty("smpGroup")]
+        [JsonPropertyName("smpGroup")]
         public int SmpGroup { get; set; }
 
-        [JsonProperty("smpOrderId")]
+        [JsonPropertyName("smpOrderId")]
         public string SmpOrderId { get; set; }
 
-        [JsonProperty("tpslMode")]
+        [JsonPropertyName("tpslMode")]
         public string TpslMode { get; set; }
 
-        [JsonProperty("tpLimitPrice")]
+        [JsonPropertyName("tpLimitPrice")]
         public string TpLimitPrice { get; set; }
 
-        [JsonProperty("slLimitPrice")]
+        [JsonPropertyName("slLimitPrice")]
         public string SlLimitPrice { get; set; }
 
-        [JsonProperty("placeType")]
+        [JsonPropertyName("placeType")]
         public string PlaceType { get; set; }
 
-        [JsonProperty("createdTime")]
+        [JsonPropertyName("createdTime")]
         public string CreatedTime { get; set; }
 
-        [JsonProperty("updatedTime")]
+        [JsonPropertyName("updatedTime")]
         public string UpdatedTime { get; set; }
     }
 
@@ -137,34 +136,34 @@ namespace CCXT.Simple.Exchanges.Bybit.Trade
     /// </summary>
     public class V5CreateOrderRequest
     {
-        [JsonProperty("category")]
+        [JsonPropertyName("category")]
         public string Category { get; set; }
 
-        [JsonProperty("symbol")]
+        [JsonPropertyName("symbol")]
         public string Symbol { get; set; }
 
-        [JsonProperty("side")]
+        [JsonPropertyName("side")]
         public string Side { get; set; }
 
-        [JsonProperty("orderType")]
+        [JsonPropertyName("orderType")]
         public string OrderType { get; set; }
 
-        [JsonProperty("qty")]
+        [JsonPropertyName("qty")]
         public string Qty { get; set; }
 
-        [JsonProperty("price")]
+        [JsonPropertyName("price")]
         public string Price { get; set; }
 
-        [JsonProperty("timeInForce")]
+        [JsonPropertyName("timeInForce")]
         public string TimeInForce { get; set; }
 
-        [JsonProperty("orderLinkId")]
+        [JsonPropertyName("orderLinkId")]
         public string OrderLinkId { get; set; }
 
-        [JsonProperty("isLeverage")]
+        [JsonPropertyName("isLeverage")]
         public int? IsLeverage { get; set; }
 
-        [JsonProperty("orderFilter")]
+        [JsonPropertyName("orderFilter")]
         public string OrderFilter { get; set; }
     }
 
@@ -173,19 +172,19 @@ namespace CCXT.Simple.Exchanges.Bybit.Trade
     /// </summary>
     public class V5CancelOrderRequest
     {
-        [JsonProperty("category")]
+        [JsonPropertyName("category")]
         public string Category { get; set; }
 
-        [JsonProperty("symbol")]
+        [JsonPropertyName("symbol")]
         public string Symbol { get; set; }
 
-        [JsonProperty("orderId")]
+        [JsonPropertyName("orderId")]
         public string OrderId { get; set; }
 
-        [JsonProperty("orderLinkId")]
+        [JsonPropertyName("orderLinkId")]
         public string OrderLinkId { get; set; }
 
-        [JsonProperty("orderFilter")]
+        [JsonPropertyName("orderFilter")]
         public string OrderFilter { get; set; }
     }
 
@@ -194,82 +193,82 @@ namespace CCXT.Simple.Exchanges.Bybit.Trade
     /// </summary>
     public class V5TradeHistory
     {
-        [JsonProperty("symbol")]
+        [JsonPropertyName("symbol")]
         public string Symbol { get; set; }
 
-        [JsonProperty("orderId")]
+        [JsonPropertyName("orderId")]
         public string OrderId { get; set; }
 
-        [JsonProperty("orderLinkId")]
+        [JsonPropertyName("orderLinkId")]
         public string OrderLinkId { get; set; }
 
-        [JsonProperty("side")]
+        [JsonPropertyName("side")]
         public string Side { get; set; }
 
-        [JsonProperty("orderPrice")]
+        [JsonPropertyName("orderPrice")]
         public string OrderPrice { get; set; }
 
-        [JsonProperty("orderQty")]
+        [JsonPropertyName("orderQty")]
         public string OrderQty { get; set; }
 
-        [JsonProperty("leavesQty")]
+        [JsonPropertyName("leavesQty")]
         public string LeavesQty { get; set; }
 
-        [JsonProperty("orderType")]
+        [JsonPropertyName("orderType")]
         public string OrderType { get; set; }
 
-        [JsonProperty("stopOrderType")]
+        [JsonPropertyName("stopOrderType")]
         public string StopOrderType { get; set; }
 
-        [JsonProperty("execFee")]
+        [JsonPropertyName("execFee")]
         public string ExecFee { get; set; }
 
-        [JsonProperty("execId")]
+        [JsonPropertyName("execId")]
         public string ExecId { get; set; }
 
-        [JsonProperty("execPrice")]
+        [JsonPropertyName("execPrice")]
         public string ExecPrice { get; set; }
 
-        [JsonProperty("execQty")]
+        [JsonPropertyName("execQty")]
         public string ExecQty { get; set; }
 
-        [JsonProperty("execType")]
+        [JsonPropertyName("execType")]
         public string ExecType { get; set; }
 
-        [JsonProperty("execValue")]
+        [JsonPropertyName("execValue")]
         public string ExecValue { get; set; }
 
-        [JsonProperty("execTime")]
+        [JsonPropertyName("execTime")]
         public string ExecTime { get; set; }
 
-        [JsonProperty("isMaker")]
+        [JsonPropertyName("isMaker")]
         public bool IsMaker { get; set; }
 
-        [JsonProperty("feeRate")]
+        [JsonPropertyName("feeRate")]
         public string FeeRate { get; set; }
 
-        [JsonProperty("tradeIv")]
+        [JsonPropertyName("tradeIv")]
         public string TradeIv { get; set; }
 
-        [JsonProperty("markIv")]
+        [JsonPropertyName("markIv")]
         public string MarkIv { get; set; }
 
-        [JsonProperty("markPrice")]
+        [JsonPropertyName("markPrice")]
         public string MarkPrice { get; set; }
 
-        [JsonProperty("indexPrice")]
+        [JsonPropertyName("indexPrice")]
         public string IndexPrice { get; set; }
 
-        [JsonProperty("underlyingPrice")]
+        [JsonPropertyName("underlyingPrice")]
         public string UnderlyingPrice { get; set; }
 
-        [JsonProperty("blockTradeId")]
+        [JsonPropertyName("blockTradeId")]
         public string BlockTradeId { get; set; }
 
-        [JsonProperty("closedSize")]
+        [JsonPropertyName("closedSize")]
         public string ClosedSize { get; set; }
 
-        [JsonProperty("seq")]
+        [JsonPropertyName("seq")]
         public long Seq { get; set; }
     }
 }

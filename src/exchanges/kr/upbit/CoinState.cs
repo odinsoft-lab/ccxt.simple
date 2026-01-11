@@ -1,5 +1,4 @@
-using CCXT.Simple.Core.Converters;
-using Newtonsoft.Json;
+﻿using CCXT.Simple.Core.Converters;
 
 namespace CCXT.Simple.Exchanges.Upbit
 {
@@ -122,7 +121,6 @@ namespace CCXT.Simple.Exchanges.Upbit
         /// <summary>
         /// External withdrawal fee amount
         /// </summary>
-        [JsonConverter(typeof(XDecimalNullConverter))]
         public decimal withdraw_fee { get; set; }
 
         /// <summary>

@@ -2,15 +2,15 @@
 
 Tracks the latest implementation status based on heuristic v2 meta headers. (Total tracked exchange files with meta headers: 110)
 
-Last Updated: 2025-12-01
+Last Updated: 2026-01-12
 
 ## 🔄 Auto-Generated Summary
 
 The following numbers are merged from `docs/EXCHANGE_STATUS.generated.md`. The source file is generated and may be ignored by Git.
 
-- **FULL**: 9 (8.2%)
-- **PARTIAL**: 3 (2.7%)
-- **SKELETON**: 98 (89.1%)
+- **FULL**: 14 (12.7%)
+- **PARTIAL**: 0 (0.0%)
+- **SKELETON**: 96 (87.3%)
 - **Total (with meta)**: 110
 <!-- Planned total previously stated as 178; consolidated current scope is 110 active adapter files. -->
 
@@ -19,27 +19,24 @@ Definitions:
 - PARTIAL: At least one implemented, at least one still pending
 - SKELETON: Zero standard methods with real implementation (only signatures / exceptions / empty body)
 
-## ✅ FULL Implementations (9)
+## ✅ FULL Implementations (14)
 
 | Exchange | Coverage (implemented/total) | Notes | Docs |
 |----------|------------------------------|-------|------|
-| Bitstamp | 16/16 | Market / Trading / Funding complete | [API](https://www.bitstamp.net/api/) |
-| Coinbase | 16/16 | Stable account + trading | [API](https://docs.cloud.coinbase.com/) |
-| Coinone  | 16/16 | KRW spot | [API](https://doc.coinone.co.kr/) |
-| OKX      | 16/16 | Integrated spot + derivatives | [API](https://www.okx.com/docs-v5/) |
-| Bithumb  | 16/16 | KRW spot market with JWT auth | [API](https://apidocs.bithumb.com/) |
-| Kraken   | 16/16 | Full implementation with legacy methods | [API](https://docs.kraken.com/rest/) |
 | Binance  | 16/16 | World's largest exchange - spot trading | [API](https://binance-docs.github.io/apidocs/) |
-| Upbit    | 16/16 | KRW spot market with JWT auth | [API](https://docs.upbit.com/reference) |
+| BinanceUs | 16/16 | US regulated version of Binance | [API](https://docs.binance.us/) |
+| Bitget   | 16/16 | v2 API with spot trading | [API](https://www.bitget.com/api-doc/) |
+| Bitstamp | 16/16 | Market / Trading / Funding complete | [API](https://www.bitstamp.net/api/) |
+| Bithumb  | 16/16 | KRW spot market with JWT auth | [API](https://apidocs.bithumb.com/) |
 | Bybit    | 16/16 | V5 API - Top 3 derivatives exchange | [API](https://bybit-exchange.github.io/docs/v5/) |
-
-## 🟡 PARTIAL Implementations (3)
-
-| Exchange | Impl | Pending | NotImplEx | Summary |
-|----------|------|---------|-----------|---------|
-| Huobi    | 1  | 15 | 15 | One basic method implemented |
-| Korbit   | 1  | 15 | 15 | One basic method implemented |
-| Kucoin   | 1  | 15 | 15 | One basic method implemented |
+| Coinbase | 16/16 | v3 Advanced Trade API | [API](https://docs.cloud.coinbase.com/) |
+| Coinone  | 16/16 | KRW spot | [API](https://doc.coinone.co.kr/) |
+| Huobi    | 16/16 | Global spot trading | [API](https://huobiapi.github.io/docs/) |
+| Korbit   | 16/16 | KRW spot market | [API](https://apidocs.korbit.co.kr/) |
+| Kraken   | 16/16 | Full implementation with legacy methods | [API](https://docs.kraken.com/rest/) |
+| Kucoin   | 16/16 | Spot trading with PassPhrase auth | [API](https://docs.kucoin.com/) |
+| OKX      | 16/16 | Integrated spot + derivatives | [API](https://www.okx.com/docs-v5/) |
+| Upbit    | 16/16 | KRW spot market with JWT auth | [API](https://docs.upbit.com/reference) |
 
 ## 📄 Full Detailed Table (auto-generated merge)
 
@@ -53,10 +50,10 @@ Definitions:
 | okx | FULL | 16 | 0 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 0 | 2025-08-13 | auto  (heuristic) |
 | binance | FULL | 16 | 0 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 0 | 2025-08-13 | developer | Full implementation completed with all standard methods |
 | bithumb | FULL | 16 | 0 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 0 | 2025-08-13 | developer | Full v2.1.0 API implementation with JWT authentication |
-| huobi | PARTIAL | 1 | 15 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 15 | 2025-08-13 | auto  (heuristic) |
-| korbit | PARTIAL | 1 | 15 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 15 | 2025-08-13 | auto  (heuristic) |
+| huobi | FULL | 16 | 0 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 0 | 2026-01-12 | developer | Full implementation with HMAC-SHA256 auth |
+| korbit | FULL | 16 | 0 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 0 | 2026-01-12 | developer | Full implementation with HMAC-SHA256 auth |
 | kraken | FULL | 16 | 0 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 0 | 2025-08-13 | developer | Full implementation completed with all standard and legacy methods |
-| kucoin | PARTIAL | 1 | 15 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 15 | 2025-08-13 | auto  (heuristic) |
+| kucoin | FULL | 16 | 0 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 0 | 2026-01-12 | developer | Full implementation with HMAC-SHA256 + PassPhrase auth |
 | upbit | FULL | 16 | 0 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 0 | 2025-08-13 | manual | Complete implementation with JWT authentication |
 | alpaca | SKELETON | 0 | 16 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 22 | 2025-08-13 | auto  (heuristic) |
 | apex | SKELETON | 0 | 16 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 22 | 2025-08-13 | auto  (heuristic) |
@@ -64,7 +61,7 @@ Definitions:
 | bequant | SKELETON | 0 | 16 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 22 | 2025-08-13 | auto  (heuristic) |
 | bigone | SKELETON | 0 | 16 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 22 | 2025-08-13 | auto  (heuristic) |
 | binancecoinm | SKELETON | 0 | 16 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 22 | 2025-08-13 | auto  (heuristic) |
-| binanceus | SKELETON | 0 | 16 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 22 | 2025-08-13 | auto  (heuristic) |
+| binanceus | FULL | 16 | 0 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 0 | 2026-01-12 | developer | Full implementation (leveraged Binance code) |
 | binanceusdm | SKELETON | 0 | 16 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 22 | 2025-08-13 | auto  (heuristic) |
 | bingx | SKELETON | 0 | 16 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 22 | 2025-08-13 | auto  (heuristic) |
 | bit2c | SKELETON | 0 | 16 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 22 | 2025-08-13 | auto  (heuristic) |
@@ -72,7 +69,7 @@ Definitions:
 | bitbns | SKELETON | 0 | 16 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 22 | 2025-08-13 | auto  (heuristic) |
 | bitfinex | SKELETON | 0 | 16 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 22 | 2025-08-13 | auto  (heuristic) |
 | bitflyer | SKELETON | 0 | 16 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 22 | 2025-08-13 | auto  (heuristic) |
-| bitget | SKELETON | 0 | 16 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 19 | 2025-08-13 | auto  (heuristic) |
+| bitget | FULL | 16 | 0 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 0 | 2026-01-12 | developer | Full v2 API implementation with HMAC-SHA256 + PassPhrase auth |
 | bitmart | SKELETON | 0 | 16 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 22 | 2025-08-13 | auto  (heuristic) |
 | bitmex | SKELETON | 0 | 16 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 22 | 2025-08-13 | auto  (heuristic) |
 | bitopro | SKELETON | 0 | 16 | 0 | VerifySymbols<br/>VerifyStates<br/>GetTickers<br/>GetVolumes<br/>GetMarkets<br/>GetBookTickers | 22 | 2025-08-13 | auto  (heuristic) |
@@ -353,23 +350,24 @@ public async ValueTask<Orderbook> GetOrderbook(string symbol, int limit = 100)
 {
     // 1. Build API URL
     var url = $"{ExchangeUrl}/api/v1/orderbook?symbol={symbol}&limit={limit}";
-    
+
     // 2. Make HTTP request
     using var client = mainXchg.HttpClientService.GetHttpClient(ExchangeName);
     var response = await client.GetStringAsync(url);
-    
-    // 3. Parse JSON response
-    var data = JObject.Parse(response);
-    
-    // 4. Transform to standard format
+
+    // 3. Parse JSON response using System.Text.Json
+    using var doc = JsonDocument.Parse(response);
+    var root = doc.RootElement;
+
+    // 4. Transform to standard format using JsonExtensions
     var orderbook = new Orderbook
     {
         symbol = symbol,
-        bids = ParseOrders(data["bids"]),
-        asks = ParseOrders(data["asks"]),
+        bids = ParseOrders(root.GetPropertyOrDefault("bids")),
+        asks = ParseOrders(root.GetPropertyOrDefault("asks")),
         timestamp = TimeExtensions.UnixTime
     };
-    
+
     return orderbook;
 }
 ```
@@ -588,4 +586,4 @@ Common country codes used in this project:
 
 ---
 
-*This document is automatically updated as exchanges are implemented. Last update: 2025-12-01*
+*This document is automatically updated as exchanges are implemented. Last update: 2026-01-12*

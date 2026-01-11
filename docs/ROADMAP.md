@@ -3,23 +3,23 @@
 ## 📊 Current Status
 
 - **Total Exchange Files**: 110
-- **FULL Implementations**: 9 (8.2%)
-- **PARTIAL Implementations**: 3 (2.7%)
-- **SKELETON Implementations**: 98 (89.1%)
-- **NotImplementedException Count**: 2,197 across 103 files
+- **FULL Implementations**: 14 (12.7%)
+- **PARTIAL Implementations**: 0 (0.0%)
+- **SKELETON Implementations**: 96 (87.3%)
+- **NotImplementedException Count**: 2,111 across 98 files
 - **Target Framework**: .NET Standard 2.0/2.1, .NET 8.0, .NET 9.0, .NET 10.0
-- **Current Version**: 1.1.11
-- **Test Coverage**: 90 tests passing across 7 test files
+- **Current Version**: 1.1.13
+- **Test Coverage**: 452 tests passing (8.79% line coverage)
 
-## ✅ Completed Features (v1.1.11)
+## ✅ Completed Features (v1.1.13)
 
-- ✅ 9 fully implemented exchanges: Binance, Bitstamp, Bithumb, Bybit, Coinbase, Coinone, Kraken, OKX, Upbit
-- ✅ 3 partial implementations: Huobi, Korbit, Kucoin
+- ✅ 14 fully implemented exchanges: Binance, BinanceUs, Bitget, Bitstamp, Bithumb, Bybit, Coinbase, Coinone, Huobi, Korbit, Kraken, Kucoin, OKX, Upbit
+- ✅ All Korean exchanges fully implemented (Bithumb, Coinone, Korbit, Upbit)
 - ✅ Standardized trading, account, and funding operations (16 standard methods)
 - ✅ Comprehensive market data access
 - ✅ HttpClient pooling for improved performance
-- ✅ Skeleton code for 98 additional exchanges with NotImplementedException placeholders
-- ✅ Unified test project structure (CCXT.Simple.Tests) with 90 tests
+- ✅ Skeleton code for 96 additional exchanges with NotImplementedException placeholders
+- ✅ Unified test project structure (CCXT.Simple.Tests) with 452 tests
 - ✅ Unified samples project structure (CCXT.Simple.Samples)
 - ✅ .NET Standard 2.0/2.1, .NET 8.0, .NET 9.0, and .NET 10.0 support
 - ✅ English documentation throughout codebase
@@ -28,6 +28,8 @@
 - ✅ Extension class refactoring (TimeExtensions, JsonExtensions, StringExtensions)
 - ✅ Bybit V5 API migration with structured model classes
 - ✅ JWT authentication support for Korean exchanges (Bithumb, Upbit)
+- ✅ Bitget v2 API migration (2026-01-12)
+- ✅ Coinbase v3 Advanced Trade API migration (2026-01-12)
 
 ## 🚀 Development Phases
 
@@ -39,6 +41,8 @@
 - Kraken ✅ Completed (2025-01)
 - Bitstamp ✅ Completed (2025-08)
 - Binance ✅ Full implementation
+- BinanceUs ✅ Full implementation (2026-01-12)
+- Bitget ✅ Full v2 API implementation (2026-01-12)
 - Bithumb ✅ Full implementation with JWT auth
 - Bybit ✅ Full V5 API implementation
 - Coinbase ✅ Full implementation
@@ -140,23 +144,22 @@
 
 Based on community demand and market importance:
 
-### Tier 1 - High Priority (Complete Partial → FULL)
-1. **Kucoin** - PARTIAL → Complete remaining 15 methods
-2. **Huobi** - PARTIAL → Complete remaining 15 methods
-3. **Korbit** - PARTIAL → Complete remaining 15 methods
+### Tier 1 - High Priority (New Implementations)
+1. ~~**BinanceUs**~~ ✅ Completed (2026-01-12) - Leveraged Binance code
+2. ~~**Bitget**~~ ✅ Completed (2026-01-12) - HMAC-SHA256 + PassPhrase auth
+3. **Bitfinex** - Advanced features, high liquidity
 
-### Tier 2 - High Priority (New Implementations)
-4. **Bitfinex** - Advanced features, high liquidity
-5. **Gemini** - US regulated, institutional
-6. **Poloniex** - Wide altcoin selection
+### Tier 2 - Medium Priority
+4. **Gemini** - US regulated, institutional
+5. **Poloniex** - Wide altcoin selection
 
 ### Tier 3 - Medium Priority
-7. **Mexc** - Growing global exchange
-8. **Deribit** - Options leader, derivatives
-9. **Bitmex** - Derivatives pioneer
-10. **Phemex** - Modern derivatives platform
-11. **Bitflyer** - Japanese market leader
-12. **Coincheck** - Major Japanese exchange
+5. **Mexc** - Growing global exchange
+6. **Deribit** - Options leader, derivatives
+7. **Bitmex** - Derivatives pioneer
+8. **Phemex** - Modern derivatives platform
+9. **Bitflyer** - Japanese market leader
+10. **Coincheck** - Major Japanese exchange
 
 ## 🔄 Continuous Improvements
 
@@ -168,7 +171,7 @@ Based on community demand and market importance:
 - Bug fixes and patches
 
 ### Technical Debt
-- Complete all `NotImplementedException` methods (2,197 remaining across 103 files)
+- Complete all `NotImplementedException` methods (2,111 remaining across 98 files)
 - Standardize error messages
 - Improve test coverage (currently 90 tests)
 - Optimize memory usage
@@ -182,7 +185,10 @@ Based on community demand and market importance:
 
 ### Q4 2025
 - Target: 15+ fully implemented exchanges
-- Complete PARTIAL → FULL for Kucoin, Huobi, Korbit
+- ✅ All PARTIAL implementations completed (14 FULL exchanges achieved)
+- ✅ BinanceUs completed (2026-01-12)
+- ✅ Bitget completed (2026-01-12)
+- Focus on Bitfinex, Gemini implementations
 - Enterprise customer adoption
 - Community contributor program
 
@@ -223,38 +229,31 @@ For roadmap discussions and suggestions:
 
 ## 🔧 Technical Tasks & Work in Progress
 
-### System.Text.Json Migration (Status: Postponed)
+### System.Text.Json Migration (Status: ✅ Completed)
 
 **Overview**: Migration from Newtonsoft.Json to System.Text.Json for performance improvements.
 
 **Current Status**:
-- **Progress**: ~50% completed, postponed for continuation
+- **Progress**: ✅ 100% completed (2026-01-12)
 - **Date Started**: 2024-08-07
-- **Migration Script**: Available at project root
+- **Date Completed**: 2026-01-12
 
 **Completed Work**:
 - ✅ Basic migration script created and executed
-- ✅ Updated 124 out of 247 source files with replacements
-- ✅ Created JsonExtensions helper class
+- ✅ Updated all source files with System.Text.Json
+- ✅ Created JsonExtensions helper class (renamed from StjExtensions)
 - ✅ Updated GlobalUsings.cs with System.Text.Json namespaces
-
-**Remaining Work**:
-- ⏳ Fix compilation errors from migration
-- ⏳ Handle JsonSerializerSettings references
-- ⏳ Update custom JsonConverter implementations
-- ⏳ Review complex LINQ operations on JsonArray/JsonObject
-
-**Files Requiring Manual Review**:
-- `src/core/converters/DecimalConverter.cs` - Custom JsonConverter
-- `src/core/Exchange.cs` - JsonSerializerSettings usage
-- Multiple exchange implementations with complex JSON parsing
+- ✅ Fixed GetStringSafe method overload ambiguity bug
+- ✅ Added Number/Boolean type handling in JsonExtensions
+- ✅ All 14 exchange implementations converted to System.Text.Json
+- ✅ 452 tests passing with the new JSON library
 
 ### Technical Debt & Improvements
 
 **High Priority**:
-- Complete all `NotImplementedException` methods (2,281 occurrences)
+- Complete all `NotImplementedException` methods (2,111 occurrences across 96 skeleton files)
 - Standardize error messages across exchanges
-- Improve test coverage from current 73 tests to >90% coverage
+- Improve test coverage (current: 8.79% line coverage, 452 tests)
 - Optimize memory usage for concurrent operations
 
 **Medium Priority**:
@@ -290,5 +289,5 @@ For roadmap discussions and suggestions:
 
 ---
 
-*This roadmap is updated monthly. Last update: 2025-12-01*
+*This roadmap is updated monthly. Last update: 2026-01-12*
 *Subject to change based on community feedback and market conditions*

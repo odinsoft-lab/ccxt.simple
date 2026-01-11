@@ -16,8 +16,8 @@ using CCXT.Simple.Models.Market;
 using CCXT.Simple.Models.Trading;
 using CCXT.Simple.Core.Utilities;
 using CCXT.Simple.Core.Extensions;
-using Newtonsoft.Json;
 using System.Security.Cryptography;
+using System.Text.Json;
 using System.Text;
 
 namespace CCXT.Simple.Exchanges.Crypto
@@ -93,7 +93,7 @@ namespace CCXT.Simple.Exchanges.Crypto
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jarray = JsonConvert.DeserializeObject<Market>(_jstring);
+                    var _jarray = JsonSerializer.Deserialize<Market>(_jstring, mainXchg.StjOptions);
 
                     var _queue_info = mainXchg.GetXInfors(ExchangeName);
 
@@ -140,7 +140,7 @@ namespace CCXT.Simple.Exchanges.Crypto
 
                 var _response = await _client.GetAsync("/v2/public/get-ticker");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jticker = JsonConvert.DeserializeObject<RaTickers>(_jstring, mainXchg.JsonSettings);
+                var _jticker = JsonSerializer.Deserialize<RaTickers>(_jstring, mainXchg.StjOptions);
 
                 if (_jticker.code == 0)
                 {
@@ -270,18 +270,18 @@ namespace CCXT.Simple.Exchanges.Crypto
                 var _endpoint = "private/get-currency-networks";
                 var _request = this.CreateSignature(_client, 1, _endpoint);
 
-                var _json = JsonConvert.SerializeObject(_request);
+                var _json = JsonSerializer.Serialize(_request, mainXchg.StjOptions);
                 var _content = new StringContent(_json, Encoding.UTF8, "application/json");
                 var _response = await _client.PostAsync($"/v2/{_endpoint}", _content);
                 if (_response.IsSuccessStatusCode)
                 {
                     var _jstring = await _response.Content.ReadAsStringAsync();
-                    var _jarray = JsonConvert.DeserializeObject<CoinState>(_jstring, mainXchg.JsonSettings);
+                    var _jarray = JsonSerializer.Deserialize<CoinState>(_jstring, mainXchg.StjOptions);
 
                     foreach (var m in _jarray.result.currency_map)
                     {
                         var _base_name = m.Key;
-                        var _c = JsonConvert.DeserializeObject<CurrencyMap>(m.Value.ToString());
+                        var _c = m.Value;
 
                         var _state = tickers.states.SingleOrDefault(x => x.baseName == _base_name);
                         if (_state == null)

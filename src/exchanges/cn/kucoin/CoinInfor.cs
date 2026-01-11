@@ -1,5 +1,4 @@
 ﻿using CCXT.Simple.Core.Converters;
-using Newtonsoft.Json;
 
 namespace CCXT.Simple.Exchanges.Kucoin
 {
@@ -27,9 +26,7 @@ namespace CCXT.Simple.Exchanges.Kucoin
         public decimal baseIncrement { get; set; }
         public decimal quoteIncrement { get; set; }
         public decimal priceIncrement { get; set; }
-        public decimal priceLimitRate { get; set; }
-        [JsonConverter(typeof(XDecimalNullConverter))]
-        public decimal minFunds { get; set; }
+        public decimal priceLimitRate { get; set; }        public decimal minFunds { get; set; }
         public bool isMarginEnabled { get; set; }
         public bool enableTrading { get; set; }
     }

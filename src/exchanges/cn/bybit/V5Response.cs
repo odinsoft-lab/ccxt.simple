@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace CCXT.Simple.Exchanges.Bybit
 {
@@ -7,19 +7,19 @@ namespace CCXT.Simple.Exchanges.Bybit
     /// </summary>
     public class V5Response<T>
     {
-        [JsonProperty("retCode")]
+        [JsonPropertyName("retCode")]
         public int RetCode { get; set; }
 
-        [JsonProperty("retMsg")]
+        [JsonPropertyName("retMsg")]
         public string RetMsg { get; set; }
 
-        [JsonProperty("result")]
+        [JsonPropertyName("result")]
         public T Result { get; set; }
 
-        [JsonProperty("retExtInfo")]
+        [JsonPropertyName("retExtInfo")]
         public object RetExtInfo { get; set; }
 
-        [JsonProperty("time")]
+        [JsonPropertyName("time")]
         public long Time { get; set; }
     }
 
@@ -28,13 +28,13 @@ namespace CCXT.Simple.Exchanges.Bybit
     /// </summary>
     public class V5ListResult<T>
     {
-        [JsonProperty("list")]
+        [JsonPropertyName("list")]
         public List<T> List { get; set; }
 
-        [JsonProperty("nextPageCursor")]
+        [JsonPropertyName("nextPageCursor")]
         public string NextPageCursor { get; set; }
 
-        [JsonProperty("category")]
+        [JsonPropertyName("category")]
         public string Category { get; set; }
     }
 }

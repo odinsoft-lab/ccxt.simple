@@ -1,4 +1,4 @@
-// == CCXT-SIMPLE-META-BEGIN ==
+﻿// == CCXT-SIMPLE-META-BEGIN ==
 // EXCHANGE: bybit
 // IMPLEMENTATION_STATUS: FULL
 // PROGRESS_STATUS: DONE
@@ -9,10 +9,9 @@
 // NOTES: Full implementation with V5 API support for spot trading
 // == CCXT-SIMPLE-META-END ==
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using CCXT.Simple.Core.Extensions;
 using CCXT.Simple.Core.Interfaces;
 using CCXT.Simple.Core;
@@ -43,7 +42,7 @@ namespace CCXT.Simple.Exchanges.Bybit
          *
          * Rate Limit
          *     https://bybit-exchange.github.io/docs/v5/rate-limit
-         *     
+         *
          *     GET/POST: 10 req/s for 5 consecutive seconds
          *     Heavy endpoints: 1 req/s
          */
@@ -82,16 +81,16 @@ namespace CCXT.Simple.Exchanges.Bybit
         {
             var _timestamp = TimeExtensions.NowMilli.ToString();
             var _recv_window = "5000";
-            
+
             var _sign_string = _timestamp + this.ApiKey + _recv_window;
             if (method == "GET" && !string.IsNullOrEmpty(queryString))
                 _sign_string += queryString;
             else if (method == "POST")
                 _sign_string += queryString;
-                
+
             var _sign_bytes = Encryptor.ComputeHash(Encoding.UTF8.GetBytes(_sign_string));
             var _sign = BitConverter.ToString(_sign_bytes).Replace("-", "").ToLower();
-            
+
             client.DefaultRequestHeaders.Clear();
             client.DefaultRequestHeaders.Add("X-BAPI-API-KEY", this.ApiKey);
             client.DefaultRequestHeaders.Add("X-BAPI-TIMESTAMP", _timestamp);
@@ -131,38 +130,42 @@ namespace CCXT.Simple.Exchanges.Bybit
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var _response = await _client.GetAsync("/v5/market/instruments-info?category=spot");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobj = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jobj["retCode"]?.ToString() == "0" && _jobj["result"] != null)
+                if (_root.GetStringSafe("retCode") == "0" && _root.HasProperty("result"))
                 {
                     var _queue_info = mainXchg.GetXInfors(ExchangeName);
-                    var _list = _jobj["result"]["list"] as JArray;
+                    var _result_elem = _root.GetProperty("result");
 
-                    if (_list != null)
+                    if (_result_elem.TryGetProperty("list", out var _list) && _list.ValueKind == JsonValueKind.Array)
                     {
-                        foreach (var item in _list)
+                        foreach (var item in _list.EnumerateArray())
                         {
-                            var _base = item["baseCoin"]?.ToString();
-                            var _quote = item["quoteCoin"]?.ToString();
-                            var _symbol = item["symbol"]?.ToString();
+                            var _base = item.GetStringSafe("baseCoin");
+                            var _quote = item.GetStringSafe("quoteCoin");
+                            var _symbol = item.GetStringSafe("symbol");
 
                             if ((_quote == "USDT" || _quote == "USD") && _base != null && _symbol != null)
                             {
+                                var _priceFilter = item.GetPropertyOrDefault("priceFilter");
+                                var _lotSizeFilter = item.GetPropertyOrDefault("lotSizeFilter");
+
                                 _queue_info.symbols.Add(new QueueSymbol
                                 {
                                     symbol = _symbol,
                                     compName = _base,
                                     baseName = _base,
                                     quoteName = _quote,
-                                    
-                                    minPrice = decimal.Parse(item["priceFilter"]?["minPrice"]?.ToString() ?? "0"),
-                                    maxPrice = decimal.Parse(item["priceFilter"]?["maxPrice"]?.ToString() ?? "0"),
-                                    
-                                    minQty = decimal.Parse(item["lotSizeFilter"]?["minOrderQty"]?.ToString() ?? "0"),
-                                    maxQty = decimal.Parse(item["lotSizeFilter"]?["maxOrderQty"]?.ToString() ?? "0")
+
+                                    minPrice = _priceFilter.GetDecimalSafe("minPrice"),
+                                    maxPrice = _priceFilter.GetDecimalSafe("maxPrice"),
+
+                                    minQty = _lotSizeFilter.GetDecimalSafe("minOrderQty"),
+                                    maxQty = _lotSizeFilter.GetDecimalSafe("maxOrderQty")
                                 });
                             }
                         }
@@ -191,22 +194,23 @@ namespace CCXT.Simple.Exchanges.Bybit
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 this.CreateSignature(_client, "GET", "/v5/asset/coin/query-info", "");
-                
+
                 var _response = await _client.GetAsync("/v5/asset/coin/query-info");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobj = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jobj["retCode"]?.ToString() == "0" && _jobj["result"] != null)
+                if (_root.GetStringSafe("retCode") == "0" && _root.HasProperty("result"))
                 {
-                    var _rows = _jobj["result"]["rows"] as JArray;
+                    var _result_elem = _root.GetProperty("result");
 
-                    if (_rows != null)
+                    if (_result_elem.TryGetProperty("rows", out var _rows) && _rows.ValueKind == JsonValueKind.Array)
                     {
-                        foreach (var coin in _rows)
+                        foreach (var coin in _rows.EnumerateArray())
                         {
-                            var _coin_name = coin["coin"]?.ToString();
+                            var _coin_name = coin.GetStringSafe("coin");
                             if (string.IsNullOrEmpty(_coin_name))
                                 continue;
 
@@ -224,12 +228,11 @@ namespace CCXT.Simple.Exchanges.Bybit
                                 tickers.states.Add(_state);
                             }
 
-                            var _chains = coin["chains"] as JArray;
-                            if (_chains != null)
+                            if (coin.TryGetProperty("chains", out var _chains) && _chains.ValueKind == JsonValueKind.Array)
                             {
-                                foreach (var chain in _chains)
+                                foreach (var chain in _chains.EnumerateArray())
                                 {
-                                    var _chain_name = chain["chain"]?.ToString();
+                                    var _chain_name = chain.GetStringSafe("chain");
                                     if (string.IsNullOrEmpty(_chain_name))
                                         continue;
 
@@ -237,17 +240,17 @@ namespace CCXT.Simple.Exchanges.Bybit
                                     {
                                         name = _coin_name + "-" + _chain_name,
                                         network = _chain_name,
-                                        chain = chain["chainType"]?.ToString() ?? _chain_name,
-                                        
-                                        deposit = chain["chainDeposit"]?.ToString() == "1",
-                                        withdraw = chain["chainWithdraw"]?.ToString() == "1",
-                                        
-                                        minWithdrawal = decimal.Parse(chain["withdrawMin"]?.ToString() ?? "0"),
-                                        withdrawFee = decimal.Parse(chain["withdrawFee"]?.ToString() ?? "0"),
-                                        
-                                        minConfirm = int.Parse(chain["confirmation"]?.ToString() ?? "0")
+                                        chain = chain.GetStringSafe("chainType") ?? _chain_name,
+
+                                        deposit = chain.GetStringSafe("chainDeposit") == "1",
+                                        withdraw = chain.GetStringSafe("chainWithdraw") == "1",
+
+                                        minWithdrawal = chain.GetDecimalSafe("withdrawMin"),
+                                        withdrawFee = chain.GetDecimalSafe("withdrawFee"),
+
+                                        minConfirm = chain.GetInt32Safe("confirmation")
                                     };
-                                    
+
                                     _state.networks.Add(_network);
                                 }
                             }
@@ -283,44 +286,53 @@ namespace CCXT.Simple.Exchanges.Bybit
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var _response = await _client.GetAsync("/v5/market/tickers?category=spot");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobj = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jobj["retCode"]?.ToString() == "0" && _jobj["result"] != null)
+                if (_root.GetStringSafe("retCode") == "0" && _root.HasProperty("result"))
                 {
-                    var _list = _jobj["result"]["list"] as JArray;
+                    var _result_elem = _root.GetProperty("result");
 
-                    if (_list != null)
+                    if (_result_elem.TryGetProperty("list", out var _list) && _list.ValueKind == JsonValueKind.Array)
                     {
+                        // Build dictionary for fast lookup
+                        var _tickerDict = new Dictionary<string, JsonElement>();
+                        foreach (var item in _list.EnumerateArray())
+                        {
+                            var _sym = item.GetStringSafe("symbol");
+                            if (!string.IsNullOrEmpty(_sym))
+                                _tickerDict[_sym] = item;
+                        }
+
                         for (var i = 0; i < tickers.items.Count; i++)
                         {
                             var _ticker = tickers.items[i];
                             if (_ticker.symbol == "X")
                                 continue;
 
-                            var _jobject = _list.FirstOrDefault(x => x["symbol"]?.ToString() == _ticker.symbol);
-                            if (_jobject != null)
+                            if (_tickerDict.TryGetValue(_ticker.symbol, out var _jobject))
                             {
                                 if (_ticker.quoteName == "USDT" || _ticker.quoteName == "USD")
                                 {
-                                    var _price = decimal.Parse(_jobject["lastPrice"]?.ToString() ?? "0");
-                                    var _ask_price = decimal.Parse(_jobject["ask1Price"]?.ToString() ?? "0");
-                                    var _bid_price = decimal.Parse(_jobject["bid1Price"]?.ToString() ?? "0");
+                                    var _price = _jobject.GetDecimalSafe("lastPrice");
+                                    var _ask_price = _jobject.GetDecimalSafe("ask1Price");
+                                    var _bid_price = _jobject.GetDecimalSafe("bid1Price");
 
                                     _ticker.lastPrice = _price * tickers.exchgRate;
                                     _ticker.askPrice = _ask_price * tickers.exchgRate;
                                     _ticker.bidPrice = _bid_price * tickers.exchgRate;
 
-                                    var _volume = decimal.Parse(_jobject["volume24h"]?.ToString() ?? "0");
+                                    var _volume = _jobject.GetDecimalSafe("volume24h");
                                     _volume *= tickers.exchgRate;
                                     _ticker.volume24h = Math.Floor(_volume / mainXchg.Volume24hBase);
 
                                     var _prev_volume24h = _ticker.previous24h;
                                     var _next_timestamp = _ticker.timestamp + 60 * 1000;
                                     var _curr_timestamp = TimeExtensions.NowMilli;
-                                    
+
                                     if (_curr_timestamp > _next_timestamp)
                                     {
                                         _ticker.volume1m = Math.Floor((_prev_volume24h > 0 ? _volume - _prev_volume24h : 0) / mainXchg.Volume1mBase);
@@ -387,41 +399,41 @@ namespace CCXT.Simple.Exchanges.Bybit
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var _response = await _client.GetAsync($"/v5/market/orderbook?category=spot&symbol={symbol}&limit={limit}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobj = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jobj["retCode"]?.ToString() == "0" && _jobj["result"] != null)
+                if (_root.GetStringSafe("retCode") == "0" && _root.HasProperty("result"))
                 {
-                    var _bids = _jobj["result"]["b"] as JArray;
-                    var _asks = _jobj["result"]["a"] as JArray;
+                    var _result_elem = _root.GetProperty("result");
 
-                    if (_bids != null)
+                    if (_result_elem.TryGetProperty("b", out var _bids) && _bids.ValueKind == JsonValueKind.Array)
                     {
-                        foreach (var bid in _bids)
+                        foreach (var bid in _bids.EnumerateArray())
                         {
                             _result.bids.Add(new OrderbookItem
                             {
-                                price = decimal.Parse(bid[0]?.ToString() ?? "0"),
-                                quantity = decimal.Parse(bid[1]?.ToString() ?? "0")
+                                price = bid[0].GetDecimalSafe(),
+                                quantity = bid[1].GetDecimalSafe()
                             });
                         }
                     }
 
-                    if (_asks != null)
+                    if (_result_elem.TryGetProperty("a", out var _asks) && _asks.ValueKind == JsonValueKind.Array)
                     {
-                        foreach (var ask in _asks)
+                        foreach (var ask in _asks.EnumerateArray())
                         {
                             _result.asks.Add(new OrderbookItem
                             {
-                                price = decimal.Parse(ask[0]?.ToString() ?? "0"),
-                                quantity = decimal.Parse(ask[1]?.ToString() ?? "0")
+                                price = ask[0].GetDecimalSafe(),
+                                quantity = ask[1].GetDecimalSafe()
                             });
                         }
                     }
 
-                    _result.timestamp = long.Parse(_jobj["result"]["ts"]?.ToString() ?? TimeExtensions.NowMilli.ToString());
+                    _result.timestamp = _result_elem.GetInt64Safe("ts", TimeExtensions.NowMilli);
                 }
             }
             catch (Exception ex)
@@ -442,33 +454,34 @@ namespace CCXT.Simple.Exchanges.Bybit
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var _interval = ConvertTimeframe(timeframe);
                 var _url = $"/v5/market/kline?category=spot&symbol={symbol}&interval={_interval}&limit={limit}";
-                
+
                 if (since.HasValue)
                     _url += $"&start={since.Value}";
-                    
+
                 var _response = await _client.GetAsync(_url);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobj = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jobj["retCode"]?.ToString() == "0" && _jobj["result"] != null)
+                if (_root.GetStringSafe("retCode") == "0" && _root.HasProperty("result"))
                 {
-                    var _list = _jobj["result"]["list"] as JArray;
+                    var _result_elem = _root.GetProperty("result");
 
-                    if (_list != null)
+                    if (_result_elem.TryGetProperty("list", out var _list) && _list.ValueKind == JsonValueKind.Array)
                     {
-                        foreach (var candle in _list)
+                        foreach (var candle in _list.EnumerateArray())
                         {
                             _result.Add(new decimal[]
                             {
-                                long.Parse(candle[0]?.ToString() ?? "0"),
-                                decimal.Parse(candle[1]?.ToString() ?? "0"),
-                                decimal.Parse(candle[2]?.ToString() ?? "0"),
-                                decimal.Parse(candle[3]?.ToString() ?? "0"),
-                                decimal.Parse(candle[4]?.ToString() ?? "0"),
-                                decimal.Parse(candle[5]?.ToString() ?? "0")
+                                candle[0].GetInt64Safe(),
+                                candle[1].GetDecimalSafe(),
+                                candle[2].GetDecimalSafe(),
+                                candle[3].GetDecimalSafe(),
+                                candle[4].GetDecimalSafe(),
+                                candle[5].GetDecimalSafe()
                             });
                         }
                     }
@@ -492,26 +505,27 @@ namespace CCXT.Simple.Exchanges.Bybit
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var _response = await _client.GetAsync($"/v5/market/recent-trade?category=spot&symbol={symbol}&limit={limit}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobj = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jobj["retCode"]?.ToString() == "0" && _jobj["result"] != null)
+                if (_root.GetStringSafe("retCode") == "0" && _root.HasProperty("result"))
                 {
-                    var _list = _jobj["result"]["list"] as JArray;
+                    var _result_elem = _root.GetProperty("result");
 
-                    if (_list != null)
+                    if (_result_elem.TryGetProperty("list", out var _list) && _list.ValueKind == JsonValueKind.Array)
                     {
-                        foreach (var trade in _list)
+                        foreach (var trade in _list.EnumerateArray())
                         {
                             _result.Add(new TradeData
                             {
-                                id = trade["execId"]?.ToString(),
-                                timestamp = long.Parse(trade["time"]?.ToString() ?? "0"),
-                                price = decimal.Parse(trade["price"]?.ToString() ?? "0"),
-                                amount = decimal.Parse(trade["size"]?.ToString() ?? "0"),
-                                side = trade["side"]?.ToString()?.ToLower() == "buy" ? SideType.Bid : SideType.Ask
+                                id = trade.GetStringSafe("execId"),
+                                timestamp = trade.GetInt64Safe("time"),
+                                price = trade.GetDecimalSafe("price"),
+                                amount = trade.GetDecimalSafe("size"),
+                                side = trade.GetStringSafe("side")?.ToLower() == "buy" ? SideType.Bid : SideType.Ask
                             });
                         }
                     }
@@ -535,33 +549,35 @@ namespace CCXT.Simple.Exchanges.Bybit
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 this.CreateSignature(_client, "GET", "/v5/account/wallet-balance", "accountType=UNIFIED");
-                
+
                 var _response = await _client.GetAsync("/v5/account/wallet-balance?accountType=UNIFIED");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobj = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jobj["retCode"]?.ToString() == "0" && _jobj["result"] != null)
+                if (_root.GetStringSafe("retCode") == "0" && _root.HasProperty("result"))
                 {
-                    var _list = _jobj["result"]["list"] as JArray;
+                    var _result_elem = _root.GetProperty("result");
 
-                    if (_list != null && _list.Count > 0)
+                    if (_result_elem.TryGetProperty("list", out var _list) && _list.ValueKind == JsonValueKind.Array && _list.GetArrayLength() > 0)
                     {
-                        var _coins = _list[0]["coin"] as JArray;
-                        
-                        if (_coins != null)
+                        var _first = _list[0];
+                        if (_first.TryGetProperty("coin", out var _coins) && _coins.ValueKind == JsonValueKind.Array)
                         {
-                            foreach (var balance in _coins)
+                            foreach (var balance in _coins.EnumerateArray())
                             {
-                                var coin = balance["coin"]?.ToString();
+                                var coin = balance.GetStringSafe("coin");
                                 if (!string.IsNullOrEmpty(coin))
                                 {
+                                    var walletBalance = balance.GetDecimalSafe("walletBalance");
+                                    var locked = balance.GetDecimalSafe("locked");
                                     _result[coin] = new BalanceInfo
                                     {
-                                        free = decimal.Parse(balance["walletBalance"]?.ToString() ?? "0"),
-                                        used = decimal.Parse(balance["locked"]?.ToString() ?? "0"),
-                                        total = decimal.Parse(balance["walletBalance"]?.ToString() ?? "0") + decimal.Parse(balance["locked"]?.ToString() ?? "0")
+                                        free = walletBalance,
+                                        used = locked,
+                                        total = walletBalance + locked
                                     };
                                 }
                             }
@@ -590,21 +606,23 @@ namespace CCXT.Simple.Exchanges.Bybit
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 this.CreateSignature(_client, "GET", "/v5/user/query-api", "");
-                
+
                 var _response = await _client.GetAsync("/v5/user/query-api");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobj = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jobj["retCode"]?.ToString() == "0" && _jobj["result"] != null)
+                if (_root.GetStringSafe("retCode") == "0" && _root.HasProperty("result"))
                 {
-                    _result.id = _jobj["result"]["uid"]?.ToString();
+                    var _result_elem = _root.GetProperty("result");
+                    _result.id = _result_elem.GetStringSafe("uid");
                     _result.type = "spot";
                     _result.canTrade = true;
                     _result.canWithdraw = true;
                     _result.canDeposit = true;
-                    
+
                     // Get balances
                     _result.balances = await GetBalance();
                 }
@@ -627,7 +645,7 @@ namespace CCXT.Simple.Exchanges.Bybit
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var _params = new Dictionary<string, object>
                 {
                     {"category", "spot"},
@@ -636,16 +654,16 @@ namespace CCXT.Simple.Exchanges.Bybit
                     {"orderType", orderType.ToUpper() == "MARKET" ? "Market" : "Limit"},
                     {"qty", amount.ToString()}
                 };
-                
+
                 if (orderType.ToUpper() != "MARKET" && price.HasValue)
                     _params["price"] = price.Value.ToString();
-                    
+
                 if (!string.IsNullOrEmpty(clientOrderId))
                     _params["orderLinkId"] = clientOrderId;
-                
-                var _json_content = JsonConvert.SerializeObject(_params);
+
+                var _json_content = JsonSerializer.Serialize(_params, mainXchg.StjOptions);
                 this.CreateSignature(_client, "POST", "/v5/order/create", _json_content);
-                
+
 #if NETSTANDARD2_0 || NETSTANDARD2_1
                 var _content = new StringContent(_json_content, Encoding.UTF8, "application/json");
 #else
@@ -654,14 +672,16 @@ namespace CCXT.Simple.Exchanges.Bybit
 #endif
                 var _response = await _client.PostAsync("/v5/order/create", _content);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobj = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jobj["retCode"]?.ToString() == "0" && _jobj["result"] != null)
+                if (_root.GetStringSafe("retCode") == "0" && _root.HasProperty("result"))
                 {
+                    var _result_elem = _root.GetProperty("result");
                     _result = new OrderInfo
                     {
-                        id = _jobj["result"]["orderId"]?.ToString(),
-                        clientOrderId = _jobj["result"]["orderLinkId"]?.ToString(),
+                        id = _result_elem.GetStringSafe("orderId"),
+                        clientOrderId = _result_elem.GetStringSafe("orderLinkId"),
                         symbol = symbol,
                         type = orderType,
                         side = side,
@@ -690,23 +710,23 @@ namespace CCXT.Simple.Exchanges.Bybit
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var _params = new Dictionary<string, object>
                 {
                     {"category", "spot"}
                 };
-                
+
                 if (!string.IsNullOrEmpty(orderId))
                     _params["orderId"] = orderId;
                 else if (!string.IsNullOrEmpty(clientOrderId))
                     _params["orderLinkId"] = clientOrderId;
-                    
+
                 if (!string.IsNullOrEmpty(symbol))
                     _params["symbol"] = symbol;
-                
-                var _json_content = JsonConvert.SerializeObject(_params);
+
+                var _json_content = JsonSerializer.Serialize(_params, mainXchg.StjOptions);
                 this.CreateSignature(_client, "POST", "/v5/order/cancel", _json_content);
-                
+
 #if NETSTANDARD2_0 || NETSTANDARD2_1
                 var _content = new StringContent(_json_content, Encoding.UTF8, "application/json");
 #else
@@ -715,9 +735,10 @@ namespace CCXT.Simple.Exchanges.Bybit
 #endif
                 var _response = await _client.PostAsync("/v5/order/cancel", _content);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobj = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                _result = _jobj["retCode"]?.ToString() == "0";
+                _result = _root.GetStringSafe("retCode") == "0";
             }
             catch (Exception ex)
             {
@@ -737,41 +758,42 @@ namespace CCXT.Simple.Exchanges.Bybit
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var _params = "category=spot";
                 if (!string.IsNullOrEmpty(orderId))
                     _params += $"&orderId={orderId}";
                 else if (!string.IsNullOrEmpty(clientOrderId))
                     _params += $"&orderLinkId={clientOrderId}";
-                    
+
                 if (!string.IsNullOrEmpty(symbol))
                     _params += $"&symbol={symbol}";
-                
+
                 this.CreateSignature(_client, "GET", "/v5/order/realtime", _params);
-                
+
                 var _response = await _client.GetAsync($"/v5/order/realtime?{_params}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobj = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jobj["retCode"]?.ToString() == "0" && _jobj["result"] != null)
+                if (_root.GetStringSafe("retCode") == "0" && _root.HasProperty("result"))
                 {
-                    var _list = _jobj["result"]["list"] as JArray;
-                    
-                    if (_list != null && _list.Count > 0)
+                    var _result_elem = _root.GetProperty("result");
+
+                    if (_result_elem.TryGetProperty("list", out var _list) && _list.ValueKind == JsonValueKind.Array && _list.GetArrayLength() > 0)
                     {
                         var order = _list[0];
                         _result = new OrderInfo
                         {
-                            id = order["orderId"]?.ToString(),
-                            clientOrderId = order["orderLinkId"]?.ToString(),
-                            symbol = order["symbol"]?.ToString(),
-                            type = order["orderType"]?.ToString()?.ToLower(),
-                            side = order["side"]?.ToString()?.ToLower() == "buy" ? SideType.Bid : SideType.Ask,
-                            price = decimal.Parse(order["price"]?.ToString() ?? "0"),
-                            amount = decimal.Parse(order["qty"]?.ToString() ?? "0"),
-                            filled = decimal.Parse(order["cumExecQty"]?.ToString() ?? "0"),
-                            status = ConvertOrderStatus(order["orderStatus"]?.ToString()),
-                            timestamp = long.Parse(order["createdTime"]?.ToString() ?? "0")
+                            id = order.GetStringSafe("orderId"),
+                            clientOrderId = order.GetStringSafe("orderLinkId"),
+                            symbol = order.GetStringSafe("symbol"),
+                            type = order.GetStringSafe("orderType")?.ToLower(),
+                            side = order.GetStringSafe("side")?.ToLower() == "buy" ? SideType.Bid : SideType.Ask,
+                            price = order.GetDecimalSafe("price"),
+                            amount = order.GetDecimalSafe("qty"),
+                            filled = order.GetDecimalSafe("cumExecQty"),
+                            status = ConvertOrderStatus(order.GetStringSafe("orderStatus")),
+                            timestamp = order.GetInt64Safe("createdTime")
                         };
                     }
                 }
@@ -794,40 +816,41 @@ namespace CCXT.Simple.Exchanges.Bybit
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var _params = "category=spot&openOnly=0&limit=50";
                 if (!string.IsNullOrEmpty(symbol))
                     _params += $"&symbol={symbol}";
-                
+
                 this.CreateSignature(_client, "GET", "/v5/order/realtime", _params);
-                
+
                 var _response = await _client.GetAsync($"/v5/order/realtime?{_params}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobj = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jobj["retCode"]?.ToString() == "0" && _jobj["result"] != null)
+                if (_root.GetStringSafe("retCode") == "0" && _root.HasProperty("result"))
                 {
-                    var _list = _jobj["result"]["list"] as JArray;
-                    
-                    if (_list != null)
+                    var _result_elem = _root.GetProperty("result");
+
+                    if (_result_elem.TryGetProperty("list", out var _list) && _list.ValueKind == JsonValueKind.Array)
                     {
-                        foreach (var order in _list)
+                        foreach (var order in _list.EnumerateArray())
                         {
-                            var status = ConvertOrderStatus(order["orderStatus"]?.ToString());
+                            var status = ConvertOrderStatus(order.GetStringSafe("orderStatus"));
                             if (status == "open" || status == "partially_filled")
                             {
                                 _result.Add(new OrderInfo
                                 {
-                                    id = order["orderId"]?.ToString(),
-                                    clientOrderId = order["orderLinkId"]?.ToString(),
-                                    symbol = order["symbol"]?.ToString(),
-                                    type = order["orderType"]?.ToString()?.ToLower(),
-                                    side = order["side"]?.ToString()?.ToLower() == "buy" ? SideType.Bid : SideType.Ask,
-                                    price = decimal.Parse(order["price"]?.ToString() ?? "0"),
-                                    amount = decimal.Parse(order["qty"]?.ToString() ?? "0"),
-                                    filled = decimal.Parse(order["cumExecQty"]?.ToString() ?? "0"),
+                                    id = order.GetStringSafe("orderId"),
+                                    clientOrderId = order.GetStringSafe("orderLinkId"),
+                                    symbol = order.GetStringSafe("symbol"),
+                                    type = order.GetStringSafe("orderType")?.ToLower(),
+                                    side = order.GetStringSafe("side")?.ToLower() == "buy" ? SideType.Bid : SideType.Ask,
+                                    price = order.GetDecimalSafe("price"),
+                                    amount = order.GetDecimalSafe("qty"),
+                                    filled = order.GetDecimalSafe("cumExecQty"),
                                     status = status,
-                                    timestamp = long.Parse(order["createdTime"]?.ToString() ?? "0")
+                                    timestamp = order.GetInt64Safe("createdTime")
                                 });
                             }
                         }
@@ -852,37 +875,38 @@ namespace CCXT.Simple.Exchanges.Bybit
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var _params = $"category=spot&limit={Math.Min(limit, 50)}";
                 if (!string.IsNullOrEmpty(symbol))
                     _params += $"&symbol={symbol}";
-                
+
                 this.CreateSignature(_client, "GET", "/v5/order/history", _params);
-                
+
                 var _response = await _client.GetAsync($"/v5/order/history?{_params}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobj = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jobj["retCode"]?.ToString() == "0" && _jobj["result"] != null)
+                if (_root.GetStringSafe("retCode") == "0" && _root.HasProperty("result"))
                 {
-                    var _list = _jobj["result"]["list"] as JArray;
-                    
-                    if (_list != null)
+                    var _result_elem = _root.GetProperty("result");
+
+                    if (_result_elem.TryGetProperty("list", out var _list) && _list.ValueKind == JsonValueKind.Array)
                     {
-                        foreach (var order in _list)
+                        foreach (var order in _list.EnumerateArray())
                         {
                             _result.Add(new OrderInfo
                             {
-                                id = order["orderId"]?.ToString(),
-                                clientOrderId = order["orderLinkId"]?.ToString(),
-                                symbol = order["symbol"]?.ToString(),
-                                type = order["orderType"]?.ToString()?.ToLower(),
-                                side = order["side"]?.ToString()?.ToLower() == "buy" ? SideType.Bid : SideType.Ask,
-                                price = decimal.Parse(order["price"]?.ToString() ?? "0"),
-                                amount = decimal.Parse(order["qty"]?.ToString() ?? "0"),
-                                filled = decimal.Parse(order["cumExecQty"]?.ToString() ?? "0"),
-                                status = ConvertOrderStatus(order["orderStatus"]?.ToString()),
-                                timestamp = long.Parse(order["createdTime"]?.ToString() ?? "0")
+                                id = order.GetStringSafe("orderId"),
+                                clientOrderId = order.GetStringSafe("orderLinkId"),
+                                symbol = order.GetStringSafe("symbol"),
+                                type = order.GetStringSafe("orderType")?.ToLower(),
+                                side = order.GetStringSafe("side")?.ToLower() == "buy" ? SideType.Bid : SideType.Ask,
+                                price = order.GetDecimalSafe("price"),
+                                amount = order.GetDecimalSafe("qty"),
+                                filled = order.GetDecimalSafe("cumExecQty"),
+                                status = ConvertOrderStatus(order.GetStringSafe("orderStatus")),
+                                timestamp = order.GetInt64Safe("createdTime")
                             });
                         }
                     }
@@ -906,36 +930,37 @@ namespace CCXT.Simple.Exchanges.Bybit
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var _params = $"category=spot&limit={Math.Min(limit, 50)}";
                 if (!string.IsNullOrEmpty(symbol))
                     _params += $"&symbol={symbol}";
-                
+
                 this.CreateSignature(_client, "GET", "/v5/execution/list", _params);
-                
+
                 var _response = await _client.GetAsync($"/v5/execution/list?{_params}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobj = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jobj["retCode"]?.ToString() == "0" && _jobj["result"] != null)
+                if (_root.GetStringSafe("retCode") == "0" && _root.HasProperty("result"))
                 {
-                    var _list = _jobj["result"]["list"] as JArray;
-                    
-                    if (_list != null)
+                    var _result_elem = _root.GetProperty("result");
+
+                    if (_result_elem.TryGetProperty("list", out var _list) && _list.ValueKind == JsonValueKind.Array)
                     {
-                        foreach (var trade in _list)
+                        foreach (var trade in _list.EnumerateArray())
                         {
                             _result.Add(new TradeInfo
                             {
-                                id = trade["execId"]?.ToString(),
-                                orderId = trade["orderId"]?.ToString(),
-                                symbol = trade["symbol"]?.ToString(),
-                                side = trade["side"]?.ToString()?.ToLower() == "buy" ? SideType.Bid : SideType.Ask,
-                                price = decimal.Parse(trade["execPrice"]?.ToString() ?? "0"),
-                                amount = decimal.Parse(trade["execQty"]?.ToString() ?? "0"),
-                                fee = decimal.Parse(trade["execFee"]?.ToString() ?? "0"),
-                                feeAsset = trade["feeTokenId"]?.ToString(),
-                                timestamp = long.Parse(trade["execTime"]?.ToString() ?? "0")
+                                id = trade.GetStringSafe("execId"),
+                                orderId = trade.GetStringSafe("orderId"),
+                                symbol = trade.GetStringSafe("symbol"),
+                                side = trade.GetStringSafe("side")?.ToLower() == "buy" ? SideType.Bid : SideType.Ask,
+                                price = trade.GetDecimalSafe("execPrice"),
+                                amount = trade.GetDecimalSafe("execQty"),
+                                fee = trade.GetDecimalSafe("execFee"),
+                                feeAsset = trade.GetStringSafe("feeTokenId"),
+                                timestamp = trade.GetInt64Safe("execTime")
                             });
                         }
                     }
@@ -959,30 +984,31 @@ namespace CCXT.Simple.Exchanges.Bybit
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var _params = $"coin={currency}";
                 if (!string.IsNullOrEmpty(network))
                     _params += $"&chainType={network}";
-                
+
                 this.CreateSignature(_client, "GET", "/v5/asset/deposit/query-address", _params);
-                
+
                 var _response = await _client.GetAsync($"/v5/asset/deposit/query-address?{_params}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobj = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jobj["retCode"]?.ToString() == "0" && _jobj["result"] != null)
+                if (_root.GetStringSafe("retCode") == "0" && _root.HasProperty("result"))
                 {
-                    var _chains = _jobj["result"]["chains"] as JArray;
-                    
-                    if (_chains != null && _chains.Count > 0)
+                    var _result_elem = _root.GetProperty("result");
+
+                    if (_result_elem.TryGetProperty("chains", out var _chains) && _chains.ValueKind == JsonValueKind.Array && _chains.GetArrayLength() > 0)
                     {
                         var chain = _chains[0];
                         _result = new DepositAddress
                         {
                             currency = currency,
-                            address = chain["addressDeposit"]?.ToString(),
-                            tag = chain["tagDeposit"]?.ToString(),
-                            network = chain["chain"]?.ToString()
+                            address = chain.GetStringSafe("addressDeposit"),
+                            tag = chain.GetStringSafe("tagDeposit"),
+                            network = chain.GetStringSafe("chain")
                         };
                     }
                 }
@@ -1005,7 +1031,7 @@ namespace CCXT.Simple.Exchanges.Bybit
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var _params = new Dictionary<string, object>
                 {
                     {"coin", currency},
@@ -1014,16 +1040,16 @@ namespace CCXT.Simple.Exchanges.Bybit
                     {"accountType", "UNIFIED"},
                     {"timestamp", TimeExtensions.NowMilli}
                 };
-                
+
                 if (!string.IsNullOrEmpty(tag))
                     _params["tag"] = tag;
-                    
+
                 if (!string.IsNullOrEmpty(network))
                     _params["chain"] = network;
-                
-                var _json_content = JsonConvert.SerializeObject(_params);
+
+                var _json_content = JsonSerializer.Serialize(_params, mainXchg.StjOptions);
                 this.CreateSignature(_client, "POST", "/v5/asset/withdraw/create", _json_content);
-                
+
 #if NETSTANDARD2_0 || NETSTANDARD2_1
                 var _content = new StringContent(_json_content, Encoding.UTF8, "application/json");
 #else
@@ -1032,13 +1058,15 @@ namespace CCXT.Simple.Exchanges.Bybit
 #endif
                 var _response = await _client.PostAsync("/v5/asset/withdraw/create", _content);
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobj = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jobj["retCode"]?.ToString() == "0" && _jobj["result"] != null)
+                if (_root.GetStringSafe("retCode") == "0" && _root.HasProperty("result"))
                 {
+                    var _result_elem = _root.GetProperty("result");
                     _result = new WithdrawalInfo
                     {
-                        id = _jobj["result"]["id"]?.ToString(),
+                        id = _result_elem.GetStringSafe("id"),
                         currency = currency,
                         amount = amount,
                         address = address,
@@ -1067,35 +1095,36 @@ namespace CCXT.Simple.Exchanges.Bybit
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var _params = $"limit={Math.Min(limit, 50)}";
                 if (!string.IsNullOrEmpty(currency))
                     _params += $"&coin={currency}";
-                
+
                 this.CreateSignature(_client, "GET", "/v5/asset/deposit/query-record", _params);
-                
+
                 var _response = await _client.GetAsync($"/v5/asset/deposit/query-record?{_params}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobj = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jobj["retCode"]?.ToString() == "0" && _jobj["result"] != null)
+                if (_root.GetStringSafe("retCode") == "0" && _root.HasProperty("result"))
                 {
-                    var _rows = _jobj["result"]["rows"] as JArray;
-                    
-                    if (_rows != null)
+                    var _result_elem = _root.GetProperty("result");
+
+                    if (_result_elem.TryGetProperty("rows", out var _rows) && _rows.ValueKind == JsonValueKind.Array)
                     {
-                        foreach (var deposit in _rows)
+                        foreach (var deposit in _rows.EnumerateArray())
                         {
                             _result.Add(new DepositInfo
                             {
-                                id = deposit["txID"]?.ToString(),
-                                currency = deposit["coin"]?.ToString(),
-                                amount = decimal.Parse(deposit["amount"]?.ToString() ?? "0"),
-                                address = deposit["toAddress"]?.ToString(),
-                                tag = deposit["tag"]?.ToString(),
-                                network = deposit["chain"]?.ToString(),
-                                status = ConvertDepositStatus(deposit["status"]?.ToString()),
-                                timestamp = long.Parse(deposit["successAt"]?.ToString() ?? "0")
+                                id = deposit.GetStringSafe("txID"),
+                                currency = deposit.GetStringSafe("coin"),
+                                amount = deposit.GetDecimalSafe("amount"),
+                                address = deposit.GetStringSafe("toAddress"),
+                                tag = deposit.GetStringSafe("tag"),
+                                network = deposit.GetStringSafe("chain"),
+                                status = ConvertDepositStatus(deposit.GetStringSafe("status")),
+                                timestamp = deposit.GetInt64Safe("successAt")
                             });
                         }
                     }
@@ -1119,36 +1148,37 @@ namespace CCXT.Simple.Exchanges.Bybit
             try
             {
                 var _client = mainXchg.GetHttpClient(ExchangeName, ExchangeUrl);
-                
+
                 var _params = $"limit={Math.Min(limit, 50)}";
                 if (!string.IsNullOrEmpty(currency))
                     _params += $"&coin={currency}";
-                
+
                 this.CreateSignature(_client, "GET", "/v5/asset/withdraw/query-record", _params);
-                
+
                 var _response = await _client.GetAsync($"/v5/asset/withdraw/query-record?{_params}");
                 var _jstring = await _response.Content.ReadAsStringAsync();
-                var _jobj = JObject.Parse(_jstring);
+                using var _doc = JsonDocument.Parse(_jstring);
+                var _root = _doc.RootElement;
 
-                if (_jobj["retCode"]?.ToString() == "0" && _jobj["result"] != null)
+                if (_root.GetStringSafe("retCode") == "0" && _root.HasProperty("result"))
                 {
-                    var _rows = _jobj["result"]["rows"] as JArray;
-                    
-                    if (_rows != null)
+                    var _result_elem = _root.GetProperty("result");
+
+                    if (_result_elem.TryGetProperty("rows", out var _rows) && _rows.ValueKind == JsonValueKind.Array)
                     {
-                        foreach (var withdrawal in _rows)
+                        foreach (var withdrawal in _rows.EnumerateArray())
                         {
                             _result.Add(new WithdrawalInfo
                             {
-                                id = withdrawal["withdrawId"]?.ToString(),
-                                currency = withdrawal["coin"]?.ToString(),
-                                amount = decimal.Parse(withdrawal["amount"]?.ToString() ?? "0"),
-                                fee = decimal.Parse(withdrawal["withdrawFee"]?.ToString() ?? "0"),
-                                address = withdrawal["toAddress"]?.ToString(),
-                                tag = withdrawal["tag"]?.ToString(),
-                                network = withdrawal["chain"]?.ToString(),
-                                status = ConvertWithdrawalStatus(withdrawal["status"]?.ToString()),
-                                timestamp = long.Parse(withdrawal["createTime"]?.ToString() ?? "0")
+                                id = withdrawal.GetStringSafe("withdrawId"),
+                                currency = withdrawal.GetStringSafe("coin"),
+                                amount = withdrawal.GetDecimalSafe("amount"),
+                                fee = withdrawal.GetDecimalSafe("withdrawFee"),
+                                address = withdrawal.GetStringSafe("toAddress"),
+                                tag = withdrawal.GetStringSafe("tag"),
+                                network = withdrawal.GetStringSafe("chain"),
+                                status = ConvertWithdrawalStatus(withdrawal.GetStringSafe("status")),
+                                timestamp = withdrawal.GetInt64Safe("createTime")
                             });
                         }
                     }

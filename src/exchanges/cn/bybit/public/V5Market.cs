@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace CCXT.Simple.Exchanges.Bybit.Public
 {
@@ -7,43 +7,43 @@ namespace CCXT.Simple.Exchanges.Bybit.Public
     /// </summary>
     public class V5Ticker
     {
-        [JsonProperty("symbol")]
+        [JsonPropertyName("symbol")]
         public string Symbol { get; set; }
 
-        [JsonProperty("lastPrice")]
+        [JsonPropertyName("lastPrice")]
         public string LastPrice { get; set; }
 
-        [JsonProperty("bid1Price")]
+        [JsonPropertyName("bid1Price")]
         public string Bid1Price { get; set; }
 
-        [JsonProperty("bid1Size")]
+        [JsonPropertyName("bid1Size")]
         public string Bid1Size { get; set; }
 
-        [JsonProperty("ask1Price")]
+        [JsonPropertyName("ask1Price")]
         public string Ask1Price { get; set; }
 
-        [JsonProperty("ask1Size")]
+        [JsonPropertyName("ask1Size")]
         public string Ask1Size { get; set; }
 
-        [JsonProperty("prevPrice24h")]
+        [JsonPropertyName("prevPrice24h")]
         public string PrevPrice24h { get; set; }
 
-        [JsonProperty("price24hPcnt")]
+        [JsonPropertyName("price24hPcnt")]
         public string Price24hPcnt { get; set; }
 
-        [JsonProperty("highPrice24h")]
+        [JsonPropertyName("highPrice24h")]
         public string HighPrice24h { get; set; }
 
-        [JsonProperty("lowPrice24h")]
+        [JsonPropertyName("lowPrice24h")]
         public string LowPrice24h { get; set; }
 
-        [JsonProperty("turnover24h")]
+        [JsonPropertyName("turnover24h")]
         public string Turnover24h { get; set; }
 
-        [JsonProperty("volume24h")]
+        [JsonPropertyName("volume24h")]
         public string Volume24h { get; set; }
 
-        [JsonProperty("usdIndexPrice")]
+        [JsonPropertyName("usdIndexPrice")]
         public string UsdIndexPrice { get; set; }
     }
 
@@ -52,19 +52,19 @@ namespace CCXT.Simple.Exchanges.Bybit.Public
     /// </summary>
     public class V5Orderbook
     {
-        [JsonProperty("s")]
+        [JsonPropertyName("s")]
         public string Symbol { get; set; }
 
-        [JsonProperty("b")]
+        [JsonPropertyName("b")]
         public List<List<string>> Bids { get; set; }
 
-        [JsonProperty("a")]
+        [JsonPropertyName("a")]
         public List<List<string>> Asks { get; set; }
 
-        [JsonProperty("ts")]
+        [JsonPropertyName("ts")]
         public long Timestamp { get; set; }
 
-        [JsonProperty("u")]
+        [JsonPropertyName("u")]
         public long UpdateId { get; set; }
     }
 
@@ -73,13 +73,13 @@ namespace CCXT.Simple.Exchanges.Bybit.Public
     /// </summary>
     public class V5KlineResult
     {
-        [JsonProperty("symbol")]
+        [JsonPropertyName("symbol")]
         public string Symbol { get; set; }
 
-        [JsonProperty("category")]
+        [JsonPropertyName("category")]
         public string Category { get; set; }
 
-        [JsonProperty("list")]
+        [JsonPropertyName("list")]
         public List<List<string>> List { get; set; }
     }
 
@@ -88,25 +88,25 @@ namespace CCXT.Simple.Exchanges.Bybit.Public
     /// </summary>
     public class V5Trade
     {
-        [JsonProperty("execId")]
+        [JsonPropertyName("execId")]
         public string ExecId { get; set; }
 
-        [JsonProperty("symbol")]
+        [JsonPropertyName("symbol")]
         public string Symbol { get; set; }
 
-        [JsonProperty("price")]
+        [JsonPropertyName("price")]
         public string Price { get; set; }
 
-        [JsonProperty("size")]
+        [JsonPropertyName("size")]
         public string Size { get; set; }
 
-        [JsonProperty("side")]
+        [JsonPropertyName("side")]
         public string Side { get; set; }
 
-        [JsonProperty("time")]
+        [JsonPropertyName("time")]
         public string Time { get; set; }
 
-        [JsonProperty("isBlockTrade")]
+        [JsonPropertyName("isBlockTrade")]
         public bool IsBlockTrade { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace CCXT.Simple.Exchanges.Bybit.Private
 {
@@ -7,103 +7,103 @@ namespace CCXT.Simple.Exchanges.Bybit.Private
     /// </summary>
     public class V5WalletBalance
     {
-        [JsonProperty("list")]
+        [JsonPropertyName("list")]
         public List<V5AccountInfo> List { get; set; }
     }
 
     public class V5AccountInfo
     {
-        [JsonProperty("totalEquity")]
+        [JsonPropertyName("totalEquity")]
         public string TotalEquity { get; set; }
 
-        [JsonProperty("accountIMRate")]
+        [JsonPropertyName("accountIMRate")]
         public string AccountIMRate { get; set; }
 
-        [JsonProperty("totalMarginBalance")]
+        [JsonPropertyName("totalMarginBalance")]
         public string TotalMarginBalance { get; set; }
 
-        [JsonProperty("totalInitialMargin")]
+        [JsonPropertyName("totalInitialMargin")]
         public string TotalInitialMargin { get; set; }
 
-        [JsonProperty("accountType")]
+        [JsonPropertyName("accountType")]
         public string AccountType { get; set; }
 
-        [JsonProperty("totalAvailableBalance")]
+        [JsonPropertyName("totalAvailableBalance")]
         public string TotalAvailableBalance { get; set; }
 
-        [JsonProperty("accountMMRate")]
+        [JsonPropertyName("accountMMRate")]
         public string AccountMMRate { get; set; }
 
-        [JsonProperty("totalPerpUPL")]
+        [JsonPropertyName("totalPerpUPL")]
         public string TotalPerpUPL { get; set; }
 
-        [JsonProperty("totalWalletBalance")]
+        [JsonPropertyName("totalWalletBalance")]
         public string TotalWalletBalance { get; set; }
 
-        [JsonProperty("accountLTV")]
+        [JsonPropertyName("accountLTV")]
         public string AccountLTV { get; set; }
 
-        [JsonProperty("totalMaintenanceMargin")]
+        [JsonPropertyName("totalMaintenanceMargin")]
         public string TotalMaintenanceMargin { get; set; }
 
-        [JsonProperty("coin")]
+        [JsonPropertyName("coin")]
         public List<V5CoinBalance> Coin { get; set; }
     }
 
     public class V5CoinBalance
     {
-        [JsonProperty("availableToBorrow")]
+        [JsonPropertyName("availableToBorrow")]
         public string AvailableToBorrow { get; set; }
 
-        [JsonProperty("bonus")]
+        [JsonPropertyName("bonus")]
         public string Bonus { get; set; }
 
-        [JsonProperty("accruedInterest")]
+        [JsonPropertyName("accruedInterest")]
         public string AccruedInterest { get; set; }
 
-        [JsonProperty("availableToWithdraw")]
+        [JsonPropertyName("availableToWithdraw")]
         public string AvailableToWithdraw { get; set; }
 
-        [JsonProperty("totalOrderIM")]
+        [JsonPropertyName("totalOrderIM")]
         public string TotalOrderIM { get; set; }
 
-        [JsonProperty("equity")]
+        [JsonPropertyName("equity")]
         public string Equity { get; set; }
 
-        [JsonProperty("totalPositionMM")]
+        [JsonPropertyName("totalPositionMM")]
         public string TotalPositionMM { get; set; }
 
-        [JsonProperty("usdValue")]
+        [JsonPropertyName("usdValue")]
         public string UsdValue { get; set; }
 
-        [JsonProperty("spotHedgingQty")]
+        [JsonPropertyName("spotHedgingQty")]
         public string SpotHedgingQty { get; set; }
 
-        [JsonProperty("unrealisedPnl")]
+        [JsonPropertyName("unrealisedPnl")]
         public string UnrealisedPnl { get; set; }
 
-        [JsonProperty("collateralSwitch")]
+        [JsonPropertyName("collateralSwitch")]
         public bool CollateralSwitch { get; set; }
 
-        [JsonProperty("borrowAmount")]
+        [JsonPropertyName("borrowAmount")]
         public string BorrowAmount { get; set; }
 
-        [JsonProperty("totalPositionIM")]
+        [JsonPropertyName("totalPositionIM")]
         public string TotalPositionIM { get; set; }
 
-        [JsonProperty("walletBalance")]
+        [JsonPropertyName("walletBalance")]
         public string WalletBalance { get; set; }
 
-        [JsonProperty("cumRealisedPnl")]
+        [JsonPropertyName("cumRealisedPnl")]
         public string CumRealisedPnl { get; set; }
 
-        [JsonProperty("locked")]
+        [JsonPropertyName("locked")]
         public string Locked { get; set; }
 
-        [JsonProperty("marginCollateral")]
+        [JsonPropertyName("marginCollateral")]
         public bool MarginCollateral { get; set; }
 
-        [JsonProperty("coin")]
+        [JsonPropertyName("coin")]
         public string Coin { get; set; }
     }
 
@@ -112,28 +112,28 @@ namespace CCXT.Simple.Exchanges.Bybit.Private
     /// </summary>
     public class V5UserInfo
     {
-        [JsonProperty("uid")]
+        [JsonPropertyName("uid")]
         public string Uid { get; set; }
 
-        [JsonProperty("username")]
+        [JsonPropertyName("username")]
         public string Username { get; set; }
 
-        [JsonProperty("memberType")]
+        [JsonPropertyName("memberType")]
         public int MemberType { get; set; }
 
-        [JsonProperty("status")]
+        [JsonPropertyName("status")]
         public int Status { get; set; }
 
-        [JsonProperty("riskLevel")]
+        [JsonPropertyName("riskLevel")]
         public string RiskLevel { get; set; }
 
-        [JsonProperty("makerFeeRate")]
+        [JsonPropertyName("makerFeeRate")]
         public string MakerFeeRate { get; set; }
 
-        [JsonProperty("takerFeeRate")]
+        [JsonPropertyName("takerFeeRate")]
         public string TakerFeeRate { get; set; }
 
-        [JsonProperty("updateTime")]
+        [JsonPropertyName("updateTime")]
         public string UpdateTime { get; set; }
     }
 
@@ -142,55 +142,55 @@ namespace CCXT.Simple.Exchanges.Bybit.Private
     /// </summary>
     public class V5CoinInfo
     {
-        [JsonProperty("rows")]
+        [JsonPropertyName("rows")]
         public List<V5CoinDetail> Rows { get; set; }
     }
 
     public class V5CoinDetail
     {
-        [JsonProperty("coin")]
+        [JsonPropertyName("coin")]
         public string Coin { get; set; }
 
-        [JsonProperty("name")]
+        [JsonPropertyName("name")]
         public string Name { get; set; }
 
-        [JsonProperty("remainAmount")]
+        [JsonPropertyName("remainAmount")]
         public string RemainAmount { get; set; }
 
-        [JsonProperty("chains")]
+        [JsonPropertyName("chains")]
         public List<V5ChainInfo> Chains { get; set; }
     }
 
     public class V5ChainInfo
     {
-        [JsonProperty("chainType")]
+        [JsonPropertyName("chainType")]
         public string ChainType { get; set; }
 
-        [JsonProperty("confirmation")]
+        [JsonPropertyName("confirmation")]
         public string Confirmation { get; set; }
 
-        [JsonProperty("withdrawFee")]
+        [JsonPropertyName("withdrawFee")]
         public string WithdrawFee { get; set; }
 
-        [JsonProperty("depositMin")]
+        [JsonPropertyName("depositMin")]
         public string DepositMin { get; set; }
 
-        [JsonProperty("withdrawMin")]
+        [JsonPropertyName("withdrawMin")]
         public string WithdrawMin { get; set; }
 
-        [JsonProperty("chain")]
+        [JsonPropertyName("chain")]
         public string Chain { get; set; }
 
-        [JsonProperty("chainDeposit")]
+        [JsonPropertyName("chainDeposit")]
         public string ChainDeposit { get; set; }
 
-        [JsonProperty("chainWithdraw")]
+        [JsonPropertyName("chainWithdraw")]
         public string ChainWithdraw { get; set; }
 
-        [JsonProperty("minAccuracy")]
+        [JsonPropertyName("minAccuracy")]
         public string MinAccuracy { get; set; }
 
-        [JsonProperty("withdrawPercentageFee")]
+        [JsonPropertyName("withdrawPercentageFee")]
         public string WithdrawPercentageFee { get; set; }
     }
 }
