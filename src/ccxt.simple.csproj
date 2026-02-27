@@ -92,9 +92,9 @@
 	<ItemGroup>
 		<PackageReference Include="GraphQL.Client" Version="6.1.0" />
 		<PackageReference Include="GraphQL.Client.Serializer.SystemTextJson" Version="6.1.0" />
-		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.16.0" />
 		<!-- System.Text.Json for netstandard2.0 compatibility (net8.0+ has it built-in) -->
-		<PackageReference Include="System.Text.Json" Version="9.0.2" Condition="'$(TargetFramework)' == 'netstandard2.0' OR '$(TargetFramework)' == 'netstandard2.1'" />
+		<PackageReference Include="System.Text.Json" Version="10.0.3" Condition="'$(TargetFramework)' == 'netstandard2.0' OR '$(TargetFramework)' == 'netstandard2.1'" />
 	</ItemGroup>
 
 </Project>

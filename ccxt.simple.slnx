@@ -1,0 +1,24 @@
+<Solution>
+  <Folder Name="/docs/">
+    <File Path="docs/DEPLOYMENT.md" />
+    <File Path="docs/EXCHANGES.md" />
+    <File Path="docs/GUIDE.md" />
+    <File Path="docs/ROADMAP.md" />
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/ccxt.sample.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+    <File Path="CLAUDE.md" />
+    <File Path="LICENSE.md" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/ccxt.simple.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ccxt.test.csproj" />
+  </Folder>
+</Solution>
